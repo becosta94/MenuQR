@@ -1,5 +1,0 @@
-C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Infra.Data\obj\Debug\net7.0\WaiterAI.Infra.Data.csproj.AssemblyReference.cache
-C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Infra.Data\obj\Debug\net7.0\WaiterAI.Infra.Data.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Infra.Data\obj\Debug\net7.0\WaiterAI.Infra.Data.AssemblyInfoInputs.cache
-C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Infra.Data\obj\Debug\net7.0\WaiterAI.Infra.Data.AssemblyInfo.cs
-C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Infra.Data\obj\Debug\net7.0\WaiterAI.Infra.Data.csproj.CoreCompileInputs.cache
