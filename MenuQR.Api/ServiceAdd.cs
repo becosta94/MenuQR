@@ -10,9 +10,15 @@ namespace MenuQR.Api
         public static void Add(IServiceCollection builder)
         {
             builder.AddTransient<IBaseRepository<Order>, BaseRepository<Order>>();
-            builder.AddTransient<IBaseService<Order>, BaseService<Order>>();
-            builder.AddTransient<INewOrder, NewOrder>();
-        }
+            builder.AddTransient<IBaseRepository<OrderProduct>, BaseRepository<OrderProduct>>();
 
+            builder.AddTransient<IBaseService<Order>, BaseService<Order>>();
+            builder.AddTransient<IBaseService<OrderProduct>, BaseService<OrderProduct>>();
+
+
+            builder.AddTransient<INewOrderFactory, NewOrderFactory>();
+            builder.AddTransient<INewOrderProductFactory, NewOrderProductFactory>();
+            builder.AddTransient<IValidator, Validator>();
+        }
     }
 }

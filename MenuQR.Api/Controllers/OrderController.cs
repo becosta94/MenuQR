@@ -1,6 +1,6 @@
-﻿using MenuQR.Domain.Entities;
+﻿using MenuQR.Domain.DTOs;
+using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
-using MenuQR.Services.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MenuQR.Api.Controllers
@@ -9,23 +9,18 @@ namespace MenuQR.Api.Controllers
     [Route("[controller]")]
     public class OrderController : ControllerBase
     {
-        private IBaseService<Order> _baseOrderService;
-
-        public OrderController(IBaseService<Order> baseOrderService)
-        {
-            _baseOrderService = baseOrderService;
-        }
-
         [HttpPost]
-        public IActionResult Create([FromBody] Order orderJson, [FromServices] INewOrder newOrder)
+        public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived, [FromServices] INewOrderFactory newOrderFactory, [FromServices] INewOrderProductFactory newOrderProductFactory)
         {
             try
             {
-                Order? order = newOrder.Make(orderJson.ToString());
-                if (order != null)
+                Order? newOrder = newOrderFactory.Make();
+                if (newOrder is not null)
                 {
-                    return Execute(() => _baseOrderService.Add<OrderValidator>(order));
-                    
+                    ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, listOrderProductReceived);
+                    if (orderProducts is not null)
+                        return Ok(orderProducts.Select(x => x.Product));
+                    return BadRequest("Pedido não realizado");
                 }
                 else
                     return BadRequest("Pedido não realizado");
@@ -33,19 +28,6 @@ namespace MenuQR.Api.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }
-        }
-
-        private IActionResult Execute(Func<object> func)
-        {
-            try
-            {
-                var result = func();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
             }
         }
     }

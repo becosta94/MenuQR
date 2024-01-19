@@ -7,8 +7,8 @@ namespace MenuQR.Services.Validators
     {
         public OrderValidator()
         {
-            RuleFor(c => c.Products)
-                .NotNull().WithMessage("Por favor insira um produto.");
+            //RuleFor(c => c.Products)
+            //    .NotNull().WithMessage("Por favor insira um produto.");
 
             RuleFor(c => c.CompanyId)
                 .NotNull().WithMessage("Por favor insira a empresa do pedido.");

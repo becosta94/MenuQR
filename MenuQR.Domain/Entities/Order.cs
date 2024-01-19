@@ -1,14 +1,13 @@
-﻿using MenuQR.Domain.Entities;
-
-namespace MenuQR.Domain.Entities
+﻿namespace MenuQR.Domain.Entities
 {
     public class Order : BaseEntity
     {
-        public ICollection<Product> Products { get; set; }
         public bool Deliverd { get; set; }
-        public Order(int companyId)
+        public DateTime Date { get; set; }
+        public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
+        public Order()
         {
-            CompanyId = companyId;
+            Date = DateTime.Now;
             Deliverd = false;
         }
     }

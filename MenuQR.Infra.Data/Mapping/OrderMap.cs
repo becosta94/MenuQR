@@ -1,8 +1,6 @@
 ﻿using MenuQR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Newtonsoft.Json;
-using System.Net;
 
 namespace MenuQR.Infra.Data.Mapping
 {
@@ -19,10 +17,10 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("CompanyId")
                .HasColumnType("int");
 
-            builder.Property(prop => prop.Products)
+            builder.Property(prop => prop.Date)
                .IsRequired()
-               .HasColumnName("Products")
-               .HasColumnType("varchar(MAX)");
+               .HasColumnName("Date")
+               .HasColumnType("datetime2");
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");

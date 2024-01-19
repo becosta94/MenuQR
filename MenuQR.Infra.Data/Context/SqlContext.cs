@@ -10,6 +10,7 @@ namespace MenuQR.Infra.Data.Context
         public SqlContext(DbContextOptions<SqlContext> options) : base(options) { }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<OrderProduct> OrderProducts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
