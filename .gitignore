@@ -132,3 +132,5 @@
 /MenuQR.Services/obj/MenuQR.Services.csproj.nuget.g.targets
 /MenuQR.Services/obj/Waiter.Services.csproj.nuget.g.targets
 /MenuQR.Services/obj/WaiterAI.Services.csproj.nuget.g.targets
+*.vsidx
+/.vs/MenuQR/v17/.suo
