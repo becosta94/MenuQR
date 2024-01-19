@@ -12,18 +12,20 @@ namespace MenuQR.Infra.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Order",
+                name: "Costumer",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Deliverd = table.Column<bool>(type: "bit", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MacAdress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Document = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsOnPlace = table.Column<bool>(type: "bit", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.PrimaryKey("PK_Costumer", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,6 +43,49 @@ namespace MenuQR.Infra.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Product", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Table",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Identification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Table", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Order",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Deliverd = table.Column<bool>(type: "bit", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TableId = table.Column<int>(type: "int", nullable: false),
+                    CostumerId = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Order_Costumer_CostumerId",
+                        column: x => x.CostumerId,
+                        principalTable: "Costumer",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Order_Table_TableId",
+                        column: x => x.TableId,
+                        principalTable: "Table",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +122,16 @@ namespace MenuQR.Infra.Data.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Order_CostumerId",
+                table: "Order",
+                column: "CostumerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Order_TableId",
+                table: "Order",
+                column: "TableId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderProducts_OrderId",
                 table: "OrderProducts",
                 column: "OrderId");
@@ -98,6 +153,12 @@ namespace MenuQR.Infra.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Product");
+
+            migrationBuilder.DropTable(
+                name: "Costumer");
+
+            migrationBuilder.DropTable(
+                name: "Table");
         }
     }
 }

@@ -22,8 +22,17 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("Date")
                .HasColumnType("datetime2");
 
+            builder.HasOne(prop => prop.Table)
+                .WithMany()
+                .HasForeignKey(prop => prop.TableId);
+
+            builder.HasOne(prop => prop.Costumer)
+                .WithMany()
+                .HasForeignKey(prop => prop.CostumerId);
+
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");
+
         }
     }
 }

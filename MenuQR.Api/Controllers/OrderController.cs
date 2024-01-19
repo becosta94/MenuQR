@@ -10,11 +10,15 @@ namespace MenuQR.Api.Controllers
     public class OrderController : ControllerBase
     {
         [HttpPost]
-        public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived, [FromServices] INewOrderFactory newOrderFactory, [FromServices] INewOrderProductFactory newOrderProductFactory)
+        public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived,
+                                    [FromServices] INewOrderFactory newOrderFactory,
+                                    [FromServices] INewOrderProductFactory newOrderProductFactory,
+                                    int tableId,
+                                    int costumerId)
         {
             try
             {
-                Order? newOrder = newOrderFactory.Make();
+                Order? newOrder = newOrderFactory.Make(tableId, costumerId);
                 if (newOrder is not null)
                 {
                     ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, listOrderProductReceived);

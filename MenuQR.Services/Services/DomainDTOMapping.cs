@@ -8,8 +8,6 @@ namespace MenuQR.Services.Services
     {
         public DomainDTOMapping()
         {
-            CreateMap<Order, OrderDTO>();
-            CreateMap<OrderDTO, Order>();
             CreateMap<Product, ProductDTO>();
             CreateMap<ProductDTO, Product>();
             CreateMap<OrderProduct, OrderProductDTO>();

@@ -9,11 +9,13 @@ namespace MenuQR.Services.Services
     public class NewOrderProductFactory : INewOrderProductFactory
     {
         private readonly IBaseService<OrderProduct> _baseOrderProductService;
+        private readonly IBaseService<Product> _baseProductService;
         private readonly IValidator _validator;
         private readonly IMapper _mapper;
-        public NewOrderProductFactory(IBaseService<OrderProduct> baseOrderProductService, IValidator validator, IMapper mapper)
+        public NewOrderProductFactory(IBaseService<OrderProduct> baseOrderProductService, IBaseService<Product> baseProductService, IValidator validator, IMapper mapper)
         {
             _baseOrderProductService = baseOrderProductService;
+            _baseProductService = baseProductService;
             _validator = validator;
             _mapper = mapper;
         }
@@ -27,7 +29,12 @@ namespace MenuQR.Services.Services
             List<OrderProduct> orderProductsAddedd = new List<OrderProduct>();
             foreach (OrderProduct orderProduct in listOrderProductMapped)
             {
+                Product product = _baseProductService.GetById(orderProduct.ProductId);
+                if (product is null) 
+                    continue;
                 OrderProduct? newOrderProduc = _validator.Execute(() => _baseOrderProductService.Add<OrderProductValidator>(orderProduct)) as OrderProduct;
+                if (newOrderProduc is null)
+                    throw new Exception("Erro in OrderProduct");
                 orderProductsAddedd.Add(newOrderProduc);
             }
             if (orderProductsAddedd.Count == 0)

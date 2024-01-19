@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MenuQR.Infra.Data.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    [Migration("20240118123859_InitialCreate")]
+    [Migration("20240119192056_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,37 @@ namespace MenuQR.Infra.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("MenuQR.Domain.Entities.Costumer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Document")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsOnPlace")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MacAdress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Costumer");
+                });
 
             modelBuilder.Entity("MenuQR.Domain.Entities.Order", b =>
                 {
@@ -37,6 +68,9 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CompanyId");
 
+                    b.Property<int>("CostumerId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2")
                         .HasColumnName("Date");
@@ -44,10 +78,17 @@ namespace MenuQR.Infra.Data.Migrations
                     b.Property<bool>("Deliverd")
                         .HasColumnType("bit");
 
+                    b.Property<int>("TableId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
+
+                    b.HasIndex("CostumerId");
+
+                    b.HasIndex("TableId");
 
                     b.ToTable("Order", (string)null);
                 });
@@ -114,6 +155,45 @@ namespace MenuQR.Infra.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Product", (string)null);
+                });
+
+            modelBuilder.Entity("MenuQR.Domain.Entities.Table", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Identification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Table");
+                });
+
+            modelBuilder.Entity("MenuQR.Domain.Entities.Order", b =>
+                {
+                    b.HasOne("MenuQR.Domain.Entities.Costumer", "Costumer")
+                        .WithMany()
+                        .HasForeignKey("CostumerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MenuQR.Domain.Entities.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Costumer");
+
+                    b.Navigation("Table");
                 });
 
             modelBuilder.Entity("MenuQR.Domain.Entities.OrderProduct", b =>
