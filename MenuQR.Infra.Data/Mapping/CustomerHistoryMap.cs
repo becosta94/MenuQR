@@ -1,14 +1,19 @@
 ﻿using MenuQR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace MenuQR.Infra.Data.Mapping
 {
-    public class TableMap : IEntityTypeConfiguration<Table>
+    internal class CustomerHistoryMap : IEntityTypeConfiguration<CustomerHistory>
     {
-        public void Configure(EntityTypeBuilder<Table> builder)
+        public void Configure(EntityTypeBuilder<CustomerHistory> builder)
         {
-            builder.ToTable("Table");
+            builder.ToTable("CustomerHistory");
 
             builder.HasKey(prop => prop.Id);
 
@@ -17,10 +22,10 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("CompanyId")
                .HasColumnType("int");
 
-            builder.Property(prop => prop.Identification)
-                   .IsRequired()
-                   .HasColumnName("Identification")
-                   .HasColumnType("varchar(100)");
+            builder.Property(prop => prop.OnPlace)
+                .IsRequired()
+                .HasColumnName("OnPlace")
+                .HasColumnType("bit");
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");

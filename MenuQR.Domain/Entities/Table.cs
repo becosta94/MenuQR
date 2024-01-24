@@ -5,6 +5,7 @@ namespace MenuQR.Domain.Entities
     public class Table : BaseEntity
     {
         public string Identification { get; set; }
+        public Bill Bill { get; set; } = null!;
 
         public Table(string identification, int companyId)
         {

@@ -12,6 +12,8 @@ namespace MenuQR.Services.Services
             CreateMap<ProductDTO, Product>();
             CreateMap<OrderProduct, OrderProductDTO>();
             CreateMap<OrderProductDTO, OrderProduct>();
+            CreateMap<Customer, CustomerDTO>();
+            CreateMap<CustomerDTO, Customer>();
         }
     }
 }

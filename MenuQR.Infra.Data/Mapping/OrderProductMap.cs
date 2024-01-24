@@ -15,22 +15,35 @@ namespace MenuQR.Infra.Data.Mapping
             builder.Property(prop => prop.OrderId)
                .IsRequired()
                .HasColumnName("OrderId")
-               .HasColumnType("int");
+               .HasColumnType("int")
+               .UseIdentityColumn();
 
             builder.Property(prop => prop.ProductId)
                .IsRequired()
                .HasColumnName("ProductId")
                .HasColumnType("int");
 
-            builder.HasOne(e => e.Order)
-                .WithMany(e => e.OrderProducts)
-                .HasForeignKey(e => e.OrderId)
-                .IsRequired();
+            builder.Property(prop => prop.Amount)
+               .IsRequired()
+               .HasColumnName("Amount")
+               .HasColumnType("int");
 
-            builder.HasOne(e => e.Product)
-                .WithMany(e => e.OrderProducts)
-                .HasForeignKey(e => e.ProductId)
-                .IsRequired();
+            builder.Property(prop => prop.Total)
+               .IsRequired()
+               .HasColumnName("Total")
+               .HasColumnType("float");
+
+            builder.HasOne(prop => prop.Order)
+                .WithMany(prop => prop.OrderProducts)
+                .HasForeignKey(prop => prop.OrderId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(prop => prop.Product)
+                .WithMany(prop => prop.OrderProducts)
+                .HasForeignKey(prop => prop.ProductId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
 
 
         }

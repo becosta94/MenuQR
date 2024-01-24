@@ -24,11 +24,13 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasOne(prop => prop.Table)
                 .WithMany()
-                .HasForeignKey(prop => prop.TableId);
+                .HasForeignKey(prop => prop.TableId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(prop => prop.Costumer)
+            builder.HasOne(prop => prop.Customer)
                 .WithMany()
-                .HasForeignKey(prop => prop.CostumerId);
+                .HasForeignKey(prop => prop.CustomerDocument)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");

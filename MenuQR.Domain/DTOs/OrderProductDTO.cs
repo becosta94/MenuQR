@@ -4,5 +4,6 @@
     {
         public int ProductId { get; set; }
         public double Amount { get; set; }
+        public int CompanyId { get; set; }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using MenuQR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Hosting;
-using System.Reflection.Emit;
 
 namespace MenuQR.Infra.Data.Mapping
 {
@@ -27,6 +25,11 @@ namespace MenuQR.Infra.Data.Mapping
                 .IsRequired()
                 .HasColumnName("Price")
                 .HasColumnType("decimal(6,2)");
+
+            builder.Property(prop => prop.Active)
+                .IsRequired()
+                .HasColumnName("Active")
+                .HasColumnType("bit");
 
             builder.Property(prop => prop.Image)
                .HasColumnName("Image")
