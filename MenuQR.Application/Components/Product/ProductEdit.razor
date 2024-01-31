@@ -1,0 +1,72 @@
+﻿@page "/product/edit"
+@rendermode InteractiveServer
+@inject IFileUpload fileUpload
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuartion
+@inject HttpClient http
+
+<h3>Adicionar Produto</h3>
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="addProduct">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Nome:</label>
+        <InputText @bind-Value="Model.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Preço:</label>
+        <InputNumber @bind-Value="Model.Price" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Descrição:</label>
+        <InputText @bind-Value="Model.Description" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Imagem:</label>
+        <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" />
+        @if (!string.IsNullOrEmpty(ImageDataUrl))
+        {
+            <img src="@ImageDataUrl" height="200" width="200" class="img-fluid border border-dark mt-3 mb-3" />
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</EditForm>
+
+@code {
+    public IFileListEntry? File;
+    public MemoryStream MsFile;
+    public ProductDTO Model { get; set; } = new ProductDTO();
+    public string ImageDataUrl;
+    public async void OnSubmit()
+    {
+        var url = configuartion["ApiLinks:ProductCreate"];
+        var response = await http.PostAsJsonAsync<ProductDTO>(url, Model);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            Console.WriteLine("Produto cadastrado");
+        else
+            Console.WriteLine("Produto não cadastrado");
+    }
+    async Task HandleFileSelected(IFileListEntry[] files)
+    {
+        try
+        {
+            File =  files.FirstOrDefault();
+            if (File != null)
+            {
+                string name = File.Name;
+                MsFile = new MemoryStream();
+                await File.Data.CopyToAsync(MsFile);
+                StreamReader reader = new StreamReader(File.Data);
+                string asBase64String = Convert.ToBase64String(MsFile.ToArray());
+                Model.Image = asBase64String;
+                ImageDataUrl = string.Format("data:image/png;base64, {0}", asBase64String);
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}
+

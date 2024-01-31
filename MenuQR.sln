@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuQR.Infra.CrossCutting",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuQR.Application", "MenuQR.Application\MenuQR.Application.csproj", "{5B4638F9-FFF0-4EE3-A34A-FFD4FDC1F59B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MenuQR.Api", "MenuQR.Api\MenuQR.Api.csproj", "{1DE55173-6C3F-4D06-BCBF-557E8DB4FBD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MenuQR.Api", "MenuQR.Api\MenuQR.Api.csproj", "{1DE55173-6C3F-4D06-BCBF-557E8DB4FBD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

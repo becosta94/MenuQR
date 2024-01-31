@@ -13,6 +13,7 @@ namespace MenuQR.Api.Controllers
     public class ProductController : ControllerBase
     {
         [HttpPost]
+        [Route("create")]
         public IActionResult Create([FromServices] IProductFactory productFactory, ProductDTO productDTO)
         {
             Product product = productFactory.Make(productDTO);
@@ -37,11 +38,11 @@ namespace MenuQR.Api.Controllers
         }
 
         [HttpPut]
-        [Route("disable")]
-        public IActionResult Disable([FromServices] IBaseService<Product> productBaseService, [FromServices] IValidator validator, int productId)
+        [Route("toggleactivity")]
+        public IActionResult ToggleActivity([FromServices] IBaseService<Product> productBaseService, [FromServices] IValidator validator, int productId)
         {
             Product? productOutdated = productBaseService.GetById(productId);
-            productOutdated.Active = false;
+            productOutdated.Active = !productOutdated.Active;
             Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated)) as Product;
             if (productUpdated is not null)
                 return Ok(productUpdated);
@@ -50,9 +51,21 @@ namespace MenuQR.Api.Controllers
         }
 
         [HttpGet]
+        [Route("getbyid")]
         public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, int productId)
         {
             Product? product = productBaseService.GetById(productId);
+            if (product is not null)
+                return Ok(product);
+            else
+                return BadRequest("Não foi possível atualizar o produto");
+        }
+
+        [HttpGet]
+        [Route("getall")]
+        public IActionResult GetAll([FromServices] IBaseService<Product> productBaseService)
+        {
+            IList<Product>? product = productBaseService.Get().OrderByDescending(x => x.Active).ThenBy(x => x.Name).ToList();
             if (product is not null)
                 return Ok(product);
             else

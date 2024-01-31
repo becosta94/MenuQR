@@ -9,6 +9,7 @@ namespace MenuQR.Infra.Data.Context
     {
         public SqlContext(DbContextOptions<SqlContext> options) : base(options) { }
         public DbSet<Bill>  Bills { get; set; }
+        public DbSet<Company> Companies { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<CustomerHistory> CustomerHistories { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -17,6 +18,7 @@ namespace MenuQR.Infra.Data.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfiguration(new BillMap());
             modelBuilder.ApplyConfiguration(new BillMap());
             modelBuilder.ApplyConfiguration(new CustomerMap());
             modelBuilder.ApplyConfiguration(new CustomerHistoryMap());

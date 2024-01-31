@@ -1,6 +1,8 @@
 using MenuQR.Application.Components;
 using MenuQR.Application.Components.Account;
 using MenuQR.Application.Data;
+using MenuQR.Application.Interfaces;
+using MenuQR.Application.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +17,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddTransient<HttpClient, HttpClient>();
+builder.Services.AddScoped<IFileUpload, FileUpload>();
 
 builder.Services.AddAuthentication(options =>
     {
