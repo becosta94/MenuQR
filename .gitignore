@@ -134,3 +134,6 @@
 /MenuQR.Services/obj/WaiterAI.Services.csproj.nuget.g.targets
 *.vsidx
 /.vs/MenuQR/v17/.suo
+/MenuQR.Application/obj/Debug/net8.0/MenuQR.Application.csproj.BuildWithSkipAnalyzers
+/MenuQR.Application/obj/Debug/net8.0/MenuQR.Application.MvcApplicationPartsAssemblyInfo.cs
+/MenuQR.Application/obj/Debug/net8.0/project.razor.vs.bin
