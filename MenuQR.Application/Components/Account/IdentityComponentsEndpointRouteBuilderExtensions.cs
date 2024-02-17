@@ -35,7 +35,6 @@ namespace Microsoft.AspNetCore.Routing
                     context.Request.PathBase,
                     "/Account/ExternalLogin",
                     QueryString.Create(query));
-
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
                 return TypedResults.Challenge(properties, [provider]);
             });

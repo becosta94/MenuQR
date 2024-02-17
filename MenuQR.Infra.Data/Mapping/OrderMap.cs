@@ -10,7 +10,10 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("Order");
 
-            builder.HasKey(prop => prop.Id);
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId });
+
+            builder.Property(prop => prop.Id)
+                    .ValueGeneratedOnAdd();
 
             builder.Property(prop => prop.CompanyId)
                .IsRequired()

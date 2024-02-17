@@ -1,9 +1,12 @@
-﻿@page "/product/edit"
+﻿@page "/product/edit/{id:int}"
+@attribute [Authorize]
 @rendermode InteractiveServer
-@inject IFileUpload fileUpload
+@inject NavigationManager navigationManager
 @inject IWebHostEnvironment Env
-@inject IConfiguration configuartion
-@inject HttpClient http
+@inject IConfiguration configuaration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
 
 <h3>Adicionar Produto</h3>
 
@@ -25,42 +28,62 @@
     <div class="mb-3">
         <label class="form-label">Imagem:</label>
         <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" />
-        @if (!string.IsNullOrEmpty(ImageDataUrl))
+        @if (!string.IsNullOrEmpty(_imageDataUrl))
         {
-            <img src="@ImageDataUrl" height="200" width="200" class="img-fluid border border-dark mt-3 mb-3" />
+            <img src="@_imageDataUrl" height="200" width="200" class="img-fluid border border-dark mt-3 mb-3" />
         }
     </div>
     <button type="submit" class="btn btn-primary">Enviar</button>
 </EditForm>
 
 @code {
-    public IFileListEntry? File;
-    public MemoryStream MsFile;
-    public ProductDTO Model { get; set; } = new ProductDTO();
-    public string ImageDataUrl;
-    public async void OnSubmit()
+    private IFileListEntry? _file;
+    private MemoryStream? _msFile;
+    private string? _imageDataUrl;
+    private ProductDTO Model { get; set; } = new ProductDTO();
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        var url = configuartion["ApiLinks:ProductCreate"];
-        var response = await http.PostAsJsonAsync<ProductDTO>(url, Model);
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            Console.WriteLine("Produto cadastrado");
+        var url = configuaration["ApiLinks:ProductGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "productId", Id);
+        if (commandResult.Sucess && commandResult.Data is ProductDTO)
+        {
+            Model = (ProductDTO)commandResult.Data;
+            _imageDataUrl = string.Format("data:image/png;base64, {0}", Model.Image);
+        }
         else
-            Console.WriteLine("Produto não cadastrado");
+            await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
     }
-    async Task HandleFileSelected(IFileListEntry[] files)
+
+    private async void OnSubmit()
+    {
+        var url = configuaration["ApiLinks:ProductUpdate"];
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductDTO>(url, Model);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Produto alterado!");
+            navigationManager.NavigateTo(configuaration["ApplicationLinks:ProductManager"]);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Produto não alterado!");
+    }
+
+    private async Task HandleFileSelected(IFileListEntry[] files)
     {
         try
         {
-            File =  files.FirstOrDefault();
-            if (File != null)
+            _file =  files.FirstOrDefault();
+            if (_file != null)
             {
-                string name = File.Name;
-                MsFile = new MemoryStream();
-                await File.Data.CopyToAsync(MsFile);
-                StreamReader reader = new StreamReader(File.Data);
-                string asBase64String = Convert.ToBase64String(MsFile.ToArray());
+                string name = _file.Name;
+                _msFile = new MemoryStream();
+                await _file.Data.CopyToAsync(_msFile);
+                StreamReader reader = new StreamReader(_file.Data);
+                string asBase64String = Convert.ToBase64String(_msFile.ToArray());
                 Model.Image = asBase64String;
-                ImageDataUrl = string.Format("data:image/png;base64, {0}", asBase64String);
+                _imageDataUrl = string.Format("data:image/png;base64, {0}", asBase64String);
             }
         }
         catch (Exception ex)

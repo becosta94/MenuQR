@@ -1,9 +1,12 @@
-﻿@page "/product/add"
+﻿@page "/product/create"
 @rendermode InteractiveServer
-@inject IFileUpload fileUpload
 @inject IWebHostEnvironment Env
 @inject IConfiguration configuartion
 @inject HttpClient http
+@attribute [Authorize]
+@inject IConfiguration configuaration
+@inject NavigationManager navigationManager
+@inject IJSRuntime JsRuntime
 
 <h3>Adicionar Produto</h3>
 
@@ -38,14 +41,18 @@
     public MemoryStream MsFile;
     public ProductDTO Model { get; set; } = new ProductDTO();
     public string ImageDataUrl;
+
     public async void OnSubmit()
     {
         var url = configuartion["ApiLinks:ProductCreate"];
         var response = await http.PostAsJsonAsync<ProductDTO>(url, Model);
         if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            Console.WriteLine("Produto cadastrado");
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
+            navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);
+        }
         else
-            Console.WriteLine("Produto não cadastrado");
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, produto não cadastrado");
     }
     async Task HandleFileSelected(IFileListEntry[] files)
     {

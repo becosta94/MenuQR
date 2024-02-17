@@ -39,6 +39,8 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasIndex(prop => prop.Name)
                 .HasDatabaseName("IX_Company_Name");
+
+            builder.HasData(new Company() { Id = 1, Name = "Bar do Bê", CompanyId = 1, Adress = "Rua Três Fazendas 370", Phone = "31987942350" });
         }
     }
 }

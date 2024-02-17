@@ -41,9 +41,7 @@ namespace MenuQR.Infra.Data.Mapping
                 .HasDatabaseName("IX_Order_Company");
 
             builder.HasMany(prop => prop.OrderProducts)
-                .WithOne(prop => prop.Bill)
-                .HasForeignKey(prop => prop.Id)
-                .IsRequired();
+                .WithOne(prop => prop.Bill);
         }
     }
 }

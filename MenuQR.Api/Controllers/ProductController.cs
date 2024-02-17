@@ -4,6 +4,7 @@ using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using MenuQR.Services.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MenuQR.Api.Controllers
@@ -14,11 +15,11 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
-        public IActionResult Create([FromServices] IProductFactory productFactory, ProductDTO productDTO)
+        public IActionResult Create([FromServices] IProductFactory productFactory, [FromServices] IMapper mapper, ProductDTO productDTO)
         {
             Product product = productFactory.Make(productDTO);
             if (product is not null)
-                return Ok(product);
+                return Ok(mapper.Map<ProductDTO>(product));
             else
                 return BadRequest("Não foi possível criar o produto");
         }
@@ -32,42 +33,50 @@ namespace MenuQR.Api.Controllers
         {
             Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(mapper.Map<Product>(product))) as Product;
             if (productUpdated is not null)
-                return Ok(productUpdated);
+                return Ok(mapper.Map<ProductDTO>(productUpdated));
             else
                 return BadRequest("Não foi possível atualizar o produto");
         }
 
         [HttpPut]
         [Route("toggleactivity")]
-        public IActionResult ToggleActivity([FromServices] IBaseService<Product> productBaseService, [FromServices] IValidator validator, int productId)
+        public IActionResult ToggleActivity([FromServices] IBaseService<Product> productBaseService,
+                                            [FromServices] IMapper mapper,
+                                            [FromServices] IValidator validator,
+                                            int productId)
         {
             Product? productOutdated = productBaseService.GetById(productId);
             productOutdated.Active = !productOutdated.Active;
             Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated)) as Product;
             if (productUpdated is not null)
-                return Ok(productUpdated);
+                return Ok(mapper.Map<ProductDTO>(productUpdated));
             else
                 return BadRequest("Não foi possível atualizar o produto");
         }
 
         [HttpGet]
         [Route("getbyid")]
-        public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, int productId)
+        [Authorize]
+        public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper, int productId)
         {
             Product? product = productBaseService.GetById(productId);
             if (product is not null)
-                return Ok(product);
+                return Ok(mapper.Map<ProductDTO>(product));
             else
-                return BadRequest("Não foi possível atualizar o produto");
+                return BadRequest("Não foi possível encontrar o produto");
         }
 
         [HttpGet]
         [Route("getall")]
-        public IActionResult GetAll([FromServices] IBaseService<Product> productBaseService)
+        public IActionResult GetAll([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper)
         {
-            IList<Product>? product = productBaseService.Get().OrderByDescending(x => x.Active).ThenBy(x => x.Name).ToList();
-            if (product is not null)
-                return Ok(product);
+            List<Product>? products = productBaseService.Get().OrderByDescending(x => x.Active).ThenBy(x => x.Name).ToList();
+            if (products is not null)
+            {
+                List<ProductDTO> productsDto = new List<ProductDTO>();
+                products.ForEach(x => productsDto.Add(mapper.Map<ProductDTO>(x)));
+                return Ok(productsDto);
+            }
             else
                 return BadRequest("Não foi possível atualizar o produto");
         }

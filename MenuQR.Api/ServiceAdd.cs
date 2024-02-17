@@ -35,6 +35,7 @@ namespace MenuQR.Api
             builder.AddTransient<IOrderFactory, OrderFactory>();
             builder.AddTransient<IOrderProductFactory, OrderProductFactory>();
             builder.AddTransient<IProductFactory, ProductFactory>();
+            builder.AddTransient<ITableFactory, TableFactory>();
             builder.AddTransient<IValidator, Validator>();
         }
     }

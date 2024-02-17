@@ -1,6 +1,13 @@
-﻿@implements IDisposable
-
+﻿@using MenuQR.Application.Components.Account
+@using MenuQR.Application.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc
+@implements IDisposable
 @inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor HttpContextAcessor
+@inject NavigationManager NavigationManager
+
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -26,13 +33,24 @@
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
+                    <NavLink class="nav-link" href="product/manager">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Produtos
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Logout">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Logout
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="table/manager">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Mesas
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/order/manager">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Pedidos
+                    </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
@@ -41,11 +59,7 @@
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="product/manager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Produtos
-                    </NavLink>
-                </div>
+
             </NotAuthorized>
         </AuthorizeView>
     </nav>
@@ -53,6 +67,8 @@
 
 @code {
     private string? currentUrl;
+    private string? urlLogout = "/logout";
+
 
     protected override void OnInitialized()
     {
@@ -66,9 +82,23 @@
         StateHasChanged();
     }
 
+
+
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    @functions {
+
+        public async void OnPost()
+        {
+
+            await SignInManager.SignOutAsync();
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
+            NavigationManager.NavigateTo("/logout");
+        }
+
     }
 }
 

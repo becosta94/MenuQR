@@ -7,7 +7,9 @@ namespace MenuQR.Services.Interfaces
         void Insert(TEntity obj);
         void Update(TEntity obj);
         void Delete(int id);
+        void DeleteByCompoundKey(object[] compoundKey);
         IList<TEntity> Select();
         TEntity Select(int id);
+        TEntity SelectByCompoundKey(object[] compoundKey);
     }
 }

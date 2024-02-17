@@ -1,0 +1,57 @@
+﻿@page "/table/edit/{id:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuaration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+
+<h3>Editar Mesa</h3>
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="editTable">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Identificação:</label>
+        <InputText @bind-Value="Model.Identification" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">QRCode:</label>
+        <InputText @bind-Value="Model.QRLink" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</EditForm>
+
+@code {
+    private TableDTO Model { get; set; } = new TableDTO();
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = configuaration["ApiLinks:TableGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "tableId", Id);
+        if (commandResult.Sucess && commandResult.Data is TableDTO)
+        {
+            Model = (TableDTO)commandResult.Data;
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("Alert", "Mesa não encontrada!");
+    }
+
+    private async void OnSubmit()
+    {
+        var url = configuaration["ApiLinks:TableUpdate"];
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<TableDTO>(url, Model);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Mesa alterada!");
+            navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Mesa não alterada!");
+    }
+}
+

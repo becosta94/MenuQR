@@ -57,6 +57,42 @@ namespace MenuQR.Infra.Data.Migrations
                     b.ToTable("Bill", (string)null);
                 });
 
+            modelBuilder.Entity("MenuQR.Domain.Entities.Company", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Adress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponsibleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("MenuQR.Domain.Entities.Customer", b =>
                 {
                     b.Property<string>("Document")
@@ -146,7 +182,7 @@ namespace MenuQR.Infra.Data.Migrations
                     b.Property<int?>("TableId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "CompanyId");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
@@ -160,36 +196,47 @@ namespace MenuQR.Infra.Data.Migrations
 
             modelBuilder.Entity("MenuQR.Domain.Entities.OrderProduct", b =>
                 {
-                    b.Property<int>("OrderId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("OrderId");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProductId");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Amount")
                         .HasColumnType("int")
                         .HasColumnName("Amount");
 
+                    b.Property<int>("BillId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("OrderCompanyId")
                         .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int")
+                        .HasColumnName("OrderId");
+
+                    b.Property<int>("ProductCompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductId");
 
                     b.Property<double>("Total")
                         .HasColumnType("float")
                         .HasColumnName("Total");
 
-                    b.HasKey("OrderId", "ProductId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("Id");
+                    b.HasIndex("BillId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("OrderId", "OrderCompanyId");
+
+                    b.HasIndex("ProductId", "ProductCompanyId");
 
                     b.ToTable("OrderProduct", (string)null);
                 });
@@ -202,12 +249,12 @@ namespace MenuQR.Infra.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Active")
                         .HasColumnType("bit")
                         .HasColumnName("Active");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -228,9 +275,21 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("decimal(6,2)")
                         .HasColumnName("Price");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "CompanyId");
 
                     b.ToTable("Product", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CompanyId = 1,
+                            Active = true,
+                            Description = "Pão artesanal",
+                            Image = "Teste",
+                            Name = "Pão",
+                            Price = 10.5m
+                        });
                 });
 
             modelBuilder.Entity("MenuQR.Domain.Entities.Table", b =>
@@ -250,12 +309,26 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Identification");
 
+                    b.Property<string>("QRLink")
+                        .IsRequired()
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("QRLink");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
 
                     b.ToTable("Table", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CompanyId = 0,
+                            Identification = "Mesa1",
+                            QRLink = "Teste"
+                        });
                 });
 
             modelBuilder.Entity("MenuQR.Domain.Entities.Bill", b =>
@@ -302,20 +375,20 @@ namespace MenuQR.Infra.Data.Migrations
                 {
                     b.HasOne("MenuQR.Domain.Entities.Bill", "Bill")
                         .WithMany("OrderProducts")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("BillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MenuQR.Domain.Entities.Order", "Order")
                         .WithMany("OrderProducts")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("OrderId", "OrderCompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MenuQR.Domain.Entities.Product", "Product")
                         .WithMany("OrderProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("ProductId", "ProductCompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Bill");

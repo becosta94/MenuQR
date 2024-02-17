@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using MenuQR.Application.Components;
 using MenuQR.Application.Components.Account;
 using MenuQR.Application.Data;
@@ -17,8 +18,15 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<HttpClient, HttpClient>();
-builder.Services.AddScoped<IFileUpload, FileUpload>();
+builder.Services.AddTransient<IApiService, ApiService>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<ITokenService, TokenService>();
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredLocalStorage(config =>
+    config.JsonSerializerOptions.WriteIndented = true);
 
 builder.Services.AddAuthentication(options =>
     {
@@ -37,7 +45,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 

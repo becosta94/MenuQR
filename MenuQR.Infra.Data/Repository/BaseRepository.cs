@@ -31,10 +31,18 @@ namespace MenuQR.Infra.Data.Repository
             _sqlContext.SaveChanges();
         }
 
+        public void DeleteByCompoundKey(object[] compoundKey)
+        {
+            _sqlContext.Set<TEntity>().Remove(SelectByCompoundKey(compoundKey));
+            _sqlContext.SaveChanges();
+        }
+
         public IList<TEntity> Select() =>
             _sqlContext.Set<TEntity>().ToList();
 
         public TEntity Select(int id) =>
             _sqlContext.Set<TEntity>().Find(id);
+        public TEntity SelectByCompoundKey(object[] compoundKey) =>
+            _sqlContext.Set<TEntity>().Find(compoundKey);
     }
 }

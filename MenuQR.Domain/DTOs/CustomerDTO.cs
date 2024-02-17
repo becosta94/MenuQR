@@ -1,10 +1,11 @@
-﻿namespace MenuQR.Domain.DTOs
+﻿using MenuQR.Domain.Entities;
+
+namespace MenuQR.Domain.DTOs
 {
-    public class CustomerDTO
+    public class CustomerDTO : BaseEntity
     {
         public string Name { get; set; }
         public string MacAdress { get; set; }
         public string Document { get; set; }
-        public int CompanyId { get; set; }
     }
 }

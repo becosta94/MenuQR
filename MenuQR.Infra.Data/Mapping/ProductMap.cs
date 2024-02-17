@@ -10,7 +10,10 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("Product");
 
-            builder.HasKey(prop => prop.Id);
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId });
+
+            builder.Property(prop => prop.Id)
+                .ValueGeneratedOnAdd();
 
             builder.Property(prop => prop.Name)
                 .IsRequired()
@@ -34,6 +37,8 @@ namespace MenuQR.Infra.Data.Mapping
             builder.Property(prop => prop.Image)
                .HasColumnName("Image")
                .HasColumnType("varchar(MAX)");
+
+            builder.HasData(new Product() { Id = 1, CompanyId = 1, Image = "Teste", Name = "Pão", Price = 10.5, Description = "Pão artesanal" });
 
         }
     }

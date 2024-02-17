@@ -9,6 +9,8 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject ITokenService TokenService
+@inject ILocalStorageService localStorage
 
 <PageTitle>Log in</PageTitle>
 
@@ -92,14 +94,21 @@
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+            string token = TokenService.GenerateToken(Input.Email);
+            HttpContext.Response.Cookies.Append("Token", token);
             Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo(ReturnUrl);
+
         }
         else if (result.RequiresTwoFactor)
         {
             RedirectManager.RedirectTo(
                 "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+                new()
+                    {
+                        ["returnUrl"] = ReturnUrl,
+                        ["rememberMe"] = Input.RememberMe
+                    });
         }
         else if (result.IsLockedOut)
         {

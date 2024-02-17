@@ -6,11 +6,29 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MenuQR.Infra.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Migra : Migration
+    public partial class Migra1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Companies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Adress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResponsibleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Companies", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Customer",
                 columns: table => new
@@ -33,16 +51,16 @@ namespace MenuQR.Infra.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(200)", nullable: false),
                     Description = table.Column<string>(type: "varchar(1000)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     Image = table.Column<string>(type: "varchar(MAX)", nullable: false),
-                    Active = table.Column<bool>(type: "bit", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                    Active = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Product", x => x.Id);
+                    table.PrimaryKey("PK_Product", x => new { x.Id, x.CompanyId });
                 });
 
             migrationBuilder.CreateTable(
@@ -52,6 +70,7 @@ namespace MenuQR.Infra.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Identification = table.Column<string>(type: "varchar(100)", nullable: false),
+                    QRLink = table.Column<string>(type: "varchar(300)", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -109,15 +128,15 @@ namespace MenuQR.Infra.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
                     Deliverd = table.Column<bool>(type: "bit", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TableId = table.Column<int>(type: "int", nullable: true),
-                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.PrimaryKey("PK_Order", x => new { x.Id, x.CompanyId });
                     table.ForeignKey(
                         name: "FK_Order_Customer_CustomerDocument",
                         column: x => x.CustomerDocument,
@@ -136,36 +155,49 @@ namespace MenuQR.Infra.Data.Migrations
                 name: "OrderProduct",
                 columns: table => new
                 {
-                    OrderId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<int>(type: "int", nullable: false),
                     Total = table.Column<double>(type: "float", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    OrderCompanyId = table.Column<int>(type: "int", nullable: false),
+                    ProductCompanyId = table.Column<int>(type: "int", nullable: false),
+                    BillId = table.Column<int>(type: "int", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderProduct", x => new { x.OrderId, x.ProductId });
+                    table.PrimaryKey("PK_OrderProduct", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderProduct_Bill_Id",
-                        column: x => x.Id,
+                        name: "FK_OrderProduct_Bill_BillId",
+                        column: x => x.BillId,
                         principalTable: "Bill",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderProduct_Order_OrderId",
-                        column: x => x.OrderId,
+                        name: "FK_OrderProduct_Order_OrderId_OrderCompanyId",
+                        columns: x => new { x.OrderId, x.OrderCompanyId },
                         principalTable: "Order",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumns: new[] { "Id", "CompanyId" },
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderProduct_Product_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_OrderProduct_Product_ProductId_ProductCompanyId",
+                        columns: x => new { x.ProductId, x.ProductCompanyId },
                         principalTable: "Product",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumns: new[] { "Id", "CompanyId" },
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Product",
+                columns: new[] { "CompanyId", "Id", "Active", "Description", "Image", "Name", "Price" },
+                values: new object[] { 1, 1, true, "Pão artesanal", "Teste", "Pão", 10.5m });
+
+            migrationBuilder.InsertData(
+                table: "Table",
+                columns: new[] { "Id", "CompanyId", "Identification", "QRLink" },
+                values: new object[] { 1, 0, "Mesa1", "Teste" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bill_TableId",
@@ -204,14 +236,19 @@ namespace MenuQR.Infra.Data.Migrations
                 column: "TableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderProduct_Id",
+                name: "IX_OrderProduct_BillId",
                 table: "OrderProduct",
-                column: "Id");
+                column: "BillId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderProduct_ProductId",
+                name: "IX_OrderProduct_OrderId_OrderCompanyId",
                 table: "OrderProduct",
-                column: "ProductId");
+                columns: new[] { "OrderId", "OrderCompanyId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderProduct_ProductId_ProductCompanyId",
+                table: "OrderProduct",
+                columns: new[] { "ProductId", "ProductCompanyId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Order_Company",
@@ -222,6 +259,9 @@ namespace MenuQR.Infra.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Companies");
+
             migrationBuilder.DropTable(
                 name: "CustomerHistory");
 

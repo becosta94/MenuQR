@@ -20,6 +20,7 @@ namespace MenuQR.Services.Services.Factories
             CustomerHistory? customerHistory = new CustomerHistory();
             customerHistory.Customer = customer;
             customerHistory.CustomerId = customer.Id;
+            customerHistory.CompanyId = customer.CompanyId;
             customerHistory.OnPlace = true;
             customerHistory = _validator.Execute(() => _customerHistoryBaseService.Add<CustomerHistoryValidator>(customerHistory)) as CustomerHistory;
             if (customerHistory is not null)

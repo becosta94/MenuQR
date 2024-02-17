@@ -22,8 +22,15 @@ namespace MenuQR.Infra.Data.Mapping
                    .HasColumnName("Identification")
                    .HasColumnType("varchar(100)");
 
+            builder.Property(prop => prop.QRLink)
+                   .IsRequired()
+                   .HasColumnName("QRLink")
+                   .HasColumnType("varchar(300)");
+
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");
+
+            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 0, QRLink = "Teste" });
 
         }
     }

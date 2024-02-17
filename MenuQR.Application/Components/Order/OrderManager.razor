@@ -1,0 +1,62 @@
+﻿@page "/order/manager"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IConfiguration configuration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+
+<h3>Gerenciador de Pedidos</h3>
+@if (Orders.Count == 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Produtos</th>
+                <th>Mesa</th>
+                <th>Horário</th>
+                <th>Entregue</th>
+            </tr>
+        </thead>
+    </table>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Produtos</th>
+                <th>Mesa</th>
+                <th>Horário</th>
+                <th>Entregue</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (OrderDTO order in Orders)
+            {
+                <tr>
+                    <td class="align-middle">@order.Id</td>
+                    <td class="align-middle">@order.TableDTO.Identification</td>
+                    <td class="align-middle">@order.Date</td>
+                    <td class="align-middle">@order.Deliverd</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<OrderDTO> Orders { get; set; } = new List<OrderDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string? url = configuration["ApiLinks:OrderGetAll"];
+        GenericCommandResult commandResult = await ApiService.GetById<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", 1);
+        if (commandResult.Sucess && commandResult.Data is List<OrderDTO>)
+            Orders = (List<OrderDTO>)commandResult.Data;
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+}

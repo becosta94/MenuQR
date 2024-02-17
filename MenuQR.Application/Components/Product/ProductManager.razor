@@ -1,11 +1,12 @@
 ﻿@page "/product/manager"
+@attribute [Authorize]
 @inject HttpClient http
 @inject IConfiguration configuartion
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
 
 <h3>ProductManager</h3>
-<a href="/product/add/" class="btn btn-primary">Adicionar</a>
+<a href="/product/create/" class="btn btn-primary">Adicionar</a>
 @if (Products.Count == 0)
 {
     <table class="table">
@@ -35,7 +36,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (Product product in Products)
+            @foreach (ProductDTO product in Products)
             {
                 <tr>
                     <td class="align-middle">
@@ -58,7 +59,7 @@ else
                         </div>
                     </td>
                     <td class="align-middle">
-                        <a href="/productmanager/edit/@product.Id" class="btn btn-primary">Editar</a>
+                        <a href="/product/edit/@product.Id" class="btn btn-primary">Editar</a>
                     </td>
                 </tr>
             }
@@ -66,12 +67,12 @@ else
     </table>
 }
 @code {
-        List<Product> Products { get; set; } = new List<Product>();
+    List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
 
     protected override async Task OnInitializedAsync()
     {
         var url = configuartion["ApiLinks:ProductGetAll"];
-        List<Product>? productsApi = await http.GetFromJsonAsync<List<Product>>(url);
+        List<ProductDTO>? productsApi = await http.GetFromJsonAsync<List<ProductDTO>>(url);
         if (productsApi is not null)
             Products = productsApi;
     }

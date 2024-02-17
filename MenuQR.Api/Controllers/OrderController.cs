@@ -1,5 +1,8 @@
-﻿using MenuQR.Domain.DTOs;
+﻿using AutoMapper;
+using Castle.Components.DictionaryAdapter.Xml;
+using MenuQR.Domain.DTOs;
 using MenuQR.Domain.Entities;
+using MenuQR.Infra.Data.Context;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using MenuQR.Services.Validators;
@@ -16,6 +19,7 @@ namespace MenuQR.Api.Controllers
                                     [FromServices] IOrderFactory newOrderFactory,
                                     [FromServices] IOrderProductFactory newOrderProductFactory,
                                     [FromServices] IBaseService<Order> orderService,
+                                    [FromServices] IMapper mapper,
                                     int tableId,
                                     string customerDocument)
         {
@@ -28,7 +32,7 @@ namespace MenuQR.Api.Controllers
                     {
                         ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, listOrderProductReceived);
                         if (orderProducts is not null)
-                            return Ok(orderProducts.Select(x => x.Product));
+                            return Ok(mapper.Map<OrderDTO>(newOrder));
                         return BadRequest("Pedido não realizado");
                     }
                     else
@@ -36,7 +40,7 @@ namespace MenuQR.Api.Controllers
                 }
                 catch
                 {
-                    orderService.Delete(newOrder.Id);
+                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId  });
                     throw new Exception("Problema ao registar OrderProduct");
                 }
             }
@@ -55,6 +59,23 @@ namespace MenuQR.Api.Controllers
             Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated)) as Order;
             if (orderUpdated is not null)
                 return Ok(orderUpdated);
+            else
+                return BadRequest("Não foi possível atualizar o produto");
+        }
+
+        [HttpGet]
+        [Route("getall")]
+        public IActionResult GetAll([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
+        {
+            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => !x.Deliverd).ThenBy(x => x.Date).ToList();
+            orders.ForEach(x => context.Entry(x).Reference(o => o.Table).Load());
+            orders.First().GetComponentType();
+            if (orders is not null)
+            {
+                List<OrderDTO> ordersDto = new List<OrderDTO>();
+                orders.ForEach(x => ordersDto.Add(mapper.Map<OrderDTO>(x)));
+                return Ok(ordersDto);
+            }
             else
                 return BadRequest("Não foi possível atualizar o produto");
         }

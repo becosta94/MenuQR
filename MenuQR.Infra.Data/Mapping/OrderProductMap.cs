@@ -10,13 +10,15 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("OrderProduct");
 
-            builder.HasKey(prop => new { prop.OrderId, prop.ProductId });
+            builder.HasKey(prop => prop.Id);
+
+            builder.Property(prop => prop.Id)
+                .UseIdentityColumn();
 
             builder.Property(prop => prop.OrderId)
                .IsRequired()
                .HasColumnName("OrderId")
-               .HasColumnType("int")
-               .UseIdentityColumn();
+               .HasColumnType("int");
 
             builder.Property(prop => prop.ProductId)
                .IsRequired()
@@ -35,17 +37,13 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasOne(prop => prop.Order)
                 .WithMany(prop => prop.OrderProducts)
-                .HasForeignKey(prop => prop.OrderId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(prop => prop.Product)
                 .WithMany(prop => prop.OrderProducts)
-                .HasForeignKey(prop => prop.ProductId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
-
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -37,11 +37,14 @@ namespace MenuQR.Services.Services.Factories
             Bill? bill = _billBaseService.Get().Where(x => x.TableId == order.TableId && x.Open).FirstOrDefault();
             foreach (OrderProduct orderProduct in listOrderProductMapped)
             {
-                Product product = _baseProductService.GetById(orderProduct.ProductId);
+                Product product = _baseProductService.GetByCompoundKey( new object[] {  orderProduct.ProductId ,  order.CompanyId });
                 if (product is null)
                     continue;
                 orderProduct.Total = product.Price * orderProduct.Amount;
                 orderProduct.Bill = bill;
+                orderProduct.Id = 0;
+                orderProduct.Order = order;
+                orderProduct.Product = product;
                 OrderProduct? newOrderProduc = _validator.Execute(() => _baseOrderProductService.Add<OrderProductValidator>(orderProduct)) as OrderProduct;
                 if (newOrderProduc is null)
                     throw new Exception("Erro in OrderProduct");
