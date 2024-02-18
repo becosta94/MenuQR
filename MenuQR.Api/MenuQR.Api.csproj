@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MenuQR.Domain\MenuQR.Domain.csproj" />
     <ProjectReference Include="..\MenuQR.Infra.Data\MenuQR.Infra.Data.csproj" />
     <ProjectReference Include="..\MenuQR.Services\MenuQR.Services.csproj" />
   </ItemGroup>

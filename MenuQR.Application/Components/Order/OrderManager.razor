@@ -40,7 +40,19 @@ else
                     <td class="align-middle">@order.Id</td>
                     <td class="align-middle">@order.TableDTO.Identification</td>
                     <td class="align-middle">@order.Date</td>
-                    <td class="align-middle">@order.Deliverd</td>
+                    <td class="align-middle">
+                        <div class="form-check form-switch">
+                            @if (order.Deliverd)
+                            {
+                                <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
+                            }
+                            else
+                            {
+                                <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
+                            }
+
+                        </div>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -52,11 +64,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        string? url = configuration["ApiLinks:OrderGetAll"];
+        string? url = configuration["ApiLinks:OrderGetAllToDelivery"];
         GenericCommandResult commandResult = await ApiService.GetById<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", 1);
         if (commandResult.Sucess && commandResult.Data is List<OrderDTO>)
             Orders = (List<OrderDTO>)commandResult.Data;
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+
+    public async void DeliverOrder(int id)
+    {
+        var url = configuartion["ApiLinks:DeliverOrder"];
+        var orderApi = await http.PutAsync(url + $"productId={id}", null);
+        if (!orderApi.IsSuccessStatusCode)
+            await JsRuntime.InvokeVoidAsync("Alert", "Pedido não marcado como entregue.");
     }
 }

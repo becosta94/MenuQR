@@ -64,10 +64,10 @@ namespace MenuQR.Api.Controllers
         }
 
         [HttpGet]
-        [Route("getall")]
-        public IActionResult GetAll([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
+        [Route("getalltodelivery")]
+        public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
-            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => !x.Deliverd).ThenBy(x => x.Date).ToList();
+            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderByDescending(x => x.Date).ToList();
             orders.ForEach(x => context.Entry(x).Reference(o => o.Table).Load());
             orders.First().GetComponentType();
             if (orders is not null)

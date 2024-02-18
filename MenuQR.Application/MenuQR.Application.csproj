@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Company\**" />
+    <Content Remove="Components\Company\**" />
+    <EmbeddedResource Remove="Components\Company\**" />
+    <None Remove="Components\Company\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="BlazorInputFile" Version="0.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.1" />
@@ -22,10 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MenuQR.Domain\MenuQR.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Company\" />
   </ItemGroup>
 
 </Project>
