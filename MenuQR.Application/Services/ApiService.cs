@@ -1,5 +1,6 @@
 ﻿using MenuQR.Application.Entities;
 using MenuQR.Application.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
@@ -51,6 +52,22 @@ namespace MenuQR.Application.Services
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
                 TEntity? response = await httpClient.GetFromJsonAsync<TEntity>($"{url}{idParameterName}={id}");
                 if (response is not null)
+                    return new GenericCommandResult(true, "Get made successfully", response);
+                else
+                    return new GenericCommandResult(false, "Get not made", response);
+            }
+            catch (Exception ex)
+            {
+                return new GenericCommandResult(false, "Get not made", ex);
+            }
+        }
+        public async Task<GenericCommandResult> GetStringById<TEntity>(string url, string jwt, string idParameterName, int id)
+        {
+            try
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                string response = httpClient.GetStringAsync($"{url}{idParameterName}={id}").Result;
+                if (!response.IsNullOrEmpty())
                     return new GenericCommandResult(true, "Get made successfully", response);
                 else
                     return new GenericCommandResult(false, "Get not made", response);

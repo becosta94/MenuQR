@@ -1,8 +1,6 @@
-﻿using MenuQR.Domain.Entities;
-
-namespace MenuQR.Domain.DTOs
+﻿namespace MenuQR.Application.Entities.DTOs
 {
-    public class OrderProductDTO : BaseEntity
+    public class OrderProductDTO : BaseDTO
     {
         public int ProductId { get; set; }
         public double Amount { get; set; }

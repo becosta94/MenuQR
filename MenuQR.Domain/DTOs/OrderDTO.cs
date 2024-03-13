@@ -1,4 +1,5 @@
 ﻿using MenuQR.Domain.Entities;
+using Newtonsoft.Json;
 
 namespace MenuQR.Domain.DTOs
 {
@@ -6,7 +7,8 @@ namespace MenuQR.Domain.DTOs
     {
         public bool Deliverd { get; set; }
         public DateTime Date { get; set; }
-        public Table? Table { get; set; }
+        public TableDTO? Table { get; set; }
         public Customer Customer { get; set; }
+        public List<OrderProductDTO> Products { get; set; }
     }
 }

@@ -1,0 +1,44 @@
+﻿@page "/product/selection"
+@attribute [Authorize]
+@inject HttpClient http
+@inject IConfiguration configuartion
+@rendermode InteractiveServer
+@inject IJSRuntime JsRuntime
+
+<h3>ProductManager</h3>
+@if (Products.Count == 0) { }
+else
+{
+    @foreach (ProductDTO product in Products)
+    {
+        <div class="product-card">
+            <img src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="product-image">
+            <h2 class="product-title">@product.Name</h2>
+            <p class="product-price">R$ @product.Price.ToString("0.00")</p>
+            <p class="product-description">@product.Description</p>
+            <div class="button-container">
+                <button class="button-add-to-cart">Add to Cart</button>
+            </div>
+        </div>
+    }
+
+}
+@code {
+    List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = configuartion["ApiLinks:ProductGetAll"];
+        List<ProductDTO>? productsApi = await http.GetFromJsonAsync<List<ProductDTO>>(url);
+        if (productsApi is not null)
+            Products = productsApi.Where(x => x.Active).ToList();
+    }
+    public async void ToggleActivity(int id)
+    {
+        var url = configuartion["ApiLinks:ToggleActivity"];
+        var productsApi = await http.PutAsync(url + $"productId={id}", null);
+        if (!productsApi.IsSuccessStatusCode)
+            await JsRuntime.InvokeVoidAsync("Alert", "Produto não alterado!");
+    }
+
+}

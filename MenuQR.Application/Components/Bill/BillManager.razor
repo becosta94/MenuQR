@@ -1,0 +1,78 @@
+﻿@page "/bill/manager"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IConfiguration configuration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+@inject HttpClient http
+
+<h3>Gerenciador de Contas</h3>
+@if (Bills.Count == 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Total</th>
+                <th>Mesa</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Total</th>
+                <th>Mesa</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (BillDTO bill in Bills)
+            {
+                <tr>
+                    <td class="align-middle">@bill.Id</td>
+                    <td class="align-middle">R$ @bill.Total.ToString("0.00")</td>
+                    <td class="align-middle">@bill.Table.Identification</td>
+                    @if (bill.Open)
+                    {
+                        <td class="align-middle">
+                            <a @onclick="(args) => CloseBill(bill.TableId)" class="btn btn-danger">Fechar</a>
+                        </td>
+                    }
+                    else
+                    {
+                        <td class="align-middle">Conta Fechada</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<BillDTO> Bills { get; set; } = new List<BillDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string? url = configuration["ApiLinks:BillGetAll"];
+        GenericCommandResult commandResult = await ApiService.GetStringById<List<BillDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", 1);
+        if (commandResult.Sucess)
+            Bills =  JsonConvert.DeserializeObject<List<BillDTO>>(commandResult.Data.ToString());
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+
+    public async void CloseBill(int tableId)
+    {
+        var url = configuration["ApiLinks:CloseBill"];
+        var orderApi = await http.PutAsync(url + $"tableId={tableId}", null);
+        if (!orderApi.IsSuccessStatusCode)
+            await JsRuntime.InvokeVoidAsync("Alert", "Pedido não marcado como entregue.");
+    }
+}

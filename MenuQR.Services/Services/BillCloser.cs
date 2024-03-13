@@ -32,7 +32,7 @@ namespace MenuQR.Services.Services
 
         public Bill Close(int tableId)
         {
-            List<Order> orders = _orderService.Get().Where(x => x.TableId == tableId && x.Deliverd).ToList();
+            List<Order> orders = _orderService.Get().Where(x => x.TableId == tableId && !x.Deliverd).ToList();
             orders.ForEach(x => x.Customer = _customerService.Get().Where(y => y.Document == x.CustomerDocument).FirstOrDefault());
             int companyId = orders.First().CompanyId;
             List<OrderProduct> orderProducts = new List<OrderProduct>();

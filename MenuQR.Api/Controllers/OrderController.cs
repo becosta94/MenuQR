@@ -7,6 +7,7 @@ using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using MenuQR.Services.Validators;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace MenuQR.Api.Controllers
 {
@@ -67,14 +68,18 @@ namespace MenuQR.Api.Controllers
         [Route("getalltodelivery")]
         public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
-            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderByDescending(x => x.Date).ToList();
+            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.Date).ToList();
             orders.ForEach(x => context.Entry(x).Reference(o => o.Table).Load());
+            orders.ForEach(x => context.Entry(x).Collection(o => o.OrderProducts).Load());
+            List<OrderProduct> orderProducts = new List<OrderProduct>();
+            orders.ForEach(x => orderProducts.AddRange(x.OrderProducts));
             orders.First().GetComponentType();
+            orderProducts.ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
             if (orders is not null)
             {
                 List<OrderDTO> ordersDto = new List<OrderDTO>();
                 orders.ForEach(x => ordersDto.Add(mapper.Map<OrderDTO>(x)));
-                return Ok(ordersDto);
+                return Ok(JsonConvert.SerializeObject(ordersDto));
             }
             else
                 return BadRequest("Não foi possível atualizar o produto");
