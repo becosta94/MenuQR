@@ -1,10 +1,9 @@
 ﻿@page "/product/create"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @inject IWebHostEnvironment Env
-@inject IConfiguration configuartion
+@inject IConfiguration configuration
 @inject HttpClient http
-@attribute [Authorize]
-@inject IConfiguration configuaration
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
 
@@ -44,12 +43,12 @@
 
     public async void OnSubmit()
     {
-        var url = configuartion["ApiLinks:ProductCreate"];
+        var url = configuration["ApiLinks:ProductCreate"];
         var response = await http.PostAsJsonAsync<ProductDTO>(url, Model);
         if (response.StatusCode == System.Net.HttpStatusCode.OK)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
-            navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:TableManager"]);
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, produto não cadastrado");

@@ -1,0 +1,7 @@
+﻿namespace MenuQR.Domain.Entities
+{
+    public class ProductType : BaseEntity
+    {
+        public string TypeName { get; set; }
+    }
+}

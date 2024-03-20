@@ -18,18 +18,22 @@ namespace MenuQR.Services.Services.Factories
         private readonly IMapper _mapper;
         private readonly IValidator _validator;
         private readonly ICustomerHistoryFactory _customerHistoryFactory;
-        public CustomerFactory(IBaseService<Customer> customerBaseService, IMapper mapper, IValidator validator, ICustomerHistoryFactory customerHistoryFactory)
+        private readonly ICpfValidatorService _cpfValidatorService;
+        public CustomerFactory(IBaseService<Customer> customerBaseService, IMapper mapper, IValidator validator, ICustomerHistoryFactory customerHistoryFactory, ICpfValidatorService cpfValidatorService)
         {
-            _customerBaseService=customerBaseService;
-            _mapper=mapper;
-            _validator=validator;
-            _customerHistoryFactory=customerHistoryFactory;
+            _customerBaseService = customerBaseService;
+            _mapper = mapper;
+            _validator = validator;
+            _customerHistoryFactory = customerHistoryFactory;
+            _cpfValidatorService = cpfValidatorService;
         }
-        public Customer Make(CustomerDTO customerDTO)
+        public object Make(CustomerDTO customerDTO)
         {
             Customer? exitingcustomer = _customerBaseService.Get().Where(x => x.Document == customerDTO.Document).FirstOrDefault();
             if (exitingcustomer is not null)
-                return null;
+                return "Número de CPF já cadastrado";
+            else if (!_cpfValidatorService.Validate(customerDTO.Document))
+                return "CPF inválido";
             Customer? newCustomer = _validator.Execute(() => _customerBaseService.Add<CustomerValidator>(_mapper.Map<Customer>(customerDTO))) as Customer;
             if (newCustomer is null)
                 return null;

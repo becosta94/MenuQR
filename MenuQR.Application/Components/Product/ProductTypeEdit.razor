@@ -1,0 +1,53 @@
+﻿@page "/product/typeedit/{id:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuaration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+
+<h3>Adicionar Produto</h3>
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="addProduct">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Nome:</label>
+        <InputText @bind-Value="Model.TypeName" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</EditForm>
+
+@code {
+    private ProductTypeDTO Model { get; set; } = new ProductTypeDTO();
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = configuaration["ApiLinks:ProductTypeGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<ProductTypeDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Id.ToString());
+        if (commandResult.Sucess && commandResult.Data is ProductTypeDTO)
+        {
+            Model = (ProductTypeDTO)commandResult.Data;
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
+    }
+
+    private async void OnSubmit()
+    {
+        var url = configuaration["ApiLinks:ProductTypeUpdate"];
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductTypeDTO>(url, Model);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Produto alterado!");
+            navigationManager.NavigateTo(configuaration["ApplicationLinks:ProductManager"]);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Produto não alterado!");
+    }
+}
+

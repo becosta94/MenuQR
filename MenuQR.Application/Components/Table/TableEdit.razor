@@ -32,7 +32,7 @@
     protected override async Task OnInitializedAsync()
     {
         var url = configuaration["ApiLinks:TableGetById"];
-        GenericCommandResult commandResult = await ApiService.GetById<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "tableId", Id);
+        GenericCommandResult commandResult = await ApiService.GetById<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Id.ToString());
         if (commandResult.Sucess && commandResult.Data is TableDTO)
         {
             Model = (TableDTO)commandResult.Data;

@@ -30,11 +30,40 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Post not made", ex);
             }
         }
-        public async Task<GenericCommandResult> Get<TEntity>(string url)
+        public async Task<GenericCommandResult> PostWithParameters<TEntity>(string url, Dictionary<string, object> parameterDataPairs)
         {
             try
             {
-                TEntity? response = await httpClient.GetFromJsonAsync<TEntity>(url);
+                string parameters = string.Empty;
+                int totalParameters = 0;
+                foreach (KeyValuePair<string, object> parameterData in parameterDataPairs)
+                {
+                    if (totalParameters == parameterDataPairs.Count - 1)
+                        parameters += $"{parameterData.Key}={parameterData.Value}";
+                    else
+                    {
+                        parameters += $"{parameterData.Key}={parameterData.Value}&";
+                        totalParameters++;
+                    }
+                }
+                HttpResponseMessage? response = await httpClient.PostAsync($"{url}{parameters}", null);
+                if (response.IsSuccessStatusCode)
+                    return new GenericCommandResult(true, "Put made successfully", response);
+                else
+                    return new GenericCommandResult(false, "Put not made", response);
+            }
+            catch (Exception ex)
+            {
+                return new GenericCommandResult(false, "Put not made", ex);
+            }
+        }
+        public async Task<GenericCommandResult> Get<TEntity>(string url, string jwt, int companyId)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(jwt))
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                TEntity? response = await httpClient.GetFromJsonAsync<TEntity>(url + companyId);
                 if (response is not null)
                     return new GenericCommandResult(true, "Get made successfully", response);
                 else
@@ -45,12 +74,12 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Get not made", ex);
             }
         }
-        public async Task<GenericCommandResult> GetById<TEntity>(string url, string jwt, string idParameterName, int id)
+        public async Task<GenericCommandResult> GetById<TEntity>(string url, string jwt, string id)
         {
             try
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-                TEntity? response = await httpClient.GetFromJsonAsync<TEntity>($"{url}{idParameterName}={id}");
+                TEntity? response = await httpClient.GetFromJsonAsync<TEntity>($"{url}id={id}");
                 if (response is not null)
                     return new GenericCommandResult(true, "Get made successfully", response);
                 else
@@ -61,12 +90,13 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Get not made", ex);
             }
         }
-        public async Task<GenericCommandResult> GetStringById<TEntity>(string url, string jwt, string idParameterName, int id)
+        public async Task<GenericCommandResult> GetStringByParameter<TEntity>(string url, string jwt, string parameterName, string parameter)
         {
             try
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-                string response = httpClient.GetStringAsync($"{url}{idParameterName}={id}").Result;
+                if (!string.IsNullOrEmpty(jwt))
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                string response = httpClient.GetStringAsync($"{url}{parameterName}={parameter}").Result;
                 if (!response.IsNullOrEmpty())
                     return new GenericCommandResult(true, "Get made successfully", response);
                 else

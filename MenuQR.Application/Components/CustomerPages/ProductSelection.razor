@@ -1,0 +1,155 @@
+﻿@page "/product/selection"
+@inject HttpClient http
+@inject IConfiguration configuartion
+@rendermode InteractiveServer
+@inject IJSRuntime JsRuntime
+@inject IHttpContextAccessor HttpContextAcessor
+@inject IApiService ApiService
+@layout MenuQR.Application.Components.Layout.CustomerLayout
+@inject StateContainer stateContainer
+@inject NavigationManager navigationManager
+
+@if (Products.Count == 0) { }
+else
+{
+    int i = 0;
+    <div class="scroll-container-top d-flex justify-content-around">
+        @foreach (ProductTypeDTO productType in ProductsType)
+        {
+            if (i == 0)
+            {
+                <div style="margin-left: 30px"></div>
+                i++;
+            }
+            <a @onclick="() => SetFocus(productType.Id)" class="nav-item nav-link">@productType.TypeName</a>
+        }
+    </div>
+    <div style="padding-top: 60px"></div>
+    <EditForm OnValidSubmit="@HandleValidSubmit" Model="@OrderProducts" FormName="addOrder">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        @foreach (ProductDTO product in Products)
+        {
+
+            <div class="justify-content-center border border-light rounded mt-60 mb-2 px-3 @string.Concat("typeProduct", product.TypeId)">
+                <h2 class="col-sm">@product.Name</h2>
+                <div class="row justify-content-around mb-1">
+                    <p class="col-6">@product.Description</p>
+                    <div class="col-6 d-flex justify-content-end">
+                        <img height="100" width="100" src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="img-fluid border border-dark">
+                    </div>
+                </div>
+                <div class="mb-2 row justify-content-around">
+                    <div class="col-6 d-flex align-items-center ">
+                        <p class="mb-0">R$ @product.Price.ToString("0.00")</p>
+                    </div>
+                    <div class="col-2 d-flex align-items-center ">
+                        <p id="@string.Concat("amount", product.Id)" class="mb-0">0</p>
+                    </div>
+                    <div class="col-4 d-flex justify-content-center">
+                        <button @onclick="() => ChangeAmount(false, product)" class="btn btn-outline-secondary col-6 btn-sm">-</button>
+                        <button @onclick="() => ChangeAmount(true, product)" class="btn btn-outline-secondary col-6 btn-sm">+</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </EditForm>
+    <footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
+        <DownBarButtons OnButtonClick="@OnSubmit" />
+    </footer>
+    <div style="padding-top: 60px"></div>
+}
+<script>
+    function IncreaseAmount(increase, productId) {
+        let amount = document.getElementById("amount" + productId).innerHTML;
+        if (amount === '0' && !increase)
+            return 0;
+        else if (amount === '99' && increase)
+            return;
+        if (increase) {
+            amount++;
+        }
+        else {
+            amount--;
+        }
+        document.getElementById("amount" + productId).innerHTML = amount
+        return amount;
+    }
+    function SetFocus(typeProductId) {
+        var element = document.getElementsByClassName("typeProduct" + typeProductId)[0];
+        var headerOffset = 70;
+        var elementPosition = element.getBoundingClientRect().top;
+        var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
+</script>
+
+
+
+@code {
+    List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+    List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
+    List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
+    public OrderDTO Model { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = configuartion["ApiLinks:ProductGetAll"];
+        List<ProductDTO>? productsApi = await http.GetFromJsonAsync<List<ProductDTO>>(url);
+        if (productsApi is not null)
+        {
+            Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+
+        url = configuartion["ApiLinks:ProductTypeGetAll"];
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, string.Empty, 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO>)
+            ProductsType =  commandResult.Data as List<ProductTypeDTO>;
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+    public async void ToggleActivity(int id)
+    {
+        var url = configuartion["ApiLinks:ToggleActivity"];
+        var productsApi = await http.PutAsync(url + $"productId={id}", null);
+        if (!productsApi.IsSuccessStatusCode)
+            await JsRuntime.InvokeVoidAsync("Alert", "Produto não alterado!");
+    }
+    public async void OnSubmit()
+    {
+        stateContainer.ObjectTunnel.Add(OrderProducts.GetHashCode(), OrderProducts);
+        navigationManager.NavigateTo($"/product/selection/confirmation/{OrderProducts.GetHashCode()}");
+    }
+    protected async void ChangeAmount(bool increase, ProductDTO product)
+    {
+        object[] args = { increase, product.Id };
+        int amount = await JsRuntime.InvokeAsync<int>("IncreaseAmount", args);
+
+        if (amount == 0)
+        {
+            if (OrderProducts.Where(x => x.ProductId == product.Id).ToList().Count() != 0)
+                OrderProducts.RemoveAll(x => x.ProductId == product.Id);
+            return;
+        }
+        else if (OrderProducts.Count == 0  || OrderProducts.Where(x => x.ProductId == product.Id).ToList().Count() == 0)
+            OrderProducts.Add(new OrderProductDTO { Product = product, Amount = amount, ProductId = product.Id, CompanyId = 1 });
+        else if (OrderProducts.Where(x => x.ProductId == product.Id).First().Amount > 0)
+            OrderProducts.Where(x => x.ProductId == product.Id).First().Amount = amount;
+    }
+
+    private void HandleValidSubmit()
+    {
+        // Lógica de submissão do formulário
+    }
+
+    protected async void SetFocus(int typeProductId)
+    {
+        await JsRuntime.InvokeVoidAsync("SetFocus", typeProductId);
+    }
+}

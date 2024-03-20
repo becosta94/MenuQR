@@ -43,9 +43,9 @@ namespace MenuQR.Api.Controllers
         public IActionResult ToggleActivity([FromServices] IBaseService<Product> productBaseService,
                                             [FromServices] IMapper mapper,
                                             [FromServices] IValidator validator,
-                                            int productId)
+                                            int id)
         {
-            Product? productOutdated = productBaseService.GetById(productId);
+            Product? productOutdated = productBaseService.GetById(id);
             productOutdated.Active = !productOutdated.Active;
             Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated)) as Product;
             if (productUpdated is not null)
@@ -56,10 +56,9 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getbyid")]
-        [Authorize]
-        public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper, int productId)
+        public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper, int id)
         {
-            Product? product = productBaseService.GetById(productId);
+            Product? product = productBaseService.Get().Where(x => x.Id == id).FirstOrDefault();
             if (product is not null)
                 return Ok(mapper.Map<ProductDTO>(product));
             else
@@ -78,7 +77,7 @@ namespace MenuQR.Api.Controllers
                 return Ok(productsDto);
             }
             else
-                return BadRequest("Não foi possível atualizar o produto");
+                return BadRequest("Não foi possível obter a lista de produtos");
         }
     }
 }

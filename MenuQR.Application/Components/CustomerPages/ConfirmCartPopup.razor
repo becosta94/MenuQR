@@ -1,0 +1,72 @@
+﻿@page "/product/selection/confirmation/{SetHashCode:int}"
+@rendermode InteractiveServer
+@inject StateContainer stateContainer
+@layout MenuQR.Application.Components.Layout.CustomerLayout
+@inject IConfiguration configuration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject NavigationManager navigationManager
+
+<div class="title-container-top d-flex justify-content-around">
+    <div>
+        <p class="nav-item nav-link">Carrinho</p>
+    </div>
+</div>
+<div style="padding-top: 60px"></div>
+@foreach (OrderProductDTO orderProductDTO in OrderProducts)
+{
+
+    <div class="justify-content-center border border-light rounded mt-60 mb-2 px-3">
+        <div class="row justify-content-around mb-1">
+            <h2 class="col-sm">@orderProductDTO.Product.Name</h2>
+            <div class="col-6 d-flex justify-content-end">
+                <p class="col-6">@orderProductDTO.Product.Description</p>
+                <img height="100" width="100" src="@string.Format("data:image/png;base64, {0}", @orderProductDTO.Product.Image)" alt="Product 1" class="img-fluid border border-dark">
+            </div>
+        </div>
+        <div class="mb-2 row justify-content-around">
+            <div class="col-6 d-flex align-items-center ">
+                <p class="mb-0">R$ @orderProductDTO.Product.Price.ToString("0.00")</p>
+            </div>
+            <div class="col-2 d-flex align-items-center ">
+                <p class="mb-0">@orderProductDTO.Amount</p>
+            </div>
+        </div>
+    </div>
+}
+<footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
+    <div class="justify-content-around bd-highlight btn-toolbar">
+        <div class="btn-group mr-md-3" role="group">
+            <button @onclick="Cancel" class="btn btn-danger">Cancelar</button>
+        </div>
+        <div class="btn-group mr-md-3" role="group">
+            <button @onclick="Confirm" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</footer>
+
+@code {
+    [Parameter]
+    public int SetHashCode { get; set; }
+    List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
+    string documentTest = "11853350648";
+    string tableTest = "1";
+    protected override void OnInitialized()
+    {
+        OrderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
+    }
+    private async void Confirm()
+    {
+        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={tableTest}&customerDocument={documentTest}";
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductDTO>>(url, OrderProducts);
+        if (commandResult.Sucess)
+            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
+    }
+    private void Cancel()
+    {
+        navigationManager.NavigateTo($"/product/selection");
+
+    }
+}

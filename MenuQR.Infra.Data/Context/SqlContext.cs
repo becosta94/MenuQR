@@ -7,8 +7,6 @@ namespace MenuQR.Infra.Data.Context
 {
     public class SqlContext : DbContext
     {
-        public SqlContext(DbContextOptions<SqlContext> options) : base(options) { }
-
         public virtual DbSet<Bill>  Bills { get; set; }
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
@@ -16,6 +14,9 @@ namespace MenuQR.Infra.Data.Context
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<Table> Tables { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<ProductType> ProductsType { get; set; }
+        public SqlContext(DbContextOptions<SqlContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -24,6 +25,7 @@ namespace MenuQR.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new CustomerHistoryMap());
             modelBuilder.ApplyConfiguration(new OrderMap());
             modelBuilder.ApplyConfiguration(new OrderProductMap());
+            modelBuilder.ApplyConfiguration(new ProductTypeMap());
             modelBuilder.ApplyConfiguration(new ProductMap());
             modelBuilder.ApplyConfiguration(new TableMap());
         }

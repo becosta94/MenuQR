@@ -3,8 +3,8 @@ using MenuQR.Domain.Entities;
 
 namespace MenuQR.Services.Interfaces.Factories
 {
-    public interface ICustomerFactory
+    public interface IProductTypeFactory
     {
-        public object Make(CustomerDTO customerDTO);
+        public ProductType Make(ProductTypeDTO productTypeDTO);
     }
 }

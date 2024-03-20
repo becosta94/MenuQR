@@ -3,7 +3,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager navigationManager
 @inject IWebHostEnvironment Env
-@inject IConfiguration configuaration
+@inject IConfiguration configuration
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
@@ -46,8 +46,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var url = configuaration["ApiLinks:ProductGetById"];
-        GenericCommandResult commandResult = await ApiService.GetById<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "productId", Id);
+        var url = configuration["ApiLinks:ProductGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Id.ToString());
         if (commandResult.Sucess && commandResult.Data is ProductDTO)
         {
             Model = (ProductDTO)commandResult.Data;
@@ -59,12 +59,12 @@
 
     private async void OnSubmit()
     {
-        var url = configuaration["ApiLinks:ProductUpdate"];
+        var url = configuration["ApiLinks:ProductUpdate"];
         GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductDTO>(url, Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto alterado!");
-            navigationManager.NavigateTo(configuaration["ApplicationLinks:ProductManager"]);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductManager"]);
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Produto não alterado!");

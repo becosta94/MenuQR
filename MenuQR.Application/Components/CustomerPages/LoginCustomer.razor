@@ -1,0 +1,48 @@
+﻿@page "/customer/login"
+@inject IConfiguration configuration
+@rendermode InteractiveServer
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject NavigationManager navigationManager
+
+@layout MenuQR.Application.Components.Layout.EmptyLayout
+
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="loginCustomer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="container">
+        <div class="card card-container">
+            <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+            <p id="profile-name" class="profile-name-card"></p>
+            <div class="div-signin" id="div-signin">
+                <span id="reauth-cpf" class="reauth-cpf"></span>
+                <InputText @bind-Value="Model.Document" type="text" id="inputCPF" class="form-control" placeholder="CPF" required autofocus />
+                <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Entrar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public CustomerDTO Model { get; set; } = new CustomerDTO();
+    public async void OnSubmit()
+    {
+        var url = configuration["ApiLinks:CustomerGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<CustomerDTO>(url, null, Model.Document);
+        if (commandResult.Sucess && commandResult.Data is CustomerDTO)
+        {
+            Model = (CustomerDTO)commandResult.Data;
+            url = configuration["ApiLinks:BillCreate"];
+            Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
+            keyParametersPair.Add("tableId", 1);
+            keyParametersPair.Add("companyId", 1);
+            commandResult = await ApiService.PostWithParameters<BillDTO>(url, keyParametersPair);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+        }
+        else
+        {
+            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerCreate"] + long.Parse(Model.Document));
+        }
+    }
+}

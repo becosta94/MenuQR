@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using MenuQR.Application.Components;
 using MenuQR.Application.Components.Account;
 using MenuQR.Application.Data;
+using MenuQR.Application.Entities;
 using MenuQR.Application.Interfaces;
 using MenuQR.Application.Services;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -23,6 +24,7 @@ builder.Services.AddTransient<HttpClient, HttpClient>();
 builder.Services.AddTransient<IApiService, ApiService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddSingleton<StateContainer>();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredLocalStorage(config =>

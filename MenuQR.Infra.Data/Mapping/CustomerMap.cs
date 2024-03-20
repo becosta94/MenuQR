@@ -10,6 +10,7 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("Customer");
 
+
             builder.HasKey(prop => prop.Document);
 
             builder.Property(prop => prop.Id)
@@ -22,10 +23,7 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("Name")
                .HasColumnType("varchar(200)");
 
-            builder.Property(prop => prop.MacAdress)
-                .IsRequired()
-                .HasColumnName("MacAdress")
-                .HasColumnType("varchar(250)");
-        }
+            builder.HasData(new Customer() { Document = "11381147666", Id = 1, Name = "Bernardo Lopes Caetano Costa", CompanyId = 1});
+            }
     }
 }

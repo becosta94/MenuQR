@@ -1,0 +1,39 @@
+﻿@page "/product/typecreate"
+@rendermode InteractiveServer
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuartion
+@inject HttpClient http
+@attribute [Authorize]
+@inject IConfiguration configuaration
+@inject NavigationManager navigationManager
+@inject IJSRuntime JsRuntime
+
+<h3>Adicionar Produto</h3>
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="addProductType">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Nome:</label>
+        <InputText @bind-Value="Model.TypeName" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</EditForm>
+
+@code {
+    public ProductTypeDTO Model { get; set; } = new ProductTypeDTO();
+
+    public async void OnSubmit()
+    {
+        var url = configuartion["ApiLinks:ProductTypeCreate"];
+        var response = await http.PostAsJsonAsync<ProductTypeDTO>(url, Model);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
+            navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, produto não cadastrado");
+    }
+}
+

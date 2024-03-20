@@ -28,6 +28,7 @@ namespace MenuQR.Api.Controllers
                 return BadRequest("Não foi possível atualizar o produto");
         }
         [HttpPost]
+        [Route("create")]
         public IActionResult Create([FromServices] IBillFactory newBillFactory ,int tableId, int companyId)
         {
             Bill bill = newBillFactory.Make(tableId, companyId);
@@ -38,9 +39,9 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
-        public IActionResult Close([FromServices] IBillCloser billCloser, int tableId)
+        public IActionResult Close([FromServices] IBillCloser billCloser, int id)
         {
-            Bill bill = billCloser.Close(tableId);
+            Bill bill = billCloser.Close(id);
             if (bill is not null)
                 return Ok(bill);
             else

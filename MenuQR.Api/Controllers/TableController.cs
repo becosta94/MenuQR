@@ -39,9 +39,9 @@ namespace MenuQR.Api.Controllers
         [HttpGet]
         [Route("getbyid")]
         [Authorize]
-        public IActionResult GetById([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int tableId)
+        public IActionResult GetById([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int id)
         {
-            Table? table = tableBaseService.GetById(tableId);
+            Table? table = tableBaseService.GetById(id);
             if (table is not null)
                 return Ok(mapper.Map<TableDTO>(table));
             else
@@ -49,9 +49,9 @@ namespace MenuQR.Api.Controllers
         }
         [HttpGet]
         [Route("getall")]
-        public IActionResult GetAll([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper)
+        public IActionResult GetAll([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int companyId)
         {
-            List<Table>? tables = tableBaseService.Get().OrderByDescending(x => x.Identification).ToList();
+            List<Table>? tables = tableBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Identification).ToList();
             if (tables is not null)
             {
                 List<TableDTO> tableDTO = new List<TableDTO>();

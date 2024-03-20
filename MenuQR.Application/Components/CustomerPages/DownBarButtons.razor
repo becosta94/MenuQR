@@ -1,0 +1,46 @@
+﻿
+<div class="justify-content-around bd-highlight btn-toolbar">
+    <div class="btn-group mr-md-3" role="group">
+        <button @onclick="HandleClick" class="btn btn-primary">Fazer Pedido</button>
+    </div>
+    <div class="btn-group" role="group">
+        <button onclick="myFunction()" id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle dropbtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Fechar Conta
+        </button>
+        <div class="dropdown-menu" id="myDropdown" aria-labelledby="btnGroupDrop1">
+            <a class="dropdown-item" href="#">Fechar Parcial</a>
+            <a class="dropdown-item" href="#">Fechar Total</a>
+        </div>
+    </div>
+</div>
+<script>
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-item");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+
+@code {
+    [Parameter]
+    public EventCallback OnButtonClick { get; set; }
+    private async Task HandleClick()
+    {
+        if (OnButtonClick.HasDelegate)
+        {
+            await OnButtonClick.InvokeAsync(null);
+        }
+    }
+}

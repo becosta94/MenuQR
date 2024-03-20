@@ -16,6 +16,7 @@ namespace MenuQR.Api.Controllers
     public class OrderController : ControllerBase
     {
         [HttpPost]
+        [Route("create")]
         public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived,
                                     [FromServices] IOrderFactory newOrderFactory,
                                     [FromServices] IOrderProductFactory newOrderProductFactory,
@@ -53,9 +54,9 @@ namespace MenuQR.Api.Controllers
 
         [HttpPut]
         [Route("deliverOrder")]
-        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int orderId)
+        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int id)
         {
-            Order? orderOutdated = orderBaseService.GetById(orderId);
+            Order? orderOutdated = orderBaseService.GetById(id);
             orderOutdated.Deliverd = true;
             Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated)) as Order;
             if (orderUpdated is not null)
@@ -66,9 +67,15 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getalltodelivery")]
-        public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
+        public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
             List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.Date).ToList();
+            if (orders.Count == 0)
+            {
+                List<OrderDTO> ordersDto = new List<OrderDTO>();
+                orders.ForEach(x => ordersDto.Add(mapper.Map<OrderDTO>(x)));
+                return Ok(JsonConvert.SerializeObject(ordersDto));
+            }
             orders.ForEach(x => context.Entry(x).Reference(o => o.Table).Load());
             orders.ForEach(x => context.Entry(x).Collection(o => o.OrderProducts).Load());
             List<OrderProduct> orderProducts = new List<OrderProduct>();
