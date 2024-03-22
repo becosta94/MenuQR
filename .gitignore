@@ -139,3 +139,14 @@
 /MenuQR.Application/obj/Debug/net8.0/project.razor.vs.bin
 /.vs/MenuQR/v17/HierarchyCache.v1.txt
 /MenuQR.Api/obj/Debug/net8.0/project.razor.vs.bin
+/MenuQR.Api/obj/publish/win-x86/MenuQR.Api.csproj.nuget.g.targets
+/MenuQR.Api/obj/Release/net8.0/PubTmp/EFSQLScripts/MenuQR.Infra.Data.Context.SqlContext.sql
+/MenuQR.Api/obj/Release/net8.0/PubTmp/Out/web.config
+/MenuQR.Api/obj/Release/net8.0
+/MenuQR.Api/obj/MenuQR.Api.csproj.EntityFrameworkCore.targets
+/MenuQR.Api/Properties/PublishProfiles
+/MenuQR.Application/obj/Release/net8.0
+/MenuQR.Domain/obj/Release/net8.0
+/MenuQR.Infra.CrossCutting/obj/Release/net8.0
+/MenuQR.Infra.Data/obj/Release/net8.0
+/MenuQR.Services/obj/Release/net8.0
