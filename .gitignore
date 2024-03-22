@@ -150,3 +150,5 @@
 /MenuQR.Infra.CrossCutting/obj/Release/net8.0
 /MenuQR.Infra.Data/obj/Release/net8.0
 /MenuQR.Services/obj/Release/net8.0
+/MenuQR.Api/MenuQR.Api.csproj.user
+/MenuQR.Application/MenuQR.Application.csproj.user
