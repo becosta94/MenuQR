@@ -37,7 +37,14 @@ else
             {
                 <tr>
                     <td class="align-middle">@bill.Id</td>
-                    <td class="align-middle">R$ @bill.Total.ToString("0.00")</td>
+                    @if (@bill.Total == 0)
+                    {
+                        <td>-</td>
+                    }
+                    else
+                    {
+                        <td class="align-middle">R$ @bill.Total.ToString("0.00")</td>
+                    }
                     <td class="align-middle">@bill.Table.Identification</td>
                     @if (bill.Open)
                     {
@@ -71,8 +78,13 @@ else
     public async void CloseBill(int tableId)
     {
         var url = configuration["ApiLinks:CloseBill"];
-        var orderApi = await http.PutAsync(url + $"tableId={tableId}", null);
-        if (!orderApi.IsSuccessStatusCode)
-            await JsRuntime.InvokeVoidAsync("Alert", "Pedido não marcado como entregue.");
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", tableId);
+        parameters.Add("companyId", 1);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess)
+            await JsRuntime.InvokeVoidAsync("alert", "Pedido não marcado como entregue.");
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 }

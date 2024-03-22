@@ -15,7 +15,10 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("Bill");
 
-            builder.HasKey(prop => prop.Id);
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId });
+
+            builder.Property(prop => prop.Id)
+                .ValueGeneratedOnAdd();
 
             builder.Property(prop => prop.CompanyId)
                .IsRequired()
@@ -32,6 +35,11 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("TableId")
                .HasColumnType("int");
 
+            builder.Property(prop => prop.TableCompanyId)
+               .IsRequired()
+               .HasColumnName("TableCompanyId")
+               .HasColumnType("int");
+
             builder.Property(prop => prop.Open)
                .IsRequired()
                .HasColumnName("OpenBill")
@@ -42,6 +50,11 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasMany(prop => prop.OrderProducts)
                 .WithOne(prop => prop.Bill);
+
+            builder.HasOne(prop => prop.Table)
+                   .WithMany()
+                   .HasForeignKey(prop => new { prop.TableCompanyId, prop.CompanyId });
+
         }
     }
 }

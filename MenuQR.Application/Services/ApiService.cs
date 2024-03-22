@@ -107,10 +107,12 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Get not made", ex);
             }
         }
-        public async Task<GenericCommandResult> PutWithParameters<TEntity>(string url, Dictionary<string, object> parameterDataPairs)
+        public async Task<GenericCommandResult> PutWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
         {
             try
             {
+                if (!string.IsNullOrEmpty(jwt))
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
                 string parameters = string.Empty;
                 int totalParameters = 0;
                 foreach (KeyValuePair<string, object> parameterData in parameterDataPairs)

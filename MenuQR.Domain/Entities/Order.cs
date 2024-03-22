@@ -10,13 +10,13 @@
         public virtual Customer Customer { get; set; }
         public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
         public Order() { }
-        public Order(Table table, Customer customer, int companyId)
+        public Order(int tableId, string customerDocument, int companyId)
         {
             Date = DateTime.Now;
             Deliverd = false;
-            Table = table;
+            TableId = tableId;
             CompanyId = companyId;
-            Customer = customer;
+            CustomerDocument = customerDocument;
         }
     }
 }

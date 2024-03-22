@@ -6,6 +6,7 @@ using MenuQR.Infra.Data.Context;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using MenuQR.Services.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -54,15 +55,18 @@ namespace MenuQR.Api.Controllers
 
         [HttpPut]
         [Route("deliverOrder")]
-        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int id)
+        [Authorize]
+        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int id, int companyId)
         {
-            Order? orderOutdated = orderBaseService.GetById(id);
+            Order? orderOutdated = orderBaseService.GetByCompoundKey(new object[] {id, companyId});
+            if (orderOutdated is null)
+                return BadRequest("Pedido não encontrado.");
             orderOutdated.Deliverd = true;
             Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated)) as Order;
             if (orderUpdated is not null)
                 return Ok(orderUpdated);
             else
-                return BadRequest("Não foi possível atualizar o produto");
+                return BadRequest("Não foi possível atualizar o pedido");
         }
 
         [HttpGet]

@@ -27,7 +27,7 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasOne(prop => prop.Table)
                 .WithMany()
-                .HasForeignKey(prop => prop.TableId)
+                .HasForeignKey(prop => new { prop.TableId, prop.CompanyId })
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(prop => prop.Customer)

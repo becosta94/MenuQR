@@ -21,10 +21,13 @@ namespace MenuQR.Services.Services.Factories
         }
         public Bill Make(int tableId, int companyId)
         {
-            Table table = _orderTable.GetById(tableId);
+            Bill exitingBill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
+            if (exitingBill is not null)
+                return exitingBill;
+            Table table = _orderTable.GetByCompoundKey(new object[] { tableId, companyId });
             if (table is null)
                 return null;
-            Bill? bill = new Bill() { Table = table, TableId = table.Id, CompanyId = companyId };
+            Bill? bill = new Bill() { TableId = table.Id, TableCompanyId = table.CompanyId, CompanyId = companyId };
             bill = _validator.Execute(() => _billService.Add<BillValidator>(bill)) as Bill;
             if (bill is not null)
                 return bill;

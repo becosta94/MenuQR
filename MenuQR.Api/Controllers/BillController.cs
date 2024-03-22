@@ -4,6 +4,7 @@ using MenuQR.Domain.Entities;
 using MenuQR.Infra.Data.Context;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MenuQR.Api.Controllers
@@ -29,7 +30,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPost]
         [Route("create")]
-        public IActionResult Create([FromServices] IBillFactory newBillFactory ,int tableId, int companyId)
+        public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId)
         {
             Bill bill = newBillFactory.Make(tableId, companyId);
             if (bill is not null)
@@ -39,9 +40,9 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
-        public IActionResult Close([FromServices] IBillCloser billCloser, int id)
+        public IActionResult Close([FromServices] IBillCloser billCloser, int tableId, int companyId)
         {
-            Bill bill = billCloser.Close(id);
+            Bill bill = billCloser.Close(tableId, companyId);
             if (bill is not null)
                 return Ok(bill);
             else

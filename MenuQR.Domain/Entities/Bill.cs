@@ -7,6 +7,7 @@ namespace MenuQR.Domain.Entities
         private Dictionary<Customer, double> _customersAndTotals;
         public double Total { get; private set; }
         public int TableId { get; set; }
+        public int TableCompanyId { get; set; }
         public virtual Table Table { get; set; }
         public bool Open { get; set; }
         public virtual ICollection<OrderProduct> OrderProducts { get; set; } = null!;

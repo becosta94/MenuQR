@@ -38,6 +38,10 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("OpenBill");
 
+                    b.Property<int>("TableCompanyId")
+                        .HasColumnType("int")
+                        .HasColumnName("TableCompanyId");
+
                     b.Property<int>("TableId")
                         .HasColumnType("int")
                         .HasColumnName("TableId");
@@ -46,13 +50,12 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("float")
                         .HasColumnName("Total");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "CompanyId");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
 
-                    b.HasIndex("TableId")
-                        .IsUnique();
+                    b.HasIndex("TableCompanyId", "CompanyId");
 
                     b.ToTable("Bill", (string)null);
                 });
@@ -112,11 +115,6 @@ namespace MenuQR.Infra.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MacAdress")
-                        .IsRequired()
-                        .HasColumnType("varchar(250)")
-                        .HasColumnName("MacAdress");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(200)")
@@ -132,7 +130,6 @@ namespace MenuQR.Infra.Data.Migrations
                             Document = "11381147666",
                             CompanyId = 1,
                             Id = 1,
-                            MacAdress = "00:1B:44:11:3A:B7",
                             Name = "Bernardo Lopes Caetano Costa"
                         });
                 });
@@ -203,7 +200,7 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.HasIndex("CustomerDocument");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("TableId", "CompanyId");
 
                     b.ToTable("Order", (string)null);
                 });
@@ -219,6 +216,9 @@ namespace MenuQR.Infra.Data.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int")
                         .HasColumnName("Amount");
+
+                    b.Property<int>("BillCompanyId")
+                        .HasColumnType("int");
 
                     b.Property<int>("BillId")
                         .HasColumnType("int");
@@ -246,7 +246,7 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
+                    b.HasIndex("BillId", "BillCompanyId");
 
                     b.HasIndex("OrderId", "OrderCompanyId");
 
@@ -413,18 +413,18 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("varchar(300)")
                         .HasColumnName("QRLink");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "CompanyId");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
 
-                    b.ToTable("Table", (string)null);
+                    b.ToTable("Tables");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            CompanyId = 0,
+                            CompanyId = 1,
                             Identification = "Mesa1",
                             QRLink = "Teste"
                         });
@@ -433,8 +433,8 @@ namespace MenuQR.Infra.Data.Migrations
             modelBuilder.Entity("MenuQR.Domain.Entities.Bill", b =>
                 {
                     b.HasOne("MenuQR.Domain.Entities.Table", "Table")
-                        .WithOne("Bill")
-                        .HasForeignKey("MenuQR.Domain.Entities.Bill", "TableId")
+                        .WithMany()
+                        .HasForeignKey("TableCompanyId", "CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -462,7 +462,7 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.HasOne("MenuQR.Domain.Entities.Table", "Table")
                         .WithMany()
-                        .HasForeignKey("TableId")
+                        .HasForeignKey("TableId", "CompanyId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
@@ -474,7 +474,7 @@ namespace MenuQR.Infra.Data.Migrations
                 {
                     b.HasOne("MenuQR.Domain.Entities.Bill", "Bill")
                         .WithMany("OrderProducts")
-                        .HasForeignKey("BillId")
+                        .HasForeignKey("BillId", "BillCompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -510,12 +510,6 @@ namespace MenuQR.Infra.Data.Migrations
             modelBuilder.Entity("MenuQR.Domain.Entities.Product", b =>
                 {
                     b.Navigation("OrderProducts");
-                });
-
-            modelBuilder.Entity("MenuQR.Domain.Entities.Table", b =>
-                {
-                    b.Navigation("Bill")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

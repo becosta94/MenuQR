@@ -1,12 +1,12 @@
-﻿@page "/customer/login"
-@inject IConfiguration configuration
+﻿@page "/customer/login/"
 @rendermode InteractiveServer
+@inject NavigationManager navigationManager
+@inject IConfiguration configuration
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
-@inject NavigationManager navigationManager
-
+@inject IHttpContextAccessor HttpContextAcessor
+@inject StateContainer stateContainer
 @layout MenuQR.Application.Components.Layout.EmptyLayout
-
 
 <EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="loginCustomer">
     <DataAnnotationsValidator />
@@ -26,23 +26,23 @@
 
 @code {
     public CustomerDTO Model { get; set; } = new CustomerDTO();
+
+
+
     public async void OnSubmit()
     {
         var url = configuration["ApiLinks:CustomerGetById"];
         GenericCommandResult commandResult = await ApiService.GetById<CustomerDTO>(url, null, Model.Document);
         if (commandResult.Sucess && commandResult.Data is CustomerDTO)
         {
-            Model = (CustomerDTO)commandResult.Data;
-            url = configuration["ApiLinks:BillCreate"];
-            Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
-            keyParametersPair.Add("tableId", 1);
-            keyParametersPair.Add("companyId", 1);
-            commandResult = await ApiService.PostWithParameters<BillDTO>(url, keyParametersPair);
-            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+            stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
         else
         {
             navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerCreate"] + long.Parse(Model.Document));
         }
+    }
+
     }
 }

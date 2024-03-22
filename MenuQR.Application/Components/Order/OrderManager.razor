@@ -5,7 +5,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
-@inject HttpClient http
+@inject IApiService ApiService
 
 <h3>Gerenciador de Pedidos</h3>
 @if (Orders.Count == 0)
@@ -81,8 +81,13 @@ else
     public async void DeliverOrder(int id)
     {
         var url = configuration["ApiLinks:DeliverOrder"];
-        var orderApi = await http.PutAsync(url + $"productId={id}", null);
-        if (!orderApi.IsSuccessStatusCode)
-            await JsRuntime.InvokeVoidAsync("Alert", "Pedido não marcado como entregue.");
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("id", id);
+        parameters.Add("companyId", 1);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess)
+            await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 }

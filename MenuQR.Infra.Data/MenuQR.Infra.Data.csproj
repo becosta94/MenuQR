@@ -26,4 +26,8 @@
     <ProjectReference Include="..\MenuQR.Services\MenuQR.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

@@ -8,9 +8,10 @@ namespace MenuQR.Infra.Data.Mapping
     {
         public void Configure(EntityTypeBuilder<Table> builder)
         {
-            builder.ToTable("Table");
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId });
 
-            builder.HasKey(prop => prop.Id);
+            builder.Property(prop => prop.Id)
+                .ValueGeneratedOnAdd();
 
             builder.Property(prop => prop.CompanyId)
                .IsRequired()
@@ -30,7 +31,8 @@ namespace MenuQR.Infra.Data.Mapping
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");
 
-            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 0, QRLink = "Teste" });
+
+            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 1, QRLink = "Teste" });
 
         }
     }

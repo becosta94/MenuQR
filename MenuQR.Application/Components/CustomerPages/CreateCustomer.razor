@@ -36,6 +36,7 @@
     }
     public async void OnSubmit()
     {
+        Model.CompanyId = 1;
         var url = configuration["ApiLinks:CustomerCreate"];
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<CustomerDTO>(url, Model);
         var result = await ((HttpResponseMessage)commandResult.Data).Content.ReadAsStringAsync();

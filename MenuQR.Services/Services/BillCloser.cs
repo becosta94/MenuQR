@@ -30,13 +30,12 @@ namespace MenuQR.Services.Services
             _validator = validator;
         }
 
-        public Bill Close(int tableId)
+        public Bill Close(int tableId, int companyId)
         {
             List<Order> orders = _orderService.Get().Where(x => x.TableId == tableId && !x.Deliverd).ToList();
             orders.ForEach(x => x.Customer = _customerService.Get().Where(y => y.Document == x.CustomerDocument).FirstOrDefault());
-            int companyId = orders.First().CompanyId;
             List<OrderProduct> orderProducts = new List<OrderProduct>();
-            Bill? bill = _billService.Get().Where(x => x.TableId == tableId).FirstOrDefault();
+            Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId).FirstOrDefault();
             if (bill is null)
                 return null;
             foreach (Order order in orders)

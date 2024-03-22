@@ -23,7 +23,6 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("Name")
                .HasColumnType("varchar(200)");
 
-            builder.HasData(new Customer() { Document = "11381147666", Id = 1, Name = "Bernardo Lopes Caetano Costa", CompanyId = 1});
             }
     }
 }

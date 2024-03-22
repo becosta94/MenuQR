@@ -3,6 +3,7 @@ using MenuQR.Infra.Data.Context;
 using MenuQR.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -61,7 +62,10 @@ builder.Services.AddSwaggerGen(c =>{
 });
 
 builder.Services.AddAutoMapper(typeof(DomainDTOMapping));
-builder.Services.AddDbContext<SqlContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("HmlConnection")));
+builder.Services.AddDbContext<SqlContext>(opt => {
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("HmlConnection"));
+    opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 ServiceAdd.Add(builder.Services);
 
 
@@ -73,6 +77,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
