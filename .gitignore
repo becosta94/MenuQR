@@ -152,3 +152,4 @@
 /MenuQR.Services/obj/Release/net8.0
 /MenuQR.Api/MenuQR.Api.csproj.user
 /MenuQR.Application/MenuQR.Application.csproj.user
+/.vs/MenuQR/config/applicationhost.config
