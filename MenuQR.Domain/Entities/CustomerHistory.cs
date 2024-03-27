@@ -1,9 +1,12 @@
 ﻿namespace MenuQR.Domain.Entities
 {
-    public class CustomerHistory : BaseEntity
+    public class CustomerHistory : BaseEntityCompanyId
     {
-        public int CustomerId { get; set; }
+        public string CustomerDocument { get; set; }
         public virtual Customer Customer { get; set; }
         public bool OnPlace { get; set; }
+        public int BillId { get; set; }
+        public int BillCompanyId { get; set; }
+        public virtual Bill Bill { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace MenuQR.Application.Entities.DTOs
 {
-    public class OrderProductDTO : BaseDTO
+    public class OrderProductDTO : BaseDTOCompanyId
     {
         public int ProductId { get; set; }
         public double Amount { get; set; }

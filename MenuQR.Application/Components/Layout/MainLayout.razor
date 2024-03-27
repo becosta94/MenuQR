@@ -1,23 +1,36 @@
 ﻿@inherits LayoutComponentBase
+@inject IHttpContextAccessor HttpContextAcessor
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<CascadingValue Name="Token" Value="Token">
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <main>
+            <div class="top-row px-4">
+                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+</CascadingValue>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+@code {
+    [Parameter]
+    public string Token { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] != null)
+            Token = HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString();
+    }
+}

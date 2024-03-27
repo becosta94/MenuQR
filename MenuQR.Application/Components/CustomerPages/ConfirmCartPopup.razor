@@ -6,6 +6,9 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject NavigationManager navigationManager
+@inject IHttpContextAccessor HttpContextAcessor
+@inject ISessionStorageService SessionStorage
+
 
 <div class="title-container-top d-flex justify-content-around">
     <div>
@@ -46,19 +49,21 @@
 </footer>
 
 @code {
+    string documentTest = "11381147666";
+    string tableTest = "1";
+    List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
     [Parameter]
     public int SetHashCode { get; set; }
-    List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
-    string documentTest = "11853350648";
-    string tableTest = "1";
     protected override void OnInitialized()
     {
         OrderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
     }
     private async void Confirm()
     {
-        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={tableTest}&customerDocument={documentTest}";
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductDTO>>(url, OrderProducts);
+        string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
+        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={tableTest}&customerDocument={customerDocument}";
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProducts);
         if (commandResult.Sucess)
             navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
         else

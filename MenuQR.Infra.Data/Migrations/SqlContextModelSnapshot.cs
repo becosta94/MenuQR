@@ -103,10 +103,8 @@ namespace MenuQR.Infra.Data.Migrations
             modelBuilder.Entity("MenuQR.Domain.Entities.Customer", b =>
                 {
                     b.Property<string>("Document")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("CustomerDocument");
 
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -123,15 +121,6 @@ namespace MenuQR.Infra.Data.Migrations
                     b.HasKey("Document");
 
                     b.ToTable("Customer", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Document = "11381147666",
-                            CompanyId = 1,
-                            Id = 1,
-                            Name = "Bernardo Lopes Caetano Costa"
-                        });
                 });
 
             modelBuilder.Entity("MenuQR.Domain.Entities.CustomerHistory", b =>
@@ -143,26 +132,33 @@ namespace MenuQR.Infra.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BillCompanyId")
                         .HasColumnType("int")
-                        .HasColumnName("CompanyId");
+                        .HasColumnName("BillCompanyId");
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("int")
+                        .HasColumnName("BillId");
 
                     b.Property<string>("CustomerDocument")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("CustomerDocument");
 
                     b.Property<bool>("OnPlace")
                         .HasColumnType("bit")
                         .HasColumnName("OnPlace");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "CompanyId");
 
                     b.HasIndex("CompanyId")
                         .HasDatabaseName("IX_Order_Company");
 
                     b.HasIndex("CustomerDocument");
+
+                    b.HasIndex("BillId", "BillCompanyId");
 
                     b.ToTable("CustomerHistory", (string)null);
                 });
@@ -181,7 +177,7 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.Property<string>("CustomerDocument")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2")
@@ -218,23 +214,27 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnName("Amount");
 
                     b.Property<int>("BillCompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("BillCompanyId");
 
                     b.Property<int>("BillId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("BillId");
 
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<int>("OrderCompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("OrderCompanyId");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("OrderId");
 
                     b.Property<int>("ProductCompanyId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("ProductCompanyId");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int")
@@ -448,6 +448,14 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasForeignKey("CustomerDocument")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("MenuQR.Domain.Entities.Bill", "Bill")
+                        .WithMany()
+                        .HasForeignKey("BillId", "BillCompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bill");
 
                     b.Navigation("Customer");
                 });

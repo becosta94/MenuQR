@@ -20,9 +20,29 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("OrderId")
                .HasColumnType("int");
 
+            builder.Property(prop => prop.OrderCompanyId)
+               .IsRequired()
+               .HasColumnName("OrderCompanyId")
+               .HasColumnType("int");
+
             builder.Property(prop => prop.ProductId)
                .IsRequired()
                .HasColumnName("ProductId")
+               .HasColumnType("int");
+
+            builder.Property(prop => prop.ProductCompanyId)
+               .IsRequired()
+               .HasColumnName("ProductCompanyId")
+               .HasColumnType("int");
+
+            builder.Property(prop => prop.BillId)
+               .IsRequired()
+               .HasColumnName("BillId")
+               .HasColumnType("int");            
+            
+            builder.Property(prop => prop.BillCompanyId)
+               .IsRequired()
+               .HasColumnName("BillCompanyId")
                .HasColumnType("int");
 
             builder.Property(prop => prop.Amount)
@@ -34,16 +54,6 @@ namespace MenuQR.Infra.Data.Mapping
                .IsRequired()
                .HasColumnName("Total")
                .HasColumnType("float");
-
-            builder.HasOne(prop => prop.Order)
-                .WithMany(prop => prop.OrderProducts)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(prop => prop.Product)
-                .WithMany(prop => prop.OrderProducts)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

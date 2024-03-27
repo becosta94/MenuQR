@@ -29,7 +29,7 @@ namespace MenuQR.Services.Services.Factories
             Table table = _baseServiceTable.GetByCompoundKey(new object[] { tableId, companyId });
             Customer? customer = _baseServiceCustomer.Get().Where(x => x.Document == customerDocument).FirstOrDefault();
             CustomerHistory? customerHistory = _customerHistorybaseService.Get()
-                                                                          .Where(x => x.CustomerId == customer.Id && x.CompanyId == companyId && x.OnPlace)
+                                                                          .Where(x => x.CustomerDocument == customer.Document && x.CompanyId == companyId && x.OnPlace)
                                                                           .FirstOrDefault();
             if (customer is not null && customerHistory.OnPlace)
                 return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(new Order(table.Id, customer.Document, companyId))) as Order;

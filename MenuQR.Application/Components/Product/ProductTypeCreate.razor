@@ -2,11 +2,12 @@
 @rendermode InteractiveServer
 @inject IWebHostEnvironment Env
 @inject IConfiguration configuartion
-@inject HttpClient http
+@inject IApiService ApiService
 @attribute [Authorize]
 @inject IConfiguration configuaration
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
+@inject IHttpContextAccessor HttpContextAcessor
 
 <h3>Adicionar Produto</h3>
 
@@ -26,8 +27,8 @@
     public async void OnSubmit()
     {
         var url = configuartion["ApiLinks:ProductTypeCreate"];
-        var response = await http.PostAsJsonAsync<ProductTypeDTO>(url, Model);
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductTypeDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
             navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);

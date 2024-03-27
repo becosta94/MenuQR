@@ -1,8 +1,8 @@
-﻿using MenuQR.Domain.Entities;
+﻿using MenuQR.Domain.DTOs;
+using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Validators;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
+
 
 namespace MenuQR.Services.Services
 {
@@ -30,22 +30,26 @@ namespace MenuQR.Services.Services
             _validator = validator;
         }
 
-        public Bill Close(int tableId, int companyId)
+        public object Close(int tableId, int companyId)
         {
-            List<Order> orders = _orderService.Get().Where(x => x.TableId == tableId && !x.Deliverd).ToList();
+            List<Order> orders = _orderService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId).ToList();
+            if (orders.Where(x => !x.Deliverd).Count() > 0)
+                return new ErroDTO("Existem pedidos em aberto.");
             orders.ForEach(x => x.Customer = _customerService.Get().Where(y => y.Document == x.CustomerDocument).FirstOrDefault());
             List<OrderProduct> orderProducts = new List<OrderProduct>();
-            Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId).FirstOrDefault();
+            Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             if (bill is null)
                 return null;
             foreach (Order order in orders)
-                orderProducts.AddRange(_orderProductService.Get().Where(x => x.OrderId == order.Id).ToList());
+                orderProducts.AddRange(_orderProductService.Get().Where(x => x.OrderId == order.Id && 
+                                                                             x.CompanyId == order.CompanyId && x.BillId == bill.Id && 
+                                                                             x.BillCompanyId == bill.CompanyId).ToList());
             ICollection<IGrouping<Customer, OrderProduct>> orderProducts1 =  orderProducts.GroupBy(x => x.Order.Customer).ToList();
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
             {
                 bill.AddNewCustomerTotal(gruped.Key, gruped.Sum(x => x.Total));
                 CustomerHistory? customerHistory = _costuerHistoryService.Get()
-                                                                        .Where(x => x.CustomerId == gruped.Key.Id && x.CompanyId == companyId && x.OnPlace)
+                                                                        .Where(x => x.CustomerDocument == gruped.Key.Document && x.CompanyId == companyId && x.OnPlace)
                                                                         .FirstOrDefault();
                 if (customerHistory is null)
                     throw new Exception();

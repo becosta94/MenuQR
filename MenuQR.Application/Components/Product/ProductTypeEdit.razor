@@ -40,7 +40,7 @@
     private async void OnSubmit()
     {
         var url = configuaration["ApiLinks:ProductTypeUpdate"];
-        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductTypeDTO>(url, Model);
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductTypeDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto alterado!");

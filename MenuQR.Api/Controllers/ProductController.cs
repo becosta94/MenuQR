@@ -15,6 +15,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
+        [Authorize]
         public IActionResult Create([FromServices] IProductFactory productFactory, [FromServices] IMapper mapper, ProductDTO productDTO)
         {
             Product product = productFactory.Make(productDTO);
@@ -26,6 +27,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpPut]
         [Route("update")]
+        [Authorize]
         public IActionResult Update([FromServices] IBaseService<Product> productBaseService,
                                     [FromServices] IValidator validator,
                                     [FromServices] IMapper mapper,
@@ -40,12 +42,14 @@ namespace MenuQR.Api.Controllers
 
         [HttpPut]
         [Route("toggleactivity")]
+        [Authorize]
         public IActionResult ToggleActivity([FromServices] IBaseService<Product> productBaseService,
                                             [FromServices] IMapper mapper,
                                             [FromServices] IValidator validator,
-                                            int id)
+                                            int productId,
+                                            int companyId)
         {
-            Product? productOutdated = productBaseService.GetById(id);
+            Product? productOutdated = productBaseService.GetByCompoundKey(new object[] { productId, companyId });
             productOutdated.Active = !productOutdated.Active;
             Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated)) as Product;
             if (productUpdated is not null)
@@ -56,6 +60,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getbyid")]
+        [Authorize]
         public IActionResult GetById([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper, int id)
         {
             Product? product = productBaseService.Get().Where(x => x.Id == id).FirstOrDefault();
@@ -67,9 +72,10 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getall")]
-        public IActionResult GetAll([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper)
+        [Authorize]
+        public IActionResult GetAll([FromServices] IBaseService<Product> productBaseService, [FromServices] IMapper mapper, int companyId)
         {
-            List<Product>? products = productBaseService.Get().OrderByDescending(x => x.Active).ThenBy(x => x.Name).ToList();
+            List<Product>? products = productBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Active).ThenBy(x => x.Name).ToList();
             if (products is not null)
             {
                 List<ProductDTO> productsDto = new List<ProductDTO>();

@@ -1,6 +1,5 @@
 ﻿@page "/product/selection"
-@inject HttpClient http
-@inject IConfiguration configuartion
+@inject IConfiguration configuration
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor HttpContextAcessor
@@ -8,6 +7,8 @@
 @layout MenuQR.Application.Components.Layout.CustomerLayout
 @inject StateContainer stateContainer
 @inject NavigationManager navigationManager
+@inject IHttpContextAccessor HttpContextAcessor
+
 
 @if (Products.Count == 0) { }
 else
@@ -98,34 +99,32 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var url = configuartion["ApiLinks:ProductGetAll"];
-        List<ProductDTO>? productsApi = await http.GetFromJsonAsync<List<ProductDTO>>(url);
-        if (productsApi is not null)
-        {
+        var url = configuration["ApiLinks:ProductGetAll"];        
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
             Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
-        }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
-
-        url = configuartion["ApiLinks:ProductTypeGetAll"];
-        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, string.Empty, 1);
+        url = configuration["ApiLinks:ProductTypeGetAll"];
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO>)
             ProductsType =  commandResult.Data as List<ProductTypeDTO>;
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        StateHasChanged();
     }
-    public async void ToggleActivity(int id)
-    {
-        var url = configuartion["ApiLinks:ToggleActivity"];
-        var productsApi = await http.PutAsync(url + $"productId={id}", null);
-        if (!productsApi.IsSuccessStatusCode)
-            await JsRuntime.InvokeVoidAsync("Alert", "Produto não alterado!");
-    }
+
     public async void OnSubmit()
     {
+        if (OrderProducts.Count == 0)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Carrinho vazio.");
+            return;
+        }
         stateContainer.ObjectTunnel.Add(OrderProducts.GetHashCode(), OrderProducts);
         navigationManager.NavigateTo($"/product/selection/confirmation/{OrderProducts.GetHashCode()}");
     }
+
     protected async void ChangeAmount(bool increase, ProductDTO product)
     {
         object[] args = { increase, product.Id };

@@ -1,5 +1,5 @@
 ﻿@page "/customer/token/{SetHashCode:int}"
-
+@rendermode InteractiveServer
 @inject ITokenService TokenService
 @inject StateContainer stateContainer
 @inject IConfiguration configuration
@@ -7,6 +7,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @layout MenuQR.Application.Components.Layout.EmptyLayout
+
 
 @code {
     public CustomerDTO Model { get; set; } = new CustomerDTO();
@@ -20,15 +21,20 @@
         Model = (CustomerDTO)stateContainer.ObjectTunnel[SetHashCode];
         string token = TokenService.GenerateToken(Model.Document);
         HttpContext.Response.Cookies.Append("Token", token);
+        HttpContext.Response.Cookies.Append("CustomerDocument", Model.Document);
         var url = configuration["ApiLinks:BillCreate"];
         Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
         keyParametersPair.Add("tableId", 1);
         keyParametersPair.Add("companyId", 1);
-        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, keyParametersPair);
+        keyParametersPair.Add("customerDocument", Model.Document);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair);
         if (commandResult.Sucess)
-            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+        {
+            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerLogged"] +  Model.GetHashCode());
+        }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
+
 }
 

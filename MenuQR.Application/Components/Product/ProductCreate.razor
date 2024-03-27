@@ -3,30 +3,47 @@
 @rendermode InteractiveServer
 @inject IWebHostEnvironment Env
 @inject IConfiguration configuration
-@inject HttpClient http
+@inject IApiService ApiService
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
+@inject IHttpContextAccessor HttpContextAcessor
 
 <h3>Adicionar Produto</h3>
 
 <EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="addProduct">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <div class="mb-3">
         <label class="form-label">Nome:</label>
-        <InputText @bind-Value="Model.Name" class="form-control" />
+        <InputText @bind-Value="Model.Name" class="form-control" style="max-width: 60%" require />
     </div>
     <div class="mb-3">
         <label class="form-label">Preço:</label>
-        <InputNumber @bind-Value="Model.Price" class="form-control" />
+        <InputNumber @bind-Value="Model.Price" class="form-control" style="max-width: 60%" />
     </div>
     <div class="mb-3">
         <label class="form-label">Descrição:</label>
-        <InputText @bind-Value="Model.Description" class="form-control" />
+        <InputTextArea @bind-Value="Model.Description" class="form-control" style="max-width: 60%" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tipo:</label>
+        <InputSelect @bind-Value="Model.TypeId" class="form-select" style="max-width: 60%">
+            @if (ProductsType == null || ProductsType.Count == 0)
+            {
+                <option></option>
+            }
+            else
+            {
+                <option selected value=""></option>
+                @foreach (ProductTypeDTO productType in ProductsType)
+                {
+                    <option value="@productType.Id">@productType.TypeName</option>
+                }
+            }
+        </InputSelect>
     </div>
     <div class="mb-3">
         <label class="form-label">Imagem:</label>
-        <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" />
+        <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" style="max-width: 60%" />
         @if (!string.IsNullOrEmpty(ImageDataUrl))
         {
             <img src="@ImageDataUrl" height="200" width="200" class="img-fluid border border-dark mt-3 mb-3" />
@@ -40,18 +57,30 @@
     public MemoryStream MsFile;
     public ProductDTO Model { get; set; } = new ProductDTO();
     public string ImageDataUrl;
+    List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
+
 
     public async void OnSubmit()
     {
-        var url = configuration["ApiLinks:ProductCreate"];
-        var response = await http.PostAsJsonAsync<ProductDTO>(url, Model);
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        Model.Active = true;
+        Model.CompanyId = 1;
+        string url = configuration["ApiLinks:ProductCreate"];
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
-            navigationManager.NavigateTo(configuration["ApplicationLinks:TableManager"]);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductManager"]);
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, produto não cadastrado");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string url = configuration["ApiLinks:ProductTypeGetAll"];
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
+            ProductsType = productsTypeApi;
     }
     async Task HandleFileSelected(IFileListEntry[] files)
     {

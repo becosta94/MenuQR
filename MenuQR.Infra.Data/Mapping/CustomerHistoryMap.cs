@@ -15,17 +15,31 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("CustomerHistory");
 
-            builder.HasKey(prop => prop.Id);
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId});
 
-            builder.Property(prop => prop.CompanyId)
+            builder.Property(prop => prop.Id)
+                   .ValueGeneratedOnAdd()
+                   .UseIdentityColumn();
+
+            builder.Property(prop => prop.CustomerDocument)
                .IsRequired()
-               .HasColumnName("CompanyId")
-               .HasColumnType("int");
+               .HasColumnName("CustomerDocument")
+               .HasColumnType("varchar(50)");
 
             builder.Property(prop => prop.OnPlace)
                 .IsRequired()
                 .HasColumnName("OnPlace")
                 .HasColumnType("bit");
+
+            builder.Property(prop => prop.BillId)
+                .IsRequired()
+                .HasColumnName("BillId")
+                .HasColumnType("int");
+
+            builder.Property(prop => prop.BillCompanyId)
+                .IsRequired()
+                .HasColumnName("BillCompanyId")
+                .HasColumnType("int");
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace MenuQR.Domain.DTOs
 {
-    public class OrderDTO : BaseEntity
+    public class OrderDTO : BaseEntityCompanyId
     {
         public bool Deliverd { get; set; }
         public DateTime Date { get; set; }

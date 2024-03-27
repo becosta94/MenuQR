@@ -1,12 +1,14 @@
 ﻿@page "/customer/create/{CPF:long}"
+@using MenuQR.Application.Data
+@using Microsoft.AspNetCore.Identity
 @inject IConfiguration configuration
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject NavigationManager navigationManager
-
+@inject UserManager<ApplicationUser> UserManager
 @layout MenuQR.Application.Components.Layout.EmptyLayout
-
+@inject StateContainer stateContainer
 
 <EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="createCustomer">
     <DataAnnotationsValidator />
@@ -36,12 +38,14 @@
     }
     public async void OnSubmit()
     {
-        Model.CompanyId = 1;
         var url = configuration["ApiLinks:CustomerCreate"];
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<CustomerDTO>(url, Model);
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<CustomerDTO>(url, null, Model);
         var result = await ((HttpResponseMessage)commandResult.Data).Content.ReadAsStringAsync();
         if (commandResult.Sucess)
-            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+        {
+            stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
+        }
         else if (!commandResult.Sucess && result is string message)
             await JsRuntime.InvokeVoidAsync("alert", message);
         else

@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.SessionStorage;
 using MenuQR.Application.Components;
 using MenuQR.Application.Components.Account;
 using MenuQR.Application.Data;
@@ -29,10 +30,7 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<StateContainer>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-
-builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddBlazoredLocalStorage(config =>
-    config.JsonSerializerOptions.WriteIndented = true);
+builder.Services.AddBlazoredSessionStorage();
 
 builder.Services.AddAuthentication(options =>
     {

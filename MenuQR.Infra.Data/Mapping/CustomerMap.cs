@@ -10,8 +10,12 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("Customer");
 
-
             builder.HasKey(prop => prop.Document);
+
+            builder.Property(prop => prop.Document)
+                .IsRequired()
+                .HasColumnName("CustomerDocument")
+                .HasColumnType("varchar(50)");
 
             builder.Property(prop => prop.Id)
                 .IsRequired()

@@ -26,9 +26,6 @@
 
 @code {
     public CustomerDTO Model { get; set; } = new CustomerDTO();
-
-
-
     public async void OnSubmit()
     {
         var url = configuration["ApiLinks:CustomerGetById"];
@@ -39,10 +36,6 @@
             navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
         else
-        {
             navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerCreate"] + long.Parse(Model.Document));
-        }
-    }
-
     }
 }

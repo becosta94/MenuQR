@@ -15,6 +15,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
+        [Authorize]
         public IActionResult Create([FromServices] ITableFactory tableFactory, [FromServices] IMapper mapper, TableDTO tableDTO)
         {
             Table product = tableFactory.Make(tableDTO);
@@ -25,6 +26,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("update")]
+        [Authorize]
         public IActionResult Update([FromServices] IBaseService<Table> tableBaseService,
                                     [FromServices] IValidator validator,
                                     [FromServices] IMapper mapper,
@@ -49,6 +51,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpGet]
         [Route("getall")]
+        [Authorize]
         public IActionResult GetAll([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int companyId)
         {
             List<Table>? tables = tableBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Identification).ToList();

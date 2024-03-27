@@ -18,6 +18,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
+        //[Authorize]
         public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived,
                                     [FromServices] IOrderFactory newOrderFactory,
                                     [FromServices] IOrderProductFactory newOrderProductFactory,
@@ -71,6 +72,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getalltodelivery")]
+        [Authorize]
         public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
             List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.Date).ToList();

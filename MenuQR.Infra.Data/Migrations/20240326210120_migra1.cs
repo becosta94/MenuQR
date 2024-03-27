@@ -36,15 +36,14 @@ namespace MenuQR.Infra.Data.Migrations
                 name: "Customer",
                 columns: table => new
                 {
-                    Document = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CustomerDocument = table.Column<string>(type: "varchar(50)", nullable: false),
                     Name = table.Column<string>(type: "varchar(200)", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CompanyId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Customer", x => x.Document);
+                    table.PrimaryKey("PK_Customer", x => x.CustomerDocument);
                 });
 
             migrationBuilder.CreateTable(
@@ -96,28 +95,6 @@ namespace MenuQR.Infra.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerHistory",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
-                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    OnPlace = table.Column<bool>(type: "bit", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerHistory", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CustomerHistory_Customer_CustomerDocument",
-                        column: x => x.CustomerDocument,
-                        principalTable: "Customer",
-                        principalColumn: "Document",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Bill",
                 columns: table => new
                 {
@@ -150,7 +127,7 @@ namespace MenuQR.Infra.Data.Migrations
                     Deliverd = table.Column<bool>(type: "bit", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TableId = table.Column<int>(type: "int", nullable: true),
-                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    CustomerDocument = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -159,7 +136,7 @@ namespace MenuQR.Infra.Data.Migrations
                         name: "FK_Order_Customer_CustomerDocument",
                         column: x => x.CustomerDocument,
                         principalTable: "Customer",
-                        principalColumn: "Document",
+                        principalColumn: "CustomerDocument",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Order_Tables_TableId_CompanyId",
@@ -170,19 +147,48 @@ namespace MenuQR.Infra.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CustomerHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyId = table.Column<int>(type: "int", nullable: false),
+                    CustomerDocument = table.Column<string>(type: "varchar(50)", nullable: false),
+                    OnPlace = table.Column<bool>(type: "bit", nullable: false),
+                    BillId = table.Column<int>(type: "int", nullable: false),
+                    BillCompanyId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerHistory", x => new { x.Id, x.CompanyId });
+                    table.ForeignKey(
+                        name: "FK_CustomerHistory_Bill_BillId_BillCompanyId",
+                        columns: x => new { x.BillId, x.BillCompanyId },
+                        principalTable: "Bill",
+                        principalColumns: new[] { "Id", "CompanyId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomerHistory_Customer_CustomerDocument",
+                        column: x => x.CustomerDocument,
+                        principalTable: "Customer",
+                        principalColumn: "CustomerDocument",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderProduct",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    Total = table.Column<double>(type: "float", nullable: false),
                     OrderCompanyId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
                     ProductCompanyId = table.Column<int>(type: "int", nullable: false),
                     BillId = table.Column<int>(type: "int", nullable: false),
                     BillCompanyId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Total = table.Column<double>(type: "float", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -207,11 +213,6 @@ namespace MenuQR.Infra.Data.Migrations
                         principalColumns: new[] { "Id", "CompanyId" },
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.InsertData(
-                table: "Customer",
-                columns: new[] { "Document", "CompanyId", "Id", "Name" },
-                values: new object[] { "11381147666", 1, 1, "Bernardo Lopes Caetano Costa" });
 
             migrationBuilder.InsertData(
                 table: "Product",
@@ -249,6 +250,11 @@ namespace MenuQR.Infra.Data.Migrations
                 name: "IX_Order_Company",
                 table: "Bill",
                 column: "CompanyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomerHistory_BillId_BillCompanyId",
+                table: "CustomerHistory",
+                columns: new[] { "BillId", "BillCompanyId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerHistory_CustomerDocument",

@@ -15,19 +15,39 @@
     <ValidationSummary />
     <div class="mb-3">
         <label class="form-label">Nome:</label>
-        <InputText @bind-Value="Model.Name" class="form-control" />
+        <InputText @bind-Value="Model.Name" class="form-control" style="max-width: 60%" />
     </div>
     <div class="mb-3">
         <label class="form-label">Preço:</label>
-        <InputNumber @bind-Value="Model.Price" class="form-control" />
+        <InputNumber @bind-Value="Model.Price" class="form-control" style="max-width: 60%" />
     </div>
     <div class="mb-3">
         <label class="form-label">Descrição:</label>
-        <InputText @bind-Value="Model.Description" class="form-control" />
+        <InputText @bind-Value="Model.Description" class="form-control" style="max-width: 60%" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tipo:</label>
+        <InputSelect @bind-Value="Model.TypeId" class="form-select" style="max-width: 60%">
+            @if (ProductsType == null || ProductsType.Count == 0)
+            {
+                <option selected value=""></option>
+            }
+            @foreach (ProductTypeDTO productType in ProductsType)
+            {
+                if (productType.Id == Model.TypeId)
+                {
+                    <option selected value="@productType.Id">@productType.TypeName</option>
+                }
+                else
+                {
+                    <option value="@productType.Id">@productType.TypeName</option>
+                }
+            }
+        </InputSelect>
     </div>
     <div class="mb-3">
         <label class="form-label">Imagem:</label>
-        <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" />
+        <BlazorInputFile.InputFile OnChange=HandleFileSelected class="form-control" style="max-width: 60%" />
         @if (!string.IsNullOrEmpty(_imageDataUrl))
         {
             <img src="@_imageDataUrl" height="200" width="200" class="img-fluid border border-dark mt-3 mb-3" />
@@ -41,6 +61,7 @@
     private MemoryStream? _msFile;
     private string? _imageDataUrl;
     private ProductDTO Model { get; set; } = new ProductDTO();
+    List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
     [Parameter]
     public int Id { get; set; }
 
@@ -55,12 +76,16 @@
         }
         else
             await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
+        url = configuration["ApiLinks:ProductTypeGetAll"];
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
+            ProductsType = productsTypeApi;
     }
 
     private async void OnSubmit()
     {
         var url = configuration["ApiLinks:ProductUpdate"];
-        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductDTO>(url, Model);
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto alterado!");

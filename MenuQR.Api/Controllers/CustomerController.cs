@@ -3,6 +3,7 @@ using MenuQR.Domain.DTOs;
 using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -19,8 +20,8 @@ namespace MenuQR.Api.Controllers
             object customerResult = customerFactory.Make(customerDTO);
             if (customerResult is not null && customerResult is Customer customer)
                 return Ok(mapper.Map<CustomerDTO>(customer));
-            if (customerResult is not null && customerResult is string message)
-                return BadRequest(message);
+            if (customerResult is not null && customerResult is ErroDTO erro)
+                return BadRequest(erro);
             return BadRequest("Ocorreu um erro.");
         }
         [HttpGet]

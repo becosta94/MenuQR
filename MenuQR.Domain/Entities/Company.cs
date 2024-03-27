@@ -1,6 +1,6 @@
 ﻿namespace MenuQR.Domain.Entities
 {
-    public class Company : BaseEntity
+    public class Company : BaseEntityCompanyId
     {
         public string Name { get; set; }
         public string DocumentNumber { get; set; }

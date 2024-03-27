@@ -44,7 +44,7 @@
     private async void OnSubmit()
     {
         var url = configuaration["ApiLinks:TableUpdate"];
-        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<TableDTO>(url, Model);
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Mesa alterada!");

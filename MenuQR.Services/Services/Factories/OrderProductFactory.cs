@@ -41,10 +41,11 @@ namespace MenuQR.Services.Services.Factories
                 if (product is null)
                     continue;
                 orderProduct.Total = product.Price * orderProduct.Amount;
-                orderProduct.Bill = bill;
                 orderProduct.Id = 0;
                 orderProduct.Order = order;
                 orderProduct.Product = product;
+                orderProduct.Bill = bill;
+                orderProduct.CompanyId = order.CompanyId;
                 OrderProduct? newOrderProduc = _validator.Execute(() => _baseOrderProductService.Add<OrderProductValidator>(orderProduct)) as OrderProduct;
                 if (newOrderProduc is null)
                     throw new Exception("Erro in OrderProduct");

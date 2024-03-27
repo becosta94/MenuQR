@@ -1,6 +1,6 @@
 ﻿namespace MenuQR.Domain.Entities
 {
-    public class Order : BaseEntity
+    public class Order : BaseEntityCompanyId
     {
         public bool Deliverd { get; set; }
         public DateTime Date { get; set; }

@@ -6,6 +6,7 @@ using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace MenuQR.Api.Controllers
 {
@@ -15,6 +16,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpGet]
         [Route("getall")]
+        [Authorize]
         public IActionResult GetAll([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
         {
             List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
@@ -30,9 +32,10 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPost]
         [Route("create")]
-        public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId)
+        [Authorize]
+        public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument)
         {
-            Bill bill = newBillFactory.Make(tableId, companyId);
+            Bill bill = newBillFactory.Make(tableId, companyId, customerDocument);
             if (bill is not null)
                 return Ok(bill);
             else
@@ -40,11 +43,14 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
+        [Authorize]
         public IActionResult Close([FromServices] IBillCloser billCloser, int tableId, int companyId)
         {
-            Bill bill = billCloser.Close(tableId, companyId);
-            if (bill is not null)
-                return Ok(bill);
+            object returnedObjectBillCloser = billCloser.Close(tableId, companyId);
+            if (returnedObjectBillCloser is not null && returnedObjectBillCloser is Bill)
+                return Ok(returnedObjectBillCloser);
+            else if (returnedObjectBillCloser is not null && returnedObjectBillCloser is ErroDTO erro)
+                return Ok(erro);
             else
                 return BadRequest("Não foi possível gerar a conta");
         }

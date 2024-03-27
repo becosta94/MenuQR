@@ -63,8 +63,7 @@ builder.Services.AddSwaggerGen(c =>{
 
 builder.Services.AddAutoMapper(typeof(DomainDTOMapping));
 builder.Services.AddDbContext<SqlContext>(opt => {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("HmlConnection"));
-    opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("HmlConnection")) ;
 });
 ServiceAdd.Add(builder.Services);
 

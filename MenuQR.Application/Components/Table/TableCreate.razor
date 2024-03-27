@@ -8,6 +8,7 @@
 @inject IApiService ApiService
 @inject IConfiguration configuaration
 @inject NavigationManager navigationManager
+@inject IHttpContextAccessor HttpContextAcessor
 
 <h3>Adicionar Mesa</h3>
 
@@ -31,7 +32,7 @@
     private async void OnSubmit()
     {
         var url = configuartion["ApiLinks:TableCreate"];
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<TableDTO>(url, Model);
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Mesa cadastrada");

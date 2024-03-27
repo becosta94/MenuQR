@@ -4,6 +4,7 @@ using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using MenuQR.Services.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MenuQR.Api.Controllers
@@ -14,6 +15,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
+        [Authorize]
         public IActionResult Create([FromServices] IProductTypeFactory productTypeFactory, [FromServices] IMapper mapper, ProductTypeDTO productTypeDTO)
         {
             ProductType productType = productTypeFactory.Make(productTypeDTO);
@@ -25,6 +27,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpPut]
         [Route("update")]
+        [Authorize]
         public IActionResult Update([FromServices] IBaseService<ProductType> productTypeBaseService,
                             [FromServices] IValidator validator,
                             [FromServices] IMapper mapper,
@@ -39,6 +42,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getall")]
+        [Authorize]
         public IActionResult GetAll([FromServices] IBaseService<ProductType> productTypeBaseService, [FromServices] IMapper mapper, int companyId)
         {
             List<ProductType>? productsType = productTypeBaseService.Get().Where(x => x.CompanyId == companyId).ToList();
@@ -54,6 +58,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getbyid")]
+        [Authorize]
         public IActionResult GetById([FromServices] IBaseService<ProductType> productTypeBaseService, [FromServices] IMapper mapper, int id)
         {
             ProductType? product = productTypeBaseService.Get().Where(x => x.Id == id).FirstOrDefault();

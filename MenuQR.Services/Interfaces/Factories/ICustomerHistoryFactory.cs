@@ -9,6 +9,6 @@ namespace MenuQR.Services.Interfaces.Factories
 {
     public interface ICustomerHistoryFactory
     {
-        public CustomerHistory Make(Customer customer);
+        public CustomerHistory Make(Customer customer, int companyId);
     }
 }

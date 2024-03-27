@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MenuQR.Infra.Data.Mapping
 {
-    internal class OrderMap : IEntityTypeConfiguration<Order>
+    public class OrderMap : IEntityTypeConfiguration<Order>
     {
         public void Configure(EntityTypeBuilder<Order> builder)
         {

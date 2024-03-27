@@ -1,9 +1,10 @@
 ﻿@page "/product/manager"
 @attribute [Authorize]
-@inject HttpClient http
-@inject IConfiguration configuartion
+@inject IApiService ApiService
+@inject IConfiguration configuration
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
+@inject IHttpContextAccessor HttpContextAcessor
 
 <h3>ProductManager</h3>
 <a href="/product/create/" class="btn btn-primary">Adicionar</a>
@@ -16,6 +17,7 @@
                 <th>Nome</th>
                 <th>Preço</th>
                 <th>Descrição</th>
+                <th>Tipo</th>
                 <th>Ativo</th>
                 <th>Editar</th>
             </tr>
@@ -31,6 +33,7 @@ else
                 <th>Nome</th>
                 <th>Preço</th>
                 <th>Descrição</th>
+                <th>Tipo</th>
                 <th>Ativo</th>
                 <th>Editar</th>
             </tr>
@@ -45,15 +48,16 @@ else
                     <td class="align-middle" scope="row">@product.Name</td>
                     <td class="align-middle">@product.Price</td>
                     <td class="align-middle">@product.Description</td>
+                    <td class="align-middle">@ProductsType.Where(x => x.Id == product.TypeId).First().TypeName</td>
                     <td class="align-middle">
                         <div class="form-check form-switch">
                             @if (product.Active)
                             {
-                                <InputCheckbox @bind-Value="product.Active" @onclick="(args) => ToggleActivity(product.Id)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
+                                <InputCheckbox @bind-Value="product.Active" @onclick="(args) => ToggleActivity(product.Id, product.CompanyId)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
                             }
                             else
                             {
-                                <InputCheckbox @bind-Value="product.Active" @onclick="(args) => ToggleActivity(product.Id)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
+                                <InputCheckbox @bind-Value="product.Active" @onclick="(args) => ToggleActivity(product.Id, product.CompanyId)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
                             }
 
                         </div>
@@ -68,20 +72,31 @@ else
 }
 @code {
     List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+    List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
 
     protected override async Task OnInitializedAsync()
     {
-        var url = configuartion["ApiLinks:ProductGetAll"];
-        List<ProductDTO>? productsApi = await http.GetFromJsonAsync<List<ProductDTO>>(url);
-        if (productsApi is not null)
+        var url = configuration["ApiLinks:ProductGetAll"];
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
             Products = productsApi;
+        url = configuration["ApiLinks:ProductTypeGetAll"];
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
+            ProductsType = (from p in productsTypeApi
+                           join pm in Products on p.Id equals pm.Id
+                           select new ProductTypeDTO {Id = p.Id, CompanyId = p.CompanyId, TypeName = p.TypeName}).ToList();
+
     }
-    public async void ToggleActivity(int id)
+    public async void ToggleActivity(int productId, int companyId)
     {
-        var url = configuartion["ApiLinks:ToggleActivity"];
-        var productsApi = await http.PutAsync(url + $"productId={id}", null);
-        if (!productsApi.IsSuccessStatusCode)
-            await JsRuntime.InvokeVoidAsync("Alert", "Produto não alterado!");
+        var url = configuration["ApiLinks:ToggleActivity"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("productId", productId);
+        parameters.Add("companyId", companyId);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (!commandResult.Sucess)
+            await JsRuntime.InvokeVoidAsync("alert", "Produto não alterado!");
     }
 
 }

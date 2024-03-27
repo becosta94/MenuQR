@@ -6,6 +6,7 @@
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
 @inject IApiService ApiService
+@inject NavigationManager navigationManager
 
 <h3>Gerenciador de Pedidos</h3>
 @if (Orders.Count == 0)
@@ -39,7 +40,8 @@ else
             {
                 <tr>
                     <td class="align-middle">@order.Id</td>
-                    <td class="align-middle">@foreach(OrderProductDTO orderProducts in order.Products)
+                    <td class="align-middle">
+                        @foreach (OrderProductDTO orderProducts in order.Products)
                         {
                             <p>Quantidade: @orderProducts.Amount / Produto:  @orderProducts.Product.Name</p>
                         }
@@ -74,8 +76,6 @@ else
         GenericCommandResult commandResult = await ApiService.GetStringByParameter<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", "1");
         if (commandResult.Sucess)
             Orders =  JsonConvert.DeserializeObject<List<OrderDTO>>(commandResult.Data.ToString());
-        else
-            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 
     public async void DeliverOrder(int id)
@@ -86,7 +86,10 @@ else
         parameters.Add("companyId", 1);
         GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess)
+        {
             await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");
+            navigationManager.NavigateTo(configuration["ApplicationLinks:OrderManager"].ToString(), true);
+        }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }

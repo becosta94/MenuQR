@@ -1,6 +1,6 @@
 ﻿namespace MenuQR.Application.Entities.DTOs
 {
-    public class BillDTO : BaseDTO
+    public class BillDTO : BaseDTOCompanyId
     {
         private Dictionary<CustomerDTO, double> _customersAndTotals;
         public double Total { get; set; }

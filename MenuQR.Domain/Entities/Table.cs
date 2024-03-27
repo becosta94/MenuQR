@@ -2,7 +2,7 @@
 
 namespace MenuQR.Domain.Entities
 {
-    public class Table : BaseEntity
+    public class Table : BaseEntityCompanyId
     {
         public string Identification { get; set; }
         public string QRLink { get; set; }

@@ -2,7 +2,7 @@
 
 namespace MenuQR.Domain.DTOs
 {
-    public class BillDTO : BaseEntity
+    public class BillDTO : BaseEntityCompanyId
     {
         private Dictionary<CustomerDTO, double> _customersAndTotals;
         public double Total { get; set; }

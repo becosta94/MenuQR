@@ -2,7 +2,7 @@
 
 namespace MenuQR.Domain.DTOs
 {
-    public class ProductDTO : BaseEntity
+    public class ProductDTO : BaseEntityCompanyId
     {
         public string Name { get; set; }
         public string Description { get; set; }
