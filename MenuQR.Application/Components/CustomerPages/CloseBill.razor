@@ -1,4 +1,5 @@
 ﻿@page "/bill/close/{CloseTotal:bool}"
+@rendermode InteractiveServer
 @inject StateContainer stateContainer
 @inject NavigationManager navigationManager
 @inject IConfiguration configuration
@@ -22,36 +23,70 @@
     }
 </div>
 <div style="padding-top: 60px"></div>
-<div>
+<br />
+@if (openOrder)
+{
+    <div>
+        <p>Existem pedidos em aberto, não é possível cálcular a conta.</p>
+    </div>
+}
+else
+{
+    <div>
 
-    @if (_bill != null)
-    {
-        @foreach (var a in _customersOrders)
+        @if (_bill != null)
         {
-            <p>@a.Where(x => x.Order.CustomerDocument == a.Key).Select(x => x.Order.CustomerDTO.Name).First()</p>
-            <table class="table">
+            @foreach (var a in _customersOrders)
+            {
+                <p>@a.Where(x => x.Order.CustomerDocument == a.Key).Select(x => x.Order.CustomerDTO.Name).First()</p>
                 @foreach (var b in a.GroupBy(x => x.Product.Id))
                 {
-                    <tr>
-                        <td class="align-middle">@b.Count() x</td>
-                        <td class="align-middle">@b.First().Product.Name</td>
-                        <td class="align-middle">R$ @b.First().Product.Price.ToString("0.00")</td>
-                    </tr>
+                    <div class="d-flex">
+                        <div class="p-2">@b.Count() x</div>
+                        <div class="p-2">@b.First().Product.Name</div>
+                        <div class="ms-auto p-2">R$ @b.First().Product.Price.ToString("0.00")</div>
+                    </div>
                 }
-            </table>
-            <p>@a.Sum(x => x.Total).ToString("0.00")</p>
+                if (CloseTotal)
+                {
+
+                    <div class="d-flex">
+                        <div class="p-2">Total Parcial: </div>
+                        <div class="ms-auto p-2">@a.Sum(x => x.Total).ToString("0.00")</div>
+                    </div>
+                }
+                <br />
+            }
+            <div class="d-flex">
+                <div class="p-2">Total Geral: </div>
+                <div class="ms-auto p-2">@_bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
+            </div>
         }
-        <p>@_bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</p>
-    }
+    </div>
+}
 
+<footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
+    <div class="justify-content-around bd-highlight btn-toolbar">
+        <div class="btn-group mr-md-3" role="group">
+            <button @onclick="Cancel" class="btn btn-danger">Cancelar</button>
+        </div>
+        @if (!openOrder)
+        {
+            <div class="btn-group mr-md-3" role="group">
+                <a @onclick="() => Close(this._tableId)" class="btn btn-primary">Fechar Conta</a>
+            </div>
+        }
+    </div>
+</footer>
 
-</div>
 @code {
     [Parameter]
     public bool CloseTotal { get; set; }
     private BillDTO _bill;
     private string _customerDocument;
     private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
+    private int _tableId;
+    private bool openOrder = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,11 +105,13 @@
             parameters.Add("closeTotal", "false");
             parameters.Add("customerDocument", _customerDocument);
         }
-        GenericCommandResult commandResult = await ApiService.GetWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
-        if (commandResult.Sucess && commandResult.Data is BillDTO bill)
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        BillDTO billResultObject = JsonConvert.DeserializeObject<BillDTO>(commandResult.Data.ToString());
+        ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0)
         {
             url = configuration["ApiLinks:CustomerGetById"];
-            _bill = bill;
+            _bill = billResultObject;
             foreach (var a in _bill.OrderProducts)
             {
                 commandResult = await ApiService.GetById<CustomerDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), a.Order.CustomerDocument);
@@ -84,7 +121,12 @@
                     _customersOrders = _bill.OrderProducts.GroupBy(x => x.Order.CustomerDocument);
                 }
             }
+            return;
         }
+        if (commandResult.Sucess && !string.IsNullOrEmpty(erroResultObject.Menssage))
+            openOrder = true;
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 
     public async void Close(int tableId)
@@ -94,19 +136,19 @@
             navigationManager.NavigateTo(configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
         var url = configuration["ApiLinks:CloseBill"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        parameters.Add("tableId", tableId);
+        parameters.Add("tableId", 1);
         parameters.Add("companyId", 1);
         if (CloseTotal)
         {
-            parameters.Add("closeTotal", false);
-            parameters.Add("customerDocument", null);
+            parameters.Add("closeTotal", "true");
+            parameters.Add("customerDocument", 0);
         }
         else
         {
-            parameters.Add("closeTotal", true);
+            parameters.Add("closeTotal", "false");
             parameters.Add("customerDocument", _customerDocument);
         }
-        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
         {
             string? content = response.Content.ReadAsStringAsync().Result;
@@ -115,7 +157,7 @@
             if (content is not null && contentObjectBill.Id != 0)
             {
                 await JsRuntime.InvokeVoidAsync("alert", "Conta fechada");
-                navigationManager.NavigateTo(configuration["ApplicationLinks:BillManager"].ToString(), true);
+                navigationManager.NavigateTo(configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
             }
             else if (content is not null && !string.IsNullOrEmpty(contentObjectErro.Menssage))
                 await JsRuntime.InvokeVoidAsync("alert", contentObjectErro.Menssage);
@@ -124,5 +166,9 @@
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+    private void Cancel()
+    {
+        navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"].ToString());
     }
 }

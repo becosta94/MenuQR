@@ -4,7 +4,7 @@ namespace MenuQR.Domain.Entities
 {
     public class Bill : BaseEntityCompanyId
     {
-        private Dictionary<Customer, double> _customersAndTotals;
+        public Dictionary<Customer, double> CustomersAndTotals = new Dictionary<Customer, double>();
         public double Total { get; private set; }
         public int TableId { get; set; }
         public int TableCompanyId { get; set; }
@@ -15,7 +15,7 @@ namespace MenuQR.Domain.Entities
         public Bill()
         {
             Open = true;
-            _customersAndTotals = new Dictionary<Customer, double>();
+            CustomersAndTotals = new Dictionary<Customer, double>();
         }
         public Bill(Bill bill)
         {
@@ -29,12 +29,12 @@ namespace MenuQR.Domain.Entities
 
         public void AddNewCustomerTotal(Customer customer, double total)
         {
-            _customersAndTotals.Add(customer, total);
+            CustomersAndTotals.Add(customer, total);
         }
 
         public void SumTotal()
         {
-            Total = _customersAndTotals.Sum(x => x.Value);
+            Total = Total + CustomersAndTotals.Sum(x => x.Value);
         }
     }
 }

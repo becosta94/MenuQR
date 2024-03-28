@@ -43,13 +43,13 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
-        [Authorize]
-        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string custmerDocument)
+        //[Authorize]
+        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
-            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, custmerDocument);
+            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument);
             if (returnedObjectBill is not null && returnedObjectBill is Bill)
             {
-                returnedObjectBill = billCloser.Close(tableId, companyId, closeTotal, custmerDocument);
+                returnedObjectBill = billCloser.Close(tableId, companyId, closeTotal, customerDocument);
                 if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
                     return Ok(bill);
             }
@@ -61,7 +61,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("get")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Get([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
             object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument);

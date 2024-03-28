@@ -39,11 +39,10 @@ namespace MenuQR.Services.Services
                                                                                        x.CompanyId == companyId).ToList();
                 foreach (CustomerHistory customerHistory in customerHistoryList)
                 {
-
+                    orders = _orderService.Get().Where(x => x.TableId == tableId &&
+                                                                   x.CompanyId == companyId &&
+                                                                   customerHistoryList.Any(y => y.Id == x.CustomerHistoryId && y.CompanyId == x.CustomerHistoryCompanyId)).ToList();
                 }
-                orders = _orderService.Get().Where(x => x.TableId == tableId &&
-                                                               x.CompanyId == companyId &&
-                                                               customerHistoryList.Any(y => y.Id == x.CustomerHistoryId && y.CompanyId == x.CustomerHistoryCompanyId)).ToList();
                 if (orders.Where(x => !x.Deliverd).Count() > 0)
                     return new ErroDTO("Existem pedidos em aberto.");
             }
@@ -72,18 +71,24 @@ namespace MenuQR.Services.Services
                                                                              x.CompanyId == order.CompanyId && x.BillId == bill.Id &&
                                                                              x.BillCompanyId == bill.CompanyId).ToList());
             ICollection<IGrouping<Customer, OrderProduct>> orderProducts1 = new HashSet<IGrouping<Customer, OrderProduct>>();
+            Bill returnedBill = new Bill(bill);
+            returnedBill.OrderProducts = new List<OrderProduct>(bill.OrderProducts);
             if (closeTotal)
                 orderProducts1 =  orderProducts.GroupBy(x => x.Order.Customer).ToList();
             else
             {
                 orderProducts1 =  orderProducts.Where(x => x.Order.CustomerDocument == custmerDocument).GroupBy(x => x.Order.Customer).ToList();
-                bill.OrderProducts.RemoveAll(x => x.Order.CustomerDocument != custmerDocument);
+                returnedBill.OrderProducts.RemoveAll(x => x.Order.CustomerDocument != custmerDocument);
             }
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
+            {
                 bill.AddNewCustomerTotal(gruped.Key, gruped.Sum(x => x.Total));
+                returnedBill.AddNewCustomerTotal(gruped.Key, gruped.Sum(x => x.Total));
+            }
             bill.SumTotal();
-            if (bill is not null)
-                return bill;
+            returnedBill.SumTotal();
+            if (returnedBill is not null)
+                return returnedBill;
             else
                 return null;
         }

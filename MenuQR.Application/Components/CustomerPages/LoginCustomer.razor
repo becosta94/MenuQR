@@ -26,6 +26,13 @@
 
 @code {
     public CustomerDTO Model { get; set; } = new CustomerDTO();
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("CustomerDocument");
+    }
     public async void OnSubmit()
     {
         var url = configuration["ApiLinks:CustomerGetById"];
