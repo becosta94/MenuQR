@@ -26,7 +26,7 @@ namespace MenuQR.Services.Services.Factories
             _validator = validator;
             _mapper = mapper;
         }
-        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductDTO> listOrderProductReceived)
+        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductCreateDTO> listOrderProductReceived)
         {
             List<OrderProduct> listOrderProductMapped = new List<OrderProduct>();
             if (listOrderProductReceived.Sum(x => x.Amount) == 0)

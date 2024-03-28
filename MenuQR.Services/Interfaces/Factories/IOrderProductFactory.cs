@@ -5,6 +5,6 @@ namespace MenuQR.Services.Interfaces.Factories
 {
     public interface IOrderProductFactory
     {
-        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductDTO> listOrderProductReceived);
+        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductCreateDTO> listOrderProductReceived);
     }
 }

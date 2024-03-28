@@ -18,7 +18,6 @@ namespace MenuQR.Services.Services.Factories
         public CustomerHistory Make(Customer customer, int companyId)
         {
             CustomerHistory? customerHistory = new CustomerHistory();
-            customerHistory.Customer = customer;
             customerHistory.CustomerDocument = customer.Document;
             customerHistory.CompanyId = companyId;
             customerHistory.OnPlace = true;

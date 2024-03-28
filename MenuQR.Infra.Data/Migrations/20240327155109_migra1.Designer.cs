@@ -4,6 +4,7 @@ using MenuQR.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MenuQR.Infra.Data.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240327155109_migra1")]
+    partial class migra1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,12 +257,10 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("OrderCompanyId")
-                        .HasColumnType("int")
-                        .HasColumnName("OrderCompanyId");
+                        .HasColumnType("int");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("OrderId");
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductCompanyId")
                         .HasColumnType("int")
@@ -277,7 +278,7 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.HasIndex("BillId", "BillCompanyId");
 
-                    b.HasIndex("OrderId", "OrderCompanyId");
+                    b.HasIndex("Id", "CompanyId");
 
                     b.HasIndex("ProductId", "ProductCompanyId");
 
@@ -516,8 +517,8 @@ namespace MenuQR.Infra.Data.Migrations
 
                     b.HasOne("MenuQR.Domain.Entities.Order", "Order")
                         .WithMany("OrderProducts")
-                        .HasForeignKey("OrderId", "OrderCompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("Id", "CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("MenuQR.Domain.Entities.Product", "Product")

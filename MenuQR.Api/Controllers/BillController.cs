@@ -32,7 +32,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPost]
         [Route("create")]
-        [Authorize]
+        //[Authorize]
         public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument)
         {
             Bill bill = newBillFactory.Make(tableId, companyId, customerDocument);
@@ -44,12 +44,34 @@ namespace MenuQR.Api.Controllers
         [HttpPut]
         [Route("close")]
         [Authorize]
-        public IActionResult Close([FromServices] IBillCloser billCloser, int tableId, int companyId)
+        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string custmerDocument)
         {
-            object returnedObjectBillCloser = billCloser.Close(tableId, companyId);
-            if (returnedObjectBillCloser is not null && returnedObjectBillCloser is Bill)
-                return Ok(returnedObjectBillCloser);
-            else if (returnedObjectBillCloser is not null && returnedObjectBillCloser is ErroDTO erro)
+            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, custmerDocument);
+            if (returnedObjectBill is not null && returnedObjectBill is Bill)
+            {
+                returnedObjectBill = billCloser.Close(tableId, companyId, closeTotal, custmerDocument);
+                if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
+                    return Ok(bill);
+            }
+            if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
+                return Ok(erro);
+            else
+                return BadRequest("Não foi possível gerar a conta");
+        }
+
+        [HttpGet]
+        [Route("get")]
+        //[Authorize]
+        public IActionResult Get([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
+        {
+            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument);
+            if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
+            {
+                bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
+                bill.OrderProducts.ToList().ForEach(x => x.Product.Image = string.Empty);
+                return Ok(bill);
+            }
+            else if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
                 return Ok(erro);
             else
                 return BadRequest("Não foi possível gerar a conta");

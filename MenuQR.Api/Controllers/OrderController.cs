@@ -18,8 +18,8 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
-        //[Authorize]
-        public IActionResult Create([FromBody] ICollection<OrderProductDTO> listOrderProductReceived,
+        [Authorize]
+        public IActionResult Create([FromBody] ICollection<OrderProductCreateDTO> listOrderProductReceived,
                                     [FromServices] IOrderFactory newOrderFactory,
                                     [FromServices] IOrderProductFactory newOrderProductFactory,
                                     [FromServices] IBaseService<Order> orderService,
@@ -72,7 +72,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getalltodelivery")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
             List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.Date).ToList();
@@ -92,7 +92,7 @@ namespace MenuQR.Api.Controllers
             {
                 List<OrderDTO> ordersDto = new List<OrderDTO>();
                 orders.ForEach(x => ordersDto.Add(mapper.Map<OrderDTO>(x)));
-                return Ok(JsonConvert.SerializeObject(ordersDto));
+                return Ok(ordersDto);
             }
             else
                 return BadRequest("Não foi possível atualizar o produto");

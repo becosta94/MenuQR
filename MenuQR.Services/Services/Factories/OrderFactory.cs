@@ -32,7 +32,7 @@ namespace MenuQR.Services.Services.Factories
                                                                           .Where(x => x.CustomerDocument == customer.Document && x.CompanyId == companyId && x.OnPlace)
                                                                           .FirstOrDefault();
             if (customer is not null && customerHistory.OnPlace)
-                return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(new Order(table.Id, customer.Document, companyId))) as Order;
+                return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(new Order(table.Id, customer.Document, companyId, customerHistory.Id, customerHistory.CompanyId))) as Order;
             return null;
         }
     }

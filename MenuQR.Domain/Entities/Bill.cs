@@ -10,7 +10,7 @@ namespace MenuQR.Domain.Entities
         public int TableCompanyId { get; set; }
         public virtual Table Table { get; set; }
         public bool Open { get; set; }
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; } = null!;
+        public virtual List<OrderProduct> OrderProducts { get; set; } = null!;
 
         public Bill()
         {

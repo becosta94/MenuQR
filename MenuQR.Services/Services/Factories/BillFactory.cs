@@ -27,7 +27,7 @@ namespace MenuQR.Services.Services.Factories
             Bill exitingBill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             if (exitingBill is not null)
             {
-                List<CustomerHistory> customerHistoryList = _custumerHistoryService.Get().Where(x => !x.OnPlace && x.CompanyId == companyId && x.CustomerDocument == custumerDocument).ToList();
+                List<CustomerHistory> customerHistoryList = _custumerHistoryService.Get().Where(x => x.OnPlace && x.CompanyId == companyId && x.CustomerDocument == custumerDocument).ToList();
                 if (customerHistoryList.Count == 0)
                 {
                     CustomerHistory customerHistory = new CustomerHistory() { BillId = exitingBill.Id, CompanyId = companyId, BillCompanyId = exitingBill.CompanyId, OnPlace = true, CustomerDocument = custumerDocument };
@@ -37,6 +37,7 @@ namespace MenuQR.Services.Services.Factories
                     else
                         return null;
                 }
+
 
                 return exitingBill;
             }

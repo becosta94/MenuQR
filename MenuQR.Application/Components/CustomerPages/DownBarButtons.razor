@@ -1,16 +1,16 @@
-﻿
+﻿@inject StateContainer stateContainer
+@inject NavigationManager navigationManager
+@inject IConfiguration configuration
+
 <div class="justify-content-around bd-highlight btn-toolbar">
     <div class="btn-group mr-md-3" role="group">
         <button @onclick="HandleClick" class="btn btn-primary">Fazer Pedido</button>
     </div>
-    <div class="btn-group" role="group">
-        <button onclick="myFunction()" id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle dropbtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Fechar Conta
-        </button>
-        <div class="dropdown-menu" id="myDropdown" aria-labelledby="btnGroupDrop1">
-            <a class="dropdown-item" href="#">Fechar Parcial</a>
-            <a class="dropdown-item" href="#">Fechar Total</a>
-        </div>
+    <div class="btn-group mr-md-3" role="group">
+        <a @onclick="NavigateToClosePartial" class="btn btn-secondary">Fechar Parcial</a>
+    </div>
+    <div class="btn-group mr-md-3" role="group">
+        <a @onclick="NavigateToCloseTotal" class="btn btn-primary">Fazer Total</a>
     </div>
 </div>
 <script>
@@ -42,5 +42,13 @@
         {
             await OnButtonClick.InvokeAsync(null);
         }
+    }
+    private void NavigateToClosePartial()
+    {
+        navigationManager.NavigateTo(configuration["ApplicationLinks:BillClose"] + false);
+    }
+    private void NavigateToCloseTotal()
+    {
+        navigationManager.NavigateTo(configuration["ApplicationLinks:BillClose"] + true);
     }
 }

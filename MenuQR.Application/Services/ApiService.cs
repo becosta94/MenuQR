@@ -14,6 +14,8 @@ namespace MenuQR.Application.Services
         {
             this.httpClient = httpClient;
         }
+
+        #region Post
         public async Task<GenericCommandResult> PostAsJsonAsync<TEntity>(string url, string jwt, TEntity data)
         {
             try
@@ -60,6 +62,9 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Post not made", ex);
             }
         }
+        #endregion
+
+        #region Get
         public async Task<GenericCommandResult> Get<TEntity>(string url, string jwt, int companyId)
         {
             try
@@ -110,6 +115,39 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Get not made", ex);
             }
         }
+        public async Task<GenericCommandResult> GetWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(jwt))
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                string parameters = string.Empty;
+                int totalParameters = 0;
+                foreach (KeyValuePair<string, object> parameterData in parameterDataPairs)
+                {
+                    if (totalParameters == parameterDataPairs.Count - 1)
+                        parameters += $"{parameterData.Key}={parameterData.Value}";
+                    else
+                    {
+                        parameters += $"{parameterData.Key}={parameterData.Value}&";
+                        totalParameters++;
+                    }
+                }
+                TEntity? response = await httpClient.GetFromJsonAsync<TEntity>($"{url}{parameters}");
+                if (response is not null)
+                    return new GenericCommandResult(true, "Post made successfully", response);
+                else
+                    return new GenericCommandResult(false, "Post not made", response);
+            }
+            catch (Exception ex)
+            {
+                return new GenericCommandResult(false, "Post not made", ex);
+            }
+        }
+
+        #endregion
+
+        #region Put
         public async Task<GenericCommandResult> PutWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
         {
             try
@@ -139,7 +177,6 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Put not made", ex);
             }
         }
-
         public async Task<GenericCommandResult> PutAsJsonAsync<TEntity>(string url, string jwt, TEntity data)
         {
             try
@@ -157,6 +194,8 @@ namespace MenuQR.Application.Services
                 return new GenericCommandResult(false, "Post not made", ex);
             }
         }
+        #endregion
+
         public static StringContent PrepareStringContent(object obj)
         {
             return new(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");

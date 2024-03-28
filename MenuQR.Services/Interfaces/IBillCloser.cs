@@ -4,6 +4,6 @@ namespace MenuQR.Services.Interfaces
 {
     public interface IBillCloser
     {
-        public object Close(int tableId, int companyId);
+        public object Close(int tableId, int companyId, bool closeTotal, string custmerDocument);
     }
 }

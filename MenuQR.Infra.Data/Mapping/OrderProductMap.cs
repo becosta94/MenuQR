@@ -13,6 +13,7 @@ namespace MenuQR.Infra.Data.Mapping
             builder.HasKey(prop => prop.Id);
 
             builder.Property(prop => prop.Id)
+                .ValueGeneratedOnAdd()
                 .UseIdentityColumn();
 
             builder.Property(prop => prop.OrderId)
@@ -54,6 +55,7 @@ namespace MenuQR.Infra.Data.Mapping
                .IsRequired()
                .HasColumnName("Total")
                .HasColumnType("float");
+
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class BillDTO : BaseDTOCompanyId
     {
-        private Dictionary<CustomerDTO, double> _customersAndTotals;
+        public ICollection<OrderProductDTO> OrderProducts { get; set; } = null!;
         public double Total { get; set; }
         public int TableId { get; set; }
         public virtual TableDTO Table { get; set; }

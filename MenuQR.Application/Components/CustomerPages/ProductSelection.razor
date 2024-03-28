@@ -99,7 +99,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var url = configuration["ApiLinks:ProductGetAll"];        
+        var url = configuration["ApiLinks:ProductGetAll"];   
+        if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] == null)
+            navigationManager.NavigateTo($"/Error");
         GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
         if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
             Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();

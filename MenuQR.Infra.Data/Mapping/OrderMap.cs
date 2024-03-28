@@ -13,27 +13,37 @@ namespace MenuQR.Infra.Data.Mapping
             builder.HasKey(prop => new { prop.Id, prop.CompanyId });
 
             builder.Property(prop => prop.Id)
-                    .ValueGeneratedOnAdd();
+                    .ValueGeneratedOnAdd()
+                    .UseIdentityColumn();
 
             builder.Property(prop => prop.CompanyId)
                .IsRequired()
                .HasColumnName("CompanyId")
                .HasColumnType("int");
 
+            builder.Property(prop => prop.Deliverd)
+               .IsRequired()
+               .HasColumnName("Deliverd")
+               .HasColumnType("bit");
+
             builder.Property(prop => prop.Date)
                .IsRequired()
                .HasColumnName("Date")
                .HasColumnType("datetime2");
 
-            builder.HasOne(prop => prop.Table)
-                .WithMany()
-                .HasForeignKey(prop => new { prop.TableId, prop.CompanyId })
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(prop => prop.CustomerHistory)
+                .WithMany(prop => prop.Orders)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(prop => prop.Customer)
                 .WithMany()
                 .HasForeignKey(prop => prop.CustomerDocument)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(prop => prop.Table)
+                .WithMany()
+                .HasForeignKey(prop => new { prop.TableId, prop.CompanyId })
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");

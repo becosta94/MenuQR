@@ -33,6 +33,7 @@ namespace MenuQR.Api
 
             builder.AddTransient<IBillFactory, BillFactory>();
             builder.AddTransient<IBillCloser, BillCloser>();
+            builder.AddTransient<IBillValueGetter, BillValueGetter>();
             builder.AddTransient<ICustomerFactory, CustomerFactory>();
             builder.AddTransient<ICustomerHistoryFactory, CustomerHistoryFactory>();
             builder.AddTransient<IOrderFactory, OrderFactory>();

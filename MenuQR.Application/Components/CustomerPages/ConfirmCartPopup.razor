@@ -16,7 +16,7 @@
     </div>
 </div>
 <div style="padding-top: 60px"></div>
-@foreach (OrderProductDTO orderProductDTO in OrderProducts)
+@foreach (OrderProductCreateDTO orderProductDTO in OrderProductsCrete)
 {
 
     <div class="justify-content-center border border-light rounded mt-60 mb-2 px-3">
@@ -51,19 +51,21 @@
 @code {
     string documentTest = "11381147666";
     string tableTest = "1";
-    List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
+    List<OrderProductCreateDTO> OrderProductsCrete { get; set; } = new List<OrderProductCreateDTO>();
     [Parameter]
     public int SetHashCode { get; set; }
     protected override void OnInitialized()
     {
-        OrderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
+        List<OrderProductDTO> orderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
+        orderProducts.ForEach(x => OrderProductsCrete.Add(new OrderProductCreateDTO() { Amount = x.Amount, CompanyId = x.CompanyId, Id = x.Id, Product = x.Product, ProductId = x.ProductId, Total = x.Total}));
+
     }
     private async void Confirm()
     {
         string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
         var url = configuration["ApiLinks:OrderCreate"] + $"tableId={tableTest}&customerDocument={customerDocument}";
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProducts);
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
         if (commandResult.Sucess)
             navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
         else

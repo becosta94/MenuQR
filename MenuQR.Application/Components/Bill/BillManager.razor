@@ -85,6 +85,8 @@ else
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", tableId);
         parameters.Add("companyId", 1);
+        parameters.Add("closeTotal", false);
+        parameters.Add("customerDocument", null);
         GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
         {
