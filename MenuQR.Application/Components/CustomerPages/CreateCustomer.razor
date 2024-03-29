@@ -1,4 +1,4 @@
-﻿@page "/customer/create/{CPF:long}"
+﻿@page "/{CompanyId:int}/{TableId:int}/customer/create/{CPF:long}"
 @using MenuQR.Application.Data
 @using Microsoft.AspNetCore.Identity
 @inject IConfiguration configuration
@@ -32,6 +32,10 @@
     public CustomerDTO Model { get; set; } = new CustomerDTO();
     [Parameter]
     public long CPF { get; set; }
+    [Parameter]
+    public int CompanyId { get; set; }
+    [Parameter]
+    public int TableId { get; set; }
     protected override async Task OnInitializedAsync()
     {
         Model.Document = CPF.ToString();
@@ -44,7 +48,7 @@
         if (commandResult.Sucess)
         {
             stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
-            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
+            navigationManager.NavigateTo(CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
         else if (!commandResult.Sucess && result is string message)
             await JsRuntime.InvokeVoidAsync("alert", message);

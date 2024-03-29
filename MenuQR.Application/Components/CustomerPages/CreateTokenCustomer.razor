@@ -1,4 +1,4 @@
-﻿@page "/customer/token/{SetHashCode:int}"
+﻿@page "/{CompanyId:int}/{TableId:int}/customer/token/{SetHashCode:int}"
 @rendermode InteractiveServer
 @inject ITokenService TokenService
 @inject StateContainer stateContainer
@@ -15,22 +15,50 @@
     private HttpContext HttpContext { get; set; }
     [Parameter]
     public int SetHashCode { get; set; }
-
+    [Parameter]
+    public int CompanyId { get; set; }
+    [Parameter]
+    public int TableId { get; set; }
+    public string TableGuid { get; set; }
+    public string CompanyName { get; set; }
     protected override async Task OnInitializedAsync()
     {
+        var url = configuration["ApiLinks:CompanyGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<CompanyDTO>(url, null, CompanyId.ToString());
+        if (commandResult.Sucess && commandResult.Data is CompanyDTO company)
+        {
+            HttpContext.Response.Cookies.Append("CompanyId", CompanyId.ToString());
+            CompanyName = company.Name;
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("tableId", TableId);
+            parameters.Add("companyId", CompanyId);
+            url = configuration["ApiLinks:TableGetById"];
+            commandResult = await ApiService.GetWithParameters<TableDTO>(url, null, parameters);
+            if (commandResult.Sucess && commandResult.Data is TableDTO table)
+            {
+
+                TableGuid = table.Unique.ToString();
+                HttpContext.Response.Cookies.Append("TableId", table.Id.ToString());
+                HttpContext.Response.Cookies.Append("TableGuid", table.Unique.ToString());
+            }
+            else
+                navigationManager.NavigateTo($"/Error");
+        }
+        else
+            navigationManager.NavigateTo($"/Error");
         Model = (CustomerDTO)stateContainer.ObjectTunnel[SetHashCode];
         string token = TokenService.GenerateToken(Model.Document);
         HttpContext.Response.Cookies.Append("Token", token);
         HttpContext.Response.Cookies.Append("CustomerDocument", Model.Document);
-        var url = configuration["ApiLinks:BillCreate"];
+        url = configuration["ApiLinks:BillCreate"];
         Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
         keyParametersPair.Add("tableId", 1);
         keyParametersPair.Add("companyId", 1);
         keyParametersPair.Add("customerDocument", Model.Document);
-        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair);
+        commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair);
         if (commandResult.Sucess)
         {
-            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerLogged"] +  Model.GetHashCode());
+            navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:CustomerLogged"] +  Model.GetHashCode());
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");

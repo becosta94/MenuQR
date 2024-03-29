@@ -40,10 +40,9 @@ namespace MenuQR.Api.Controllers
         }
         [HttpGet]
         [Route("getbyid")]
-        [Authorize]
-        public IActionResult GetById([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int id)
+        public IActionResult GetById([FromServices] IBaseService<Table> tableBaseService, [FromServices] IMapper mapper, int tableId, int companyId)
         {
-            Table? table = tableBaseService.GetById(id);
+            Table? table = tableBaseService.GetByCompoundKey(new object[] { tableId, companyId});
             if (table is not null)
                 return Ok(mapper.Map<TableDTO>(table));
             else

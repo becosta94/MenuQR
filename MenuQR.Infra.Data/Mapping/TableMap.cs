@@ -13,10 +13,15 @@ namespace MenuQR.Infra.Data.Mapping
             builder.Property(prop => prop.Id)
                 .ValueGeneratedOnAdd();
 
+            builder.Property(prop => prop.Unique)
+                   .IsRequired()
+                   .HasColumnName("Unique")
+                   .HasColumnType("uniqueidentifier");
+
             builder.Property(prop => prop.CompanyId)
-               .IsRequired()
-               .HasColumnName("CompanyId")
-               .HasColumnType("int");
+                   .IsRequired()
+                   .HasColumnName("CompanyId")
+                   .HasColumnType("int");
 
             builder.Property(prop => prop.Identification)
                    .IsRequired()
@@ -32,7 +37,7 @@ namespace MenuQR.Infra.Data.Mapping
                 .HasDatabaseName("IX_Order_Company");
 
 
-            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 1, QRLink = "Teste" });
+            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 1, Unique = Guid.Parse("440cdeee-5b8a-462a-96fd-20b24bd82f55"), QRLink = "Teste" });
 
         }
     }

@@ -12,6 +12,7 @@ namespace MenuQR.Api
         public static void Add(IServiceCollection builder)
         {
             builder.AddTransient<IBaseRepository<Bill>, BaseRepository<Bill>>();
+            builder.AddTransient<IBaseRepository<Company>, BaseRepository<Company>>();
             builder.AddTransient<IBaseRepository<Customer>, BaseRepository<Customer>>();
             builder.AddTransient<IBaseRepository<CustomerHistory>, BaseRepository<CustomerHistory>>();
             builder.AddTransient<IBaseRepository<Order>, BaseRepository<Order>>();
@@ -21,6 +22,7 @@ namespace MenuQR.Api
             builder.AddTransient<IBaseRepository<Table>, BaseRepository<Table>>();
 
             builder.AddTransient<IBaseService<Bill>, BaseService<Bill>>();
+            builder.AddTransient<IBaseService<Company>, BaseService<Company>>();
             builder.AddTransient<IBaseService<Customer>, BaseService<Customer>>();
             builder.AddTransient<IBaseService<CustomerHistory>, BaseService<CustomerHistory>>();
             builder.AddTransient<IBaseService<Order>, BaseService<Order>>();
@@ -42,6 +44,7 @@ namespace MenuQR.Api
             builder.AddTransient<IProductTypeFactory, ProductTypeFactory>();
             builder.AddTransient<ITableFactory, TableFactory>();
             builder.AddTransient<IValidator, Validator>();
+            builder.AddTransient<IAccentRemover, AccentRemover>();
         }
     }
 }

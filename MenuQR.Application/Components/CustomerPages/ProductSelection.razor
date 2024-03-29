@@ -1,4 +1,4 @@
-﻿@page "/product/selection"
+﻿@page "/{CompanyName}/{TableGuid:guid}/product/selection"
 @inject IConfiguration configuration
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
@@ -96,7 +96,10 @@ else
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
     List<OrderProductDTO> OrderProducts { get; set; } = new List<OrderProductDTO>();
     public OrderDTO Model { get; set; }
-
+    [Parameter]
+    public string CompanyName { get; set; }
+    [Parameter]
+    public Guid TableGuid { get; set; }
     protected override async Task OnInitializedAsync()
     {
         var url = configuration["ApiLinks:ProductGetAll"];   

@@ -1,4 +1,4 @@
-﻿@page "/customer/logged/{SetHashCode:int}"
+﻿@page "/{CompanyName}/{TableGuid:guid}/customer/logged/{SetHashCode:int}"
 
 @layout MenuQR.Application.Components.Layout.EmptyLayout
 @inject IConfiguration configuration
@@ -18,10 +18,13 @@
     public CustomerDTO Model { get; set; } = new CustomerDTO();
     [Parameter]
     public int SetHashCode { get; set; }
+    [Parameter]
+    public string CompanyName { get; set; }
+    [Parameter]
+    public Guid TableGuid { get; set; }
     private async void ChangePage()
     {
-
-        navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"], true);
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"], true);
     }
 }
 

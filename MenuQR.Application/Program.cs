@@ -25,6 +25,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<HttpClient, HttpClient>();
 builder.Services.AddTransient<IApiService, ApiService>();
+builder.Services.AddTransient<ITableAndCompanyChecker, TableAndCompanyChecker>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<StateContainer>();

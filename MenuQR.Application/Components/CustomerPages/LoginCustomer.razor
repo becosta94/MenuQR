@@ -1,4 +1,4 @@
-﻿@page "/customer/login/"
+﻿@page "/{CompanyId:int}/{TableId:int}/customer/login/"
 @rendermode InteractiveServer
 @inject NavigationManager navigationManager
 @inject IConfiguration configuration
@@ -25,6 +25,12 @@
 </EditForm>
 
 @code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; }
+    [Parameter]
+    public int CompanyId { get; set; }
+    [Parameter]
+    public int TableId { get; set; }
     public CustomerDTO Model { get; set; } = new CustomerDTO();
     protected override async Task OnInitializedAsync()
     {
@@ -32,6 +38,12 @@
             HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
         if (HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"] != null)
             HttpContextAcessor.HttpContext.Response.Cookies.Delete("CustomerDocument");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("CompanyId");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableId"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableId");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableGuid"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableGuid");
     }
     public async void OnSubmit()
     {
@@ -40,9 +52,9 @@
         if (commandResult.Sucess && commandResult.Data is CustomerDTO)
         {
             stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
-            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
         else
-            navigationManager.NavigateTo(configuration["ApplicationLinks:CustomerCreate"] + long.Parse(Model.Document));
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerCreate"] +   +long.Parse(Model.Document));
     }
 }
