@@ -26,22 +26,20 @@ namespace MenuQR.Services.Services
             _customerHistoryService = costuerHistoryService;
             _validator = validator;
         }
-        public object Get(int tableId, int companyId, bool closeTotal, string custmerDocument)
+        public object Get(int tableId, int companyId, bool closeTotal, string custmerDocument, bool customerRequest)
         {
             Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             List<Order> orders = new List<Order>();
 
-            if (closeTotal)
+            List<CustomerHistory> customerHistoryList = _customerHistoryService.Get().Where(x => x.OnPlace &&
+                                                                                   x.BillId == bill.Id &&
+                                                                                   x.BillCompanyId == bill.CompanyId &&
+                                                                                   x.CompanyId == companyId).ToList();
+            if (closeTotal || customerHistoryList.Where(x => x.OnPlace).Count() == 1)
             {
-                List<CustomerHistory> customerHistoryList = _customerHistoryService.Get().Where(x => x.OnPlace &&
-                                                                                       x.BillId == bill.Id &&
-                                                                                       x.BillCompanyId == bill.CompanyId &&
-                                                                                       x.CompanyId == companyId).ToList();
                 foreach (CustomerHistory customerHistory in customerHistoryList)
                 {
-                    orders = _orderService.Get().Where(x => x.TableId == tableId &&
-                                                                   x.CompanyId == companyId &&
-                                                                   customerHistoryList.Any(y => y.Id == x.CustomerHistoryId && y.CompanyId == x.CustomerHistoryCompanyId)).ToList();
+                    orders = _orderService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && customerHistoryList.Any(y => y.Id == x.CustomerHistoryId && y.CompanyId == x.CustomerHistoryCompanyId && y.OnPlace)).ToList();
                 }
                 if (orders.Where(x => !x.Deliverd).Count() > 0)
                     return new ErroDTO("Existem pedidos em aberto.");
@@ -82,15 +80,25 @@ namespace MenuQR.Services.Services
             }
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
             {
-                bill.AddNewCustomerTotal(gruped.Key, gruped.Sum(x => x.Total));
-                returnedBill.AddNewCustomerTotal(gruped.Key, gruped.Sum(x => x.Total));
+                returnedBill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => x.Order.CustomerHistory.OnPlace).Sum(x => x.Total));
             }
-            bill.SumTotal();
+            bill.CustomersAndTotals = new Dictionary<Customer, double>(returnedBill.CustomersAndTotals);
             returnedBill.SumTotal();
-            if (returnedBill is not null)
-                return returnedBill;
+            if (customerRequest)
+            {
+                returnedBill.OrderProducts = orderProducts;
+                if (returnedBill is not null)
+                    return returnedBill;
+                else
+                    return null;
+            }
             else
-                return null;
+            {
+                if (bill is not null)
+                    return bill;
+                else
+                    return null;
+            }
         }
     }
 }

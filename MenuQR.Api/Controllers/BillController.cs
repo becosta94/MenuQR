@@ -44,17 +44,50 @@ namespace MenuQR.Api.Controllers
         [HttpPut]
         [Route("close")]
         //[Authorize]
-        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
+        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, BillClosureOrder billClosureOrder)
         {
-            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument);
-            if (returnedObjectBill is not null && returnedObjectBill is Bill)
-            {
-                returnedObjectBill = billCloser.Close(tableId, companyId, closeTotal, customerDocument);
-                if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
-                    return Ok(bill);
-            }
-            if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
+            object returnedObjectBill = billCloser.Close(billClosureOrder);
+            if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
+                return Ok(bill);
+            else if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
                 return Ok(erro);
+            else
+                return BadRequest("Não foi possível gerar a conta");
+        }
+
+        [HttpPost]
+        [Route("billclosureorder")]
+        [Authorize]
+        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
+        {
+            object returnedBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument, true);
+            if (returnedBill is not null && returnedBill is Bill bill)
+            {
+
+                List<CustomerHistory> customerHistoryList = customerHistoryService.Get().Where(x => x.OnPlace &&
+                                                                                       x.BillId == bill.Id &&
+                                                                                       x.BillCompanyId == bill.CompanyId &&
+                                                                                       x.CompanyId == companyId).ToList();
+                if (customerHistoryList.Count == 1)
+                    closeTotal = true;
+                object returnedRequestClosure = billCloser.RequestClosure(tableId, companyId, closeTotal, customerDocument, bill);
+                if (returnedRequestClosure is not null && returnedRequestClosure is BillClosureOrder billClosureOrder)
+                    return Ok(billClosureOrder);
+            }
+            if (returnedBill is not null && returnedBill is ErroDTO erro)
+                return Ok(erro);
+            else
+                return BadRequest("Não foi possível gerar a conta");
+        }
+
+        [HttpGet]
+        [Route("billclosureordergetall")]
+        //[Authorize]
+        public IActionResult Get([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int companyId)
+        {
+            List<BillClosureOrder> billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted).ToList();
+            if (billClosureOrders is not null)
+                return Ok(billClosureOrders);
             else
                 return BadRequest("Não foi possível gerar a conta");
         }
@@ -64,7 +97,7 @@ namespace MenuQR.Api.Controllers
         [Authorize]
         public IActionResult Get([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
-            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument);
+            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument, true);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
             {
                 bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());

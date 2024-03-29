@@ -8,6 +8,7 @@ namespace MenuQR.Infra.Data.Context
     public class SqlContext : DbContext
     {
         public virtual DbSet<Bill>  Bills { get; set; }
+        public virtual DbSet<BillClosureOrder> BillClosureOrders { get; set; }
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerHistory> CustomerHistories { get; set; }
@@ -21,6 +22,7 @@ namespace MenuQR.Infra.Data.Context
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfiguration(new BillMap());
+            modelBuilder.ApplyConfiguration(new BillClosureOrderMap());
             modelBuilder.ApplyConfiguration(new CompanyMap());
             modelBuilder.ApplyConfiguration(new CustomerHistoryMap());
             modelBuilder.ApplyConfiguration(new CustomerMap());

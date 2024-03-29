@@ -11,7 +11,8 @@ namespace MenuQR.Api
     {
         public static void Add(IServiceCollection builder)
         {
-            builder.AddTransient<IBaseRepository<Bill>, BaseRepository<Bill>>();
+            builder.AddScoped<IBaseRepository<Bill>, BaseRepository<Bill>>();
+            builder.AddTransient<IBaseRepository<BillClosureOrder>, BaseRepository<BillClosureOrder>>();
             builder.AddTransient<IBaseRepository<Company>, BaseRepository<Company>>();
             builder.AddTransient<IBaseRepository<Customer>, BaseRepository<Customer>>();
             builder.AddTransient<IBaseRepository<CustomerHistory>, BaseRepository<CustomerHistory>>();
@@ -21,7 +22,8 @@ namespace MenuQR.Api
             builder.AddTransient<IBaseRepository<ProductType>, BaseRepository<ProductType>>();
             builder.AddTransient<IBaseRepository<Table>, BaseRepository<Table>>();
 
-            builder.AddTransient<IBaseService<Bill>, BaseService<Bill>>();
+            builder.AddScoped<IBaseService<Bill>, BaseService<Bill>>();
+            builder.AddTransient<IBaseService<BillClosureOrder>, BaseService<BillClosureOrder>>();
             builder.AddTransient<IBaseService<Company>, BaseService<Company>>();
             builder.AddTransient<IBaseService<Customer>, BaseService<Customer>>();
             builder.AddTransient<IBaseService<CustomerHistory>, BaseService<CustomerHistory>>();

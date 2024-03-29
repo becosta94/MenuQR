@@ -24,7 +24,6 @@ namespace MenuQR.Infra.Data.Repository
             _sqlContext.Entry(obj).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             _sqlContext.SaveChanges();
         }
-
         public void Delete(int id)
         {
             _sqlContext.Set<TEntity>().Remove(Select(id));

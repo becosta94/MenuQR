@@ -34,7 +34,6 @@ namespace MenuQR.Services.Services
             _baseRepository.Update(obj);
             return obj;
         }
-
         private void Validate(TEntity obj, AbstractValidator<TEntity> validator)
         {
             if (obj == null)

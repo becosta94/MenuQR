@@ -134,7 +134,7 @@ else
         string token = HttpContextAcessor.HttpContext.Request.Cookies["Token"];
         if (string.IsNullOrEmpty(token))
             navigationManager.NavigateTo(configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
-        var url = configuration["ApiLinks:CloseBill"];
+        var url = configuration["ApiLinks:BillClosureOrder"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", 1);
         parameters.Add("companyId", 1);
@@ -148,7 +148,7 @@ else
             parameters.Add("closeTotal", "false");
             parameters.Add("customerDocument", _customerDocument);
         }
-        GenericCommandResult commandResult = await ApiService.PutWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
         {
             string? content = response.Content.ReadAsStringAsync().Result;

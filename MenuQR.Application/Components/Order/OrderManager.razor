@@ -66,9 +66,73 @@ else
         </tbody>
     </table>
 }
+@if (BillClosureOrders.Count == 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Mesa</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Fechamento Parcial</th>
+                <th>Pago</th>
+            </tr>
+        </thead>
+    </table>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Mesa</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Fechamento Parcial</th>
+                <th>Pago</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (BillClosureOrderDTO billClosureOrder in BillClosureOrders)
+            {
+                <tr>
+                    <td class="align-middle">@billClosureOrder.Id</td>
+                    <td class="align-middle">@billClosureOrder.TableId</td>
+                    <td class="align-middle">@billClosureOrder.CustumerDocument</td>
+                    <td class="align-middle">@billClosureOrder.Value</td>
+                    <td class="align-middle">
+                            @if (billClosureOrder.CloseTotal)
+                            {
+                                <p>Não</p>
+                            }
+                            else
+                            {
+                                <p>Sim</p>
+                            }
+                    </td>
+                    <td class="align-middle">
+                        <div class="form-check form-switch">
+                            @if (billClosureOrder.OrderCompleted)
+                            {
+                                <InputCheckbox @bind-Value="billClosureOrder.OrderCompleted" @onclick="(args) => CompleteBillOrder(billClosureOrder)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
+                            }
+                            else
+                            {
+                                <InputCheckbox @bind-Value="billClosureOrder.OrderCompleted" @onclick="(args) => CompleteBillOrder(billClosureOrder)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
+                            }
 
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 @code {
     List<OrderDTO> Orders { get; set; } = new List<OrderDTO>();
+    List<BillClosureOrderDTO> BillClosureOrders { get; set; } = new List<BillClosureOrderDTO>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,6 +140,10 @@ else
         GenericCommandResult commandResult = await ApiService.GetStringByParameter<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", "1");
         if (commandResult.Sucess)
             Orders =  JsonConvert.DeserializeObject<List<OrderDTO>>(commandResult.Data.ToString());
+        url = configuration["ApiLinks:BillClosureOrderGetAll"];
+        commandResult = await ApiService.Get<List<BillClosureOrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        if (commandResult.Sucess && commandResult.Data is List<BillClosureOrderDTO> billClosureOrderDTO)
+            BillClosureOrders =  billClosureOrderDTO;
     }
 
     public async void DeliverOrder(int id)
@@ -85,6 +153,18 @@ else
         parameters.Add("id", id);
         parameters.Add("companyId", 1);
         GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");
+            navigationManager.NavigateTo(configuration["ApplicationLinks:OrderManager"].ToString(), true);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+    public async void CompleteBillOrder(BillClosureOrderDTO billClosureOrder)
+    {
+        var url = configuration["ApiLinks:CloseBill"];
+        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<BillClosureOrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), billClosureOrder);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");

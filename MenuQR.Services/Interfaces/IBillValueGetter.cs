@@ -2,6 +2,6 @@
 {
     public interface IBillValueGetter
     {
-        public object Get(int tableId, int companyId, bool closeTotal, string custmerDocument);
+        public object Get(int tableId, int companyId, bool closeTotal, string custmerDocument, bool customerRequest);
     }
 }
