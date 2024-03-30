@@ -55,9 +55,13 @@ else
             </div>
         }
     </EditForm>
-    <footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
-        <DownBarButtons OnButtonClick="@OnSubmit" />
-    </footer>
+    <CascadingValue Value="@CompanyName">
+        <CascadingValue Value="@TableGuid">
+            <footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
+                <DownBarButtons OnButtonClick="@OnSubmit" />
+            </footer>
+        </CascadingValue>
+    </CascadingValue>
     <div style="padding-top: 60px"></div>
 }
 <script>
@@ -102,7 +106,7 @@ else
     public Guid TableGuid { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        var url = configuration["ApiLinks:ProductGetAll"];   
+        var url = configuration["ApiLinks:ProductGetAll"];
         if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] == null)
             navigationManager.NavigateTo($"/Error");
         GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
@@ -127,7 +131,7 @@ else
             return;
         }
         stateContainer.ObjectTunnel.Add(OrderProducts.GetHashCode(), OrderProducts);
-        navigationManager.NavigateTo($"/product/selection/confirmation/{OrderProducts.GetHashCode()}");
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + configuration["ApplicationLinks:ProductSelectionConfimation"] + OrderProducts.GetHashCode());
     }
 
     protected async void ChangeAmount(bool increase, ProductDTO product)

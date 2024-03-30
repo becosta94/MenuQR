@@ -36,6 +36,10 @@
 @code {
     [Parameter]
     public EventCallback OnButtonClick { get; set; }
+    [CascadingParameter]
+    public string CompanyName { get; set; }
+    [CascadingParameter]
+    public Guid TableGuid { get; set; }
     private async Task HandleClick()
     {
         if (OnButtonClick.HasDelegate)
@@ -45,10 +49,10 @@
     }
     private void NavigateToClosePartial()
     {
-        navigationManager.NavigateTo(configuration["ApplicationLinks:BillClose"] + false);
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + configuration["ApplicationLinks:BillClose"] + false);
     }
     private void NavigateToCloseTotal()
     {
-        navigationManager.NavigateTo(configuration["ApplicationLinks:BillClose"] + true);
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + configuration["ApplicationLinks:BillClose"] + true);
     }
 }

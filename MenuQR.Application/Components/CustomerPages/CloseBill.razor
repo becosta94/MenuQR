@@ -1,4 +1,4 @@
-﻿@page "/bill/close/{CloseTotal:bool}"
+﻿@page "/{CompanyName}/{TableGuid:guid}/bill/close/{CloseTotal:bool}"
 @rendermode InteractiveServer
 @inject StateContainer stateContainer
 @inject NavigationManager navigationManager
@@ -87,7 +87,10 @@ else
     private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
     private int _tableId;
     private bool openOrder = false;
-
+    [Parameter]
+    public string CompanyName { get; set; }
+    [Parameter]
+    public Guid TableGuid { get; set; }
     protected override async Task OnInitializedAsync()
     {
         _customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
@@ -133,7 +136,7 @@ else
     {
         string token = HttpContextAcessor.HttpContext.Request.Cookies["Token"];
         if (string.IsNullOrEmpty(token))
-            navigationManager.NavigateTo(configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
+            navigationManager.NavigateTo(_bill.CompanyId.ToString() + "/" + _tableId.ToString() + "/" + configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
         var url = configuration["ApiLinks:BillClosureOrder"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", 1);
@@ -157,7 +160,7 @@ else
             if (content is not null && contentObjectBill.Id != 0)
             {
                 await JsRuntime.InvokeVoidAsync("alert", "Conta fechada");
-                navigationManager.NavigateTo(configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
+                navigationManager.NavigateTo(_bill.CompanyId.ToString() + "/" + _bill.TableId.ToString() + "/" + configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
             }
             else if (content is not null && !string.IsNullOrEmpty(contentObjectErro.Menssage))
                 await JsRuntime.InvokeVoidAsync("alert", contentObjectErro.Menssage);
@@ -169,6 +172,6 @@ else
     }
     private void Cancel()
     {
-        navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"].ToString());
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/product/selection/confirmation/{SetHashCode:int}"
+﻿@page "/{CompanyName}/{TableGuid:guid}/product/selection/confirmation/{SetHashCode:int}"
 @rendermode InteractiveServer
 @inject StateContainer stateContainer
 @layout MenuQR.Application.Components.Layout.CustomerLayout
@@ -54,6 +54,10 @@
     List<OrderProductCreateDTO> OrderProductsCrete { get; set; } = new List<OrderProductCreateDTO>();
     [Parameter]
     public int SetHashCode { get; set; }
+    [Parameter]
+    public string CompanyName { get; set; }
+    [Parameter]
+    public Guid TableGuid { get; set; }
     protected override void OnInitialized()
     {
         List<OrderProductDTO> orderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
@@ -67,13 +71,13 @@
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
         if (commandResult.Sucess)
-            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductSelection"]);
+            navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
     }
     private void Cancel()
     {
-        navigationManager.NavigateTo($"/product/selection");
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
 
     }
 }
