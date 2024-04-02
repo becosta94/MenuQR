@@ -13,15 +13,9 @@
 @if (Products.Count == 0) { }
 else
 {
-    int i = 0;
     <div class="scroll-container-top d-flex justify-content-around">
         @foreach (ProductTypeDTO productType in ProductsType)
         {
-            if (i == 0)
-            {
-                <div style="margin-left: 30px"></div>
-                i++;
-            }
             <a @onclick="() => SetFocus(productType.Id)" class="nav-item nav-link">@productType.TypeName</a>
         }
     </div>
@@ -37,19 +31,17 @@ else
                 <div class="row justify-content-around mb-1">
                     <p class="col-6">@product.Description</p>
                     <div class="col-6 d-flex justify-content-end">
-                        <img height="100" width="100" src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="img-fluid border border-dark">
+                        <img height="100" width="105" src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="border border-dark">
                     </div>
                 </div>
                 <div class="mb-2 row justify-content-around">
                     <div class="col-6 d-flex align-items-center ">
                         <p class="mb-0">R$ @product.Price.ToString("0.00")</p>
                     </div>
-                    <div class="col-2 d-flex align-items-center ">
-                        <p id="@string.Concat("amount", product.Id)" class="mb-0">0</p>
-                    </div>
-                    <div class="col-4 d-flex justify-content-center">
-                        <button @onclick="() => ChangeAmount(false, product)" class="btn btn-outline-secondary col-6 btn-sm">-</button>
-                        <button @onclick="() => ChangeAmount(true, product)" class="btn btn-outline-secondary col-6 btn-sm">+</button>
+                    <div class="col-6 d-flex justify-content-end align-items-center">
+                        <p @onclick="() => ChangeAmount(false, product)" class="col-3 text-secondary mb-0 d-flex justify-content-center" style="font-size: 20px">-</p>
+                        <p id="@string.Concat("amount", product.Id)" class="mb-0 me-1 ms-1">0</p>
+                        <p @onclick="() => ChangeAmount(true, product)" class="col-3 text-danger mb-0 d-flex justify-content-center" style="font-size: 20px">+</p>
                     </div>
                 </div>
             </div>
@@ -104,18 +96,20 @@ else
     public string CompanyName { get; set; }
     [Parameter]
     public Guid TableGuid { get; set; }
+    private int _companyId;
     protected override async Task OnInitializedAsync()
     {
         var url = configuration["ApiLinks:ProductGetAll"];
         if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] == null)
             navigationManager.NavigateTo($"/Error");
-        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        _companyId = int.Parse(HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString());
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
             Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
         url = configuration["ApiLinks:ProductTypeGetAll"];
-        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO>)
             ProductsType =  commandResult.Data as List<ProductTypeDTO>;
         else

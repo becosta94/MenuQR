@@ -73,7 +73,7 @@ else
         @if (!openOrder)
         {
             <div class="btn-group mr-md-3" role="group">
-                <a @onclick="() => Close(this._tableId)" class="btn btn-primary">Fechar Conta</a>
+                <a @onclick="() => Close(int.Parse(_tableId))" class="btn btn-primary">Fechar Conta</a>
             </div>
         }
     </div>
@@ -85,7 +85,8 @@ else
     private BillDTO _bill;
     private string _customerDocument;
     private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
-    private int _tableId;
+    private string _tableId;
+    private string _companyId;
     private bool openOrder = false;
     [Parameter]
     public string CompanyName { get; set; }
@@ -94,10 +95,12 @@ else
     protected override async Task OnInitializedAsync()
     {
         _customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
+        _tableId = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
+        _companyId = HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString();
         var url = configuration["ApiLinks:BillGet"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        parameters.Add("tableId", 1);
-        parameters.Add("companyId", 1);
+        parameters.Add("tableId", _tableId);
+        parameters.Add("companyId", _companyId);
         if (CloseTotal)
         {
             parameters.Add("closeTotal", "true");
@@ -139,8 +142,8 @@ else
             navigationManager.NavigateTo(_bill.CompanyId.ToString() + "/" + _tableId.ToString() + "/" + configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
         var url = configuration["ApiLinks:BillClosureOrder"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        parameters.Add("tableId", 1);
-        parameters.Add("companyId", 1);
+        parameters.Add("tableId", _tableId);
+        parameters.Add("companyId", _companyId);
         if (CloseTotal)
         {
             parameters.Add("closeTotal", "true");

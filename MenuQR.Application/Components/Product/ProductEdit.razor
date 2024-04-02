@@ -7,6 +7,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Adicionar Produto</h3>
 
@@ -64,9 +65,19 @@
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
     [Parameter]
     public int Id { get; set; }
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         var url = configuration["ApiLinks:ProductGetById"];
         GenericCommandResult commandResult = await ApiService.GetById<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Id.ToString());
         if (commandResult.Sucess && commandResult.Data is ProductDTO)
@@ -77,7 +88,7 @@
         else
             await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
         url = configuration["ApiLinks:ProductTypeGetAll"];
-        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
             ProductsType = productsTypeApi;
     }

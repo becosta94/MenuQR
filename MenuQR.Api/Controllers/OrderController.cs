@@ -62,7 +62,16 @@ namespace MenuQR.Api.Controllers
             Order? orderOutdated = orderBaseService.GetByCompoundKey(new object[] {id, companyId});
             if (orderOutdated is null)
                 return BadRequest("Pedido não encontrado.");
-            orderOutdated.Deliverd = true;
+            if (orderOutdated.Deliverd == false)
+            {
+                orderOutdated.DeliveryTime = DateTime.Now;
+                orderOutdated.Deliverd = true;
+            }
+            else
+            {
+                orderOutdated.DeliveryTime = DateTime.MinValue;
+                orderOutdated.Deliverd = false;
+            }
             Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated)) as Order;
             if (orderUpdated is not null)
                 return Ok(orderUpdated);
@@ -75,7 +84,7 @@ namespace MenuQR.Api.Controllers
         //[Authorize]
         public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
-            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.Date).ToList();
+            List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.OrderTime).ToList();
             if (orders.Count == 0)
             {
                 List<OrderDTO> ordersDto = new List<OrderDTO>();

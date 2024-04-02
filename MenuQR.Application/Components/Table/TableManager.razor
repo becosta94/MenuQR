@@ -5,6 +5,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Gerenciador de Mesas</h3>
 <a href="/table/create/" class="btn btn-primary">Adicionar</a>
@@ -46,14 +47,26 @@ else
 }
 @code {
     List<TableDTO> Tables { get; set; } = new List<TableDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         string? url = configuration["ApiLinks:TableGetAll"];
-        GenericCommandResult commandResult = await ApiService.Get<List<TableDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
-        if (commandResult.Sucess && commandResult.Data is List<TableDTO>)
-            Tables = (List<TableDTO>)commandResult.Data;
-        else
+        GenericCommandResult commandResult = await ApiService.Get<List<TableDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
+        if (commandResult.Sucess && commandResult.Data is List<TableDTO> tables)
+            Tables = tables.OrderBy(x => x.Identification).ToList();
+    else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 }

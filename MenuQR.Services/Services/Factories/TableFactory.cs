@@ -23,6 +23,7 @@ namespace MenuQR.Services.Services.Factories
         public Table Make(TableDTO tableDTO)
         {
             Table? table = _mapper.Map<Table>(tableDTO);
+            table.Unique = Guid.NewGuid();
             table = _validator.Execute(() => _tableBaseService.Add<TableValidator>(table)) as Table;
             if (table is not null)
                 return table;

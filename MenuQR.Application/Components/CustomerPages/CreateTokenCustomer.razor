@@ -52,8 +52,8 @@
         HttpContext.Response.Cookies.Append("CustomerDocument", Model.Document);
         url = configuration["ApiLinks:BillCreate"];
         Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
-        keyParametersPair.Add("tableId", 1);
-        keyParametersPair.Add("companyId", 1);
+        keyParametersPair.Add("tableId", TableId);
+        keyParametersPair.Add("companyId", CompanyId);
         keyParametersPair.Add("customerDocument", Model.Document);
         commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair);
         if (commandResult.Sucess)

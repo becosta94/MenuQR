@@ -1,4 +1,4 @@
-﻿@page "/table/edit/{id:int}"
+﻿@page "/table/edit/{Id:int}"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject NavigationManager navigationManager
@@ -7,6 +7,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Editar Mesa</h3>
 
@@ -28,11 +29,25 @@
     private TableDTO Model { get; set; } = new TableDTO();
     [Parameter]
     public int Id { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         var url = configuaration["ApiLinks:TableGetById"];
-        GenericCommandResult commandResult = await ApiService.GetById<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Id.ToString());
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", Id);
+        parameters.Add("companyId", _companyId);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess && commandResult.Data is TableDTO)
         {
             Model = (TableDTO)commandResult.Data;

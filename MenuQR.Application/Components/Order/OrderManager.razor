@@ -7,17 +7,18 @@
 @inject IHttpContextAccessor HttpContextAcessor
 @inject IApiService ApiService
 @inject NavigationManager navigationManager
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Gerenciador de Pedidos</h3>
-@if (Orders.Count == 0)
+@if (Orders.Count() == 0)
 {
     <table class="table">
         <thead>
             <tr>
+                <th>Mesa</th>
                 <th>Número</th>
                 <th>Produtos</th>
-                <th>Mesa</th>
-                <th>Horário</th>
+                <th>Horário do Pedido</th>
                 <th>Entregue</th>
             </tr>
         </thead>
@@ -28,40 +29,48 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>Mesa</th>
                 <th>Número</th>
                 <th>Produtos</th>
-                <th>Mesa</th>
-                <th>Horário</th>
+                <th>Horário do Pedido</th>
                 <th>Entregue</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (OrderDTO order in Orders)
+            @foreach (var tableOrder in Orders)
             {
-                <tr>
-                    <td class="align-middle">@order.Id</td>
-                    <td class="align-middle">
-                        @foreach (OrderProductDTO orderProducts in order.Products)
+                int firstIteration = 0;
+                @foreach (var order in tableOrder.OrderByDescending(x => x.OrderTime))
+                {
+                    <tr>
+                        @if (firstIteration == 0)
                         {
-                            <p>Quantidade: @orderProducts.Amount / Produto:  @orderProducts.Product.Name</p>
+                            <td rowspan="@tableOrder.Count()" class="align-middle">@tableOrder.Where(x => x.Table.Id == tableOrder.Key).Select(x => x.Table.Identification).First()</td>
                         }
-                    </td>
-                    <td class="align-middle">@order.Table.Identification</td>
-                    <td class="align-middle">@order.Date</td>
-                    <td class="align-middle">
-                        <div class="form-check form-switch">
-                            @if (order.Deliverd)
+                        <td class="align-middle">@order.Id</td>
+                        <td class="align-middle">
+                            @foreach (OrderProductDTO orderProducts in order.Products)
                             {
-                                <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
+                                <p>Qtd: @string.Concat(orderProducts.Amount, "x") - Produto:  @orderProducts.Product.Name</p>
                             }
-                            else
-                            {
-                                <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
-                            }
+                        </td>
+                        <td class="align-middle">@order.OrderTime</td>
+                        <td class="align-middle">
+                            <div class="form-check form-switch">
+                                @if (order.Deliverd)
+                                {
+                                    <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" checked="checked" id="flexSwitchCheckDefault" />
+                                }
+                                else
+                                {
+                                    <InputCheckbox @bind-Value="order.Deliverd" @onclick="(args) => DeliverOrder(order.Id)" class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" />
+                                }
 
-                        </div>
-                    </td>
-                </tr>
+                            </div>
+                        </td>
+                    </tr>
+                    firstIteration++;
+                }
             }
         </tbody>
     </table>
@@ -103,14 +112,14 @@ else
                     <td class="align-middle">@billClosureOrder.CustumerDocument</td>
                     <td class="align-middle">@billClosureOrder.Value</td>
                     <td class="align-middle">
-                            @if (billClosureOrder.CloseTotal)
-                            {
-                                <p>Não</p>
-                            }
-                            else
-                            {
-                                <p>Sim</p>
-                            }
+                        @if (billClosureOrder.CloseTotal)
+                        {
+                            <p>Não</p>
+                        }
+                        else
+                        {
+                            <p>Sim</p>
+                        }
                     </td>
                     <td class="align-middle">
                         <div class="form-check form-switch">
@@ -131,15 +140,29 @@ else
     </table>
 }
 @code {
-    List<OrderDTO> Orders { get; set; } = new List<OrderDTO>();
+    IEnumerable<IGrouping<int, OrderDTO>> Orders { get; set; } = new List<IGrouping<int, OrderDTO>>();
     List<BillClosureOrderDTO> BillClosureOrders { get; set; } = new List<BillClosureOrderDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         string? url = configuration["ApiLinks:OrderGetAllToDelivery"];
-        GenericCommandResult commandResult = await ApiService.GetStringByParameter<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", "1");
-        if (commandResult.Sucess)
-            Orders =  JsonConvert.DeserializeObject<List<OrderDTO>>(commandResult.Data.ToString());
+        GenericCommandResult commandResult = await ApiService.Get<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
+        if (commandResult.Sucess && commandResult.Data is List<OrderDTO> orders)
+        {
+
+            Orders =  orders.GroupBy(x => x.Table.Id).OrderBy(x => x.First().Table.Identification);
+        }
         url = configuration["ApiLinks:BillClosureOrderGetAll"];
         commandResult = await ApiService.Get<List<BillClosureOrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
         if (commandResult.Sucess && commandResult.Data is List<BillClosureOrderDTO> billClosureOrderDTO)
@@ -151,7 +174,7 @@ else
         var url = configuration["ApiLinks:DeliverOrder"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("id", id);
-        parameters.Add("companyId", 1);
+        parameters.Add("companyId", _companyId);
         GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         if (commandResult.Sucess)
         {

@@ -4,6 +4,7 @@ using MenuQR.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MenuQR.Infra.Data.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240401203040_migra4")]
+    partial class migra4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,17 +253,13 @@ namespace MenuQR.Infra.Data.Migrations
                     b.Property<int?>("CustomerHistoryId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Date");
+
                     b.Property<bool>("Deliverd")
                         .HasColumnType("bit")
                         .HasColumnName("Deliverd");
-
-                    b.Property<DateTime>("DeliveryTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DeliveryTime");
-
-                    b.Property<DateTime>("OrderTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("OrderTime");
 
                     b.Property<int?>("TableId")
                         .HasColumnType("int");

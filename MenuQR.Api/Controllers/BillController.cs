@@ -16,11 +16,14 @@ namespace MenuQR.Api.Controllers
     {
         [HttpGet]
         [Route("getall")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetAll([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
         {
             List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
-            bills.ForEach(x => context.Entry(x).Reference(o => o.Table).Load());
+            foreach (var bill in bills)
+            {
+                context.Entry(bill).Reference(x => x.Table).Load();
+            }
             if (bills is not null)
             {
                 List<BillDTO> billDTO = new List<BillDTO>();

@@ -11,7 +11,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">MenuQR.Application</a>
+        <a class="navbar-brand" href="">MenuQR</a>
     </div>
 </div>
 
@@ -27,39 +27,40 @@
 
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item px-3 d-flex align-items-center">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true" ></span>
+                        <p style="  overflow: hidden;  white-space: nowrap;  text-overflow: ellipsis; margin: 0;">@context.User.Identity?.Name</p>
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/bill/manager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Contas
+                        <span class="fa fa-regular fa-money-bill-1 fa-lg" aria-hidden="true"></span> Contas
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="table/manager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Mesas
+                        <span class="fa fa-solid fa-people-line fa-lg" aria-hidden="true"></span> Mesas
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/order/manager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Pedidos
+                        <span class="fa fa-regular fa-bell fa-lg" aria-hidden="true"></span> Chamados
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="product/manager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Produtos
+                        <span class="fa fa-cutlery fa-lg" aria-hidden="true"></span> Produtos
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/product/typemanager">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Tipos de produtos
+                        <span class="fa fa-brands fa-product-hunt fa-lg" aria-hidden="true"></span> Tipos de produtos
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Logout">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Logout
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Sair
                     </NavLink>
                 </div>
             </Authorized>

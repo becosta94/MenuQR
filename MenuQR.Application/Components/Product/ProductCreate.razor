@@ -7,6 +7,7 @@
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Adicionar Produto</h3>
 
@@ -58,12 +59,17 @@
     public ProductDTO Model { get; set; } = new ProductDTO();
     public string ImageDataUrl;
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
-
+    public string Base64;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     public async void OnSubmit()
     {
         Model.Active = true;
-        Model.CompanyId = 1;
+        Model.CompanyId = _companyId;
         string url = configuration["ApiLinks:ProductCreate"];
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
@@ -77,8 +83,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         string url = configuration["ApiLinks:ProductTypeGetAll"];
-        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
             ProductsType = productsTypeApi;
     }
@@ -94,6 +106,7 @@
                 await File.Data.CopyToAsync(MsFile);
                 StreamReader reader = new StreamReader(File.Data);
                 string asBase64String = Convert.ToBase64String(MsFile.ToArray());
+                Base64 = asBase64String;
                 Model.Image = asBase64String;
                 ImageDataUrl = string.Format("data:image/png;base64, {0}", asBase64String);
             }

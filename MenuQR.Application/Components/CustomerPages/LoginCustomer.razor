@@ -13,7 +13,7 @@
     <ValidationSummary />
     <div class="container">
         <div class="card card-container">
-            <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
+            <img id="profile-img" class="profile-img-card" src="@string.Format("data:image/png;base64, {0}", Company.Banner)" />
             <p id="profile-name" class="profile-name-card"></p>
             <div class="div-signin" id="div-signin">
                 <span id="reauth-cpf" class="reauth-cpf"></span>
@@ -32,6 +32,7 @@
     [Parameter]
     public int TableId { get; set; }
     public CustomerDTO Model { get; set; } = new CustomerDTO();
+    public CompanyDTO Company { get; set; } = new CompanyDTO();
     protected override async Task OnInitializedAsync()
     {
         if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] != null)
@@ -44,6 +45,13 @@
             HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableId");
         if (HttpContextAcessor.HttpContext.Request.Cookies["TableGuid"] != null)
             HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableGuid");
+        var url = configuration["ApiLinks:CompanyGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<CompanyDTO>(url, null, CompanyId.ToString());
+        if (commandResult.Sucess && commandResult.Data is CompanyDTO company)
+            Company = company;
+        else
+            navigationManager.NavigateTo("/Error");
+
     }
     public async void OnSubmit()
     {

@@ -1,4 +1,6 @@
 ﻿@page "/table/create"
+
+
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IWebHostEnvironment Env
@@ -9,6 +11,7 @@
 @inject IConfiguration configuaration
 @inject NavigationManager navigationManager
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Adicionar Mesa</h3>
 
@@ -28,10 +31,16 @@
 
 @code {
     public TableDTO Model { get; set; } = new TableDTO();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     private async void OnSubmit()
     {
         var url = configuartion["ApiLinks:TableCreate"];
+        Model.CompanyId = _companyId;
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {
@@ -40,6 +49,16 @@
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, mesa não cadastrada");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = (await authenticationStateTask).User;
+
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
     }
 }
 

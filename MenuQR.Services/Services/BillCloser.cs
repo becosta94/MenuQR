@@ -83,6 +83,7 @@ namespace MenuQR.Services.Services
             billClosureOrder.OrderCompleted = true;
             billClosureOrder = _validator.Execute(() => _billClosureOrderService.Update<BillClosureOrderValidator>(billClosureOrder)) as BillClosureOrder;
             bill.SumTotal();
+            bill.ClosingDate = DateTime.Now;
             bill = _validator.Execute(() => _billService.Update<BillValidator>(bill)) as Bill;
             if (bill is not null)
                 return bill;

@@ -4,6 +4,7 @@ using MenuQR.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MenuQR.Infra.Data.Migrations
 {
     [DbContext(typeof(SqlContext))]
-    partial class SqlContextModelSnapshot : ModelSnapshot
+    [Migration("20240401193135_migra3")]
+    partial class migra3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,17 +37,9 @@ namespace MenuQR.Infra.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CompanyId");
 
-                    b.Property<DateTime>("ClosingDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ClosingDate");
-
                     b.Property<bool>("Open")
                         .HasColumnType("bit")
                         .HasColumnName("OpenBill");
-
-                    b.Property<DateTime>("OpeningDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("OpeningDate");
 
                     b.Property<int>("TableCompanyId")
                         .HasColumnType("int")
@@ -250,17 +245,13 @@ namespace MenuQR.Infra.Data.Migrations
                     b.Property<int?>("CustomerHistoryId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Date");
+
                     b.Property<bool>("Deliverd")
                         .HasColumnType("bit")
                         .HasColumnName("Deliverd");
-
-                    b.Property<DateTime>("DeliveryTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DeliveryTime");
-
-                    b.Property<DateTime>("OrderTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("OrderTime");
 
                     b.Property<int?>("TableId")
                         .HasColumnType("int");

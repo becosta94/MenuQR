@@ -40,7 +40,7 @@
 <footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
     <div class="justify-content-around bd-highlight btn-toolbar">
         <div class="btn-group mr-md-3" role="group">
-            <button @onclick="Cancel" class="btn btn-danger">Cancelar</button>
+            <button @onclick="Cancel" class="btn btn-secondary">Cancelar</button>
         </div>
         <div class="btn-group mr-md-3" role="group">
             <button @onclick="Confirm" class="btn btn-primary">Confirmar</button>
@@ -49,8 +49,7 @@
 </footer>
 
 @code {
-    string documentTest = "11381147666";
-    string tableTest = "1";
+    private string _tableId;
     List<OrderProductCreateDTO> OrderProductsCrete { get; set; } = new List<OrderProductCreateDTO>();
     [Parameter]
     public int SetHashCode { get; set; }
@@ -60,6 +59,9 @@
     public Guid TableGuid { get; set; }
     protected override void OnInitialized()
     {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableId"] == null)
+            navigationManager.NavigateTo("/Error");
+        _tableId  = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
         List<OrderProductDTO> orderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
         orderProducts.ForEach(x => OrderProductsCrete.Add(new OrderProductCreateDTO() { Amount = x.Amount, CompanyId = x.CompanyId, Id = x.Id, Product = x.Product, ProductId = x.ProductId, Total = x.Total}));
 
@@ -67,7 +69,7 @@
     private async void Confirm()
     {
         string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
-        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={tableTest}&customerDocument={customerDocument}";
+        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={_tableId}&customerDocument={customerDocument}";
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
         if (commandResult.Sucess)

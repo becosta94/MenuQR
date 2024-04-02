@@ -26,9 +26,13 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("Deliverd")
                .HasColumnType("bit");
 
-            builder.Property(prop => prop.Date)
+            builder.Property(prop => prop.OrderTime)
                .IsRequired()
-               .HasColumnName("Date")
+               .HasColumnName("OrderTime")
+               .HasColumnType("datetime2");            
+            
+            builder.Property(prop => prop.DeliveryTime)
+               .HasColumnName("DeliveryTime")
                .HasColumnType("datetime2");
 
             builder.HasOne(prop => prop.CustomerHistory)

@@ -5,6 +5,7 @@
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor HttpContextAcessor
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Gerenciador de Produtos</h3>
 <a href="/product/create/" class="btn btn-primary">Adicionar</a>
@@ -73,15 +74,26 @@ else
 @code {
     List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
+        [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         var url = configuration["ApiLinks:ProductGetAll"];
-        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
             Products = productsApi;
         url = configuration["ApiLinks:ProductTypeGetAll"];
-        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
             ProductsType = (from p in productsTypeApi
                            join pm in Products on p.Id equals pm.Id

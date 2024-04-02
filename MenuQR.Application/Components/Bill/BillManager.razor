@@ -6,6 +6,7 @@
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
 @inject NavigationManager navigationManager
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Gerenciador de Contas</h3>
 @if (Bills.Count == 0)
@@ -16,6 +17,8 @@
                 <th>Número</th>
                 <th>Total</th>
                 <th>Mesa</th>
+                <th>Abertura</th>
+                <th>Fechamento</th>
                 <th></th>
             </tr>
         </thead>
@@ -29,6 +32,8 @@ else
                 <th>Número</th>
                 <th>Total</th>
                 <th>Mesa</th>
+                <th>Abertura</th>
+                <th>Fechamento</th>
                 <th></th>
             </tr>
         </thead>
@@ -53,6 +58,15 @@ else
                         }
                     }
                     <td class="align-middle">@bill.Table.Identification</td>
+                    <td class="align-middle">@bill.OpeningDate</td>
+                    @if (bill.ClosingDate == DateTime.MinValue)
+                    {
+                        <td class="align-middle">-</td>
+                    }
+                    else
+                    {
+                        <td class="align-middle">@bill.ClosingDate</td>                        
+                    }
                     @if (bill.Open)
                     {
                         <td class="align-middle">
@@ -71,15 +85,27 @@ else
 
 @code {
     List<BillDTO> Bills { get; set; } = new List<BillDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
-        string? url = configuration["ApiLinks:BillGetAll"];
-        GenericCommandResult commandResult = await ApiService.GetStringByParameter<List<BillDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), "companyId", "1");
-        if (commandResult.Sucess)
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
         {
-            Bills =  JsonConvert.DeserializeObject<List<BillDTO>>(commandResult.Data.ToString());
-            Bills = Bills.OrderBy(x => x.Open).OrderByDescending(x => x.Id).ToList();
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
+
+        string? url = configuration["ApiLinks:BillGetAll"];
+        GenericCommandResult commandResult = await ApiService.Get<List<BillDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
+        if (commandResult.Sucess && commandResult.Data is List<BillDTO> bills)
+        {
+            Bills =  bills;
+            Bills = Bills.OrderBy(x => x.Open).OrderByDescending(x => x.Id).ThenBy(x => x.Table.Identification).ToList();
         }
 
         else

@@ -7,6 +7,7 @@
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
 @inject IJSRuntime JsRuntime
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>Gerenciador de Tipos de Produtos</h3>
 <a href="/product/typecreate/" class="btn btn-primary">Adicionar</a>
@@ -45,11 +46,22 @@ else
 }
 @code {
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
+        [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
         var url = configuration["ApiLinks:ProductTypeGetAll"];
-        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO>)
             ProductsType =  commandResult.Data as List<ProductTypeDTO>;
         else
