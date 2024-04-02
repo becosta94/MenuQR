@@ -15,7 +15,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
-        [Authorize]
+        //[Authorize]
         public IActionResult Create([FromServices] IProductFactory productFactory, [FromServices] IMapper mapper, ProductDTO productDTO)
         {
             Product product = productFactory.Make(productDTO);

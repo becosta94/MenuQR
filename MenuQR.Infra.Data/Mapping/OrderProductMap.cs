@@ -16,6 +16,11 @@ namespace MenuQR.Infra.Data.Mapping
                 .ValueGeneratedOnAdd()
                 .UseIdentityColumn();
 
+            builder.Property(prop => prop.CreatedAt)
+               .IsRequired()
+               .HasColumnName("CreatedAt")
+               .HasColumnType("datetime2");
+
             builder.Property(prop => prop.OrderId)
                .IsRequired()
                .HasColumnName("OrderId")

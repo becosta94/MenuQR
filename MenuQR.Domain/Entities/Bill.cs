@@ -9,7 +9,6 @@ namespace MenuQR.Domain.Entities
         public int TableId { get; set; }
         public int TableCompanyId { get; set; }
         public bool Open { get; set; }
-        public DateTime OpeningDate { get; set; }
         public DateTime ClosingDate { get; set; }
         public virtual Table Table { get; set; }
         public virtual List<OrderProduct> OrderProducts { get; set; } = null!;
@@ -18,7 +17,8 @@ namespace MenuQR.Domain.Entities
         {
             Open = true;
             CustomersAndTotals = new Dictionary<Customer, double>();
-            OpeningDate = DateTime.Now;
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
         }
         public Bill(Bill bill)
         {
@@ -29,7 +29,7 @@ namespace MenuQR.Domain.Entities
             CompanyId = bill.CompanyId;
             Id = bill.Id;
             Table = new Table() { Id = bill.TableId, CompanyId = bill.TableCompanyId };
-            OpeningDate = DateTime.Now;
+            CreatedAt = DateTime.Now;
         }
 
         public void AddNewCustomerTotal(Customer customer, double total)

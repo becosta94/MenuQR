@@ -4,6 +4,10 @@
     {
         public string Name { get; set; }
         public string Document { get; set; }
-        public Customer() { }
+        public Customer() 
+        {
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
+        }
     }
 }

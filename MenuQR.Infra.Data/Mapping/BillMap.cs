@@ -25,9 +25,9 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("CompanyId")
                .HasColumnType("int");
 
-            builder.Property(prop => prop.OpeningDate)
+            builder.Property(prop => prop.CreatedAt)
                .IsRequired()
-               .HasColumnName("OpeningDate")
+               .HasColumnName("CreatedAt")
                .HasColumnType("datetime2");
 
             builder.Property(prop => prop.ClosingDate)

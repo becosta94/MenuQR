@@ -8,5 +8,11 @@
         public int BillCompanyId { get; set; }
         public virtual Bill Bill { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
+
+        public CustomerHistory()
+        {
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
+        }
     }
 }

@@ -12,6 +12,11 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasKey(prop => prop.Document);
 
+            builder.Property(prop => prop.CreatedAt)
+               .IsRequired()
+               .HasColumnName("CreatedAt")
+               .HasColumnType("datetime2");
+
             builder.Property(prop => prop.Document)
                 .IsRequired()
                 .HasColumnName("CustomerDocument")

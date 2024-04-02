@@ -18,6 +18,11 @@ namespace MenuQR.Infra.Data.Mapping
                    .HasColumnName("Unique")
                    .HasColumnType("uniqueidentifier");
 
+            builder.Property(prop => prop.CreatedAt)
+                   .IsRequired()
+                   .HasColumnName("CreatedAt")
+                   .HasColumnType("datetime2");
+
             builder.Property(prop => prop.CompanyId)
                    .IsRequired()
                    .HasColumnName("CompanyId")

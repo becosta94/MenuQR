@@ -7,5 +7,11 @@
         public bool OrderCompleted { get; set; }
         public string CustumerDocument { get; set; }
         public double Value { get; set; }
+
+        public BillClosureOrder()
+        {
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
+        }
     }
 }

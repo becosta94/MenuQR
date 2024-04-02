@@ -9,7 +9,7 @@ namespace MenuQR.Application.Entities.DTOs
         public string? Name { get; set; }
         public string? Description { get; set; }
         [Required]
-        [Range(1, double.MaxValue)]
+        [Range(1.00, double.MaxValue)]
         public double Price { get; set; }
         public string? Image { get; set; }
         [Required]
@@ -17,5 +17,6 @@ namespace MenuQR.Application.Entities.DTOs
         [Required]
         [Range(1, int.MaxValue)]
         public int TypeId { get; set; }
+
     }
 }

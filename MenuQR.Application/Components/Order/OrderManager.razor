@@ -40,7 +40,7 @@ else
             @foreach (var tableOrder in Orders)
             {
                 int firstIteration = 0;
-                @foreach (var order in tableOrder.OrderByDescending(x => x.OrderTime))
+                @foreach (var order in tableOrder.OrderByDescending(x => x.CreatedAt))
                 {
                     <tr>
                         @if (firstIteration == 0)
@@ -54,7 +54,7 @@ else
                                 <p>Qtd: @string.Concat(orderProducts.Amount, "x") - Produto:  @orderProducts.Product.Name</p>
                             }
                         </td>
-                        <td class="align-middle">@order.OrderTime</td>
+                        <td class="align-middle">@order.CreatedAt</td>
                         <td class="align-middle">
                             <div class="form-check form-switch">
                                 @if (order.Deliverd)

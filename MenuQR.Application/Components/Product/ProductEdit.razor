@@ -86,7 +86,7 @@
             _imageDataUrl = string.Format("data:image/png;base64, {0}", Model.Image);
         }
         else
-            await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
+            await JsRuntime.InvokeVoidAsync("alert", "Produto não encontrado!");
         url = configuration["ApiLinks:ProductTypeGetAll"];
         commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)

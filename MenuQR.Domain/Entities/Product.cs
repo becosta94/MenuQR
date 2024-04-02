@@ -14,6 +14,8 @@ namespace MenuQR.Domain.Entities
         public Product()
         {
             Active = true;
+            CreatedAt = DateTime.Now;
+            UpdatedAt = DateTime.Now;
         }
     }
 }

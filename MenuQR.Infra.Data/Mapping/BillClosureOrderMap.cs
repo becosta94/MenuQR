@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MenuQR.Infra.Data.Mapping
 {
-    internal class BillClosureOrderMap : IEntityTypeConfiguration<BillClosureOrder>
+    public class BillClosureOrderMap : IEntityTypeConfiguration<BillClosureOrder>
     {
         public void Configure(EntityTypeBuilder<BillClosureOrder> builder)
         {
@@ -16,6 +16,11 @@ namespace MenuQR.Infra.Data.Mapping
                .IsRequired()
                .HasColumnName("CompanyId")
                .HasColumnType("int");
+
+            builder.Property(prop => prop.CreatedAt)
+               .IsRequired()
+               .HasColumnName("CreatedAt")
+               .HasColumnType("datetime2");
 
             builder.Property(prop => prop.Value)
                .IsRequired()
