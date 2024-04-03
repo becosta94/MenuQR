@@ -16,7 +16,7 @@ namespace MenuQR.Api.Controllers
     {
         [HttpGet]
         [Route("getall")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetAll([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
         {
             List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
@@ -32,7 +32,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPost]
         [Route("create")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument)
         {
             Bill bill = newBillFactory.Make(tableId, companyId, customerDocument);
@@ -43,7 +43,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, BillClosureOrder billClosureOrder)
         {
             object returnedObjectBill = billCloser.Close(billClosureOrder);
@@ -82,7 +82,7 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("billclosureordergetall")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Get([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, [FromServices] SqlContext context, int companyId)
         {
             List<BillClosureOrder> billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted).ToList();
@@ -93,6 +93,20 @@ namespace MenuQR.Api.Controllers
             else
                 return BadRequest("Não foi possível gerar a conta");
         }
+
+        [HttpGet]
+        [Route("billclosureorderget")]
+        public IActionResult GetClose([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int companyId, int tableId)
+        {
+            BillClosureOrder? billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted && x.TableId == tableId && x.TableCompanyId == companyId).LastOrDefault();
+            if (billClosureOrders is not null)
+                return Ok(billClosureOrders);
+            else if (billClosureOrders is null)
+                return Ok(new BillClosureOrder());
+            else
+                return BadRequest("Não foi possível gerar a conta");
+        }
+
 
         [HttpGet]
         [Route("get")]

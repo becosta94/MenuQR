@@ -204,3 +204,8 @@ h2 {
 .fa {
     margin-right: 12px;
 }
+
+.px-40 {
+    padding-left: 24rem !important;
+    padding-right: 24rem !important;
+}

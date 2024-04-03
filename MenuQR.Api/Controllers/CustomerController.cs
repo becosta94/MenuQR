@@ -25,11 +25,16 @@ namespace MenuQR.Api.Controllers
             return BadRequest("Ocorreu um erro.");
         }
         [HttpGet]
-        [Route("getbyid")]
-        public IActionResult GetById([FromServices] IBaseService<Customer> customerService, [FromServices] IMapper mapper, string id)
+        [Route("get")]
+        public IActionResult Get([FromServices] IBaseService<Customer> customerService, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IMapper mapper, string document, int companyId)
         {
-            Customer? customer = customerService.Get().Where(x => x.Document == id).FirstOrDefault();
-            if (customer is not null)
+            Customer? customer = customerService.Get().Where(x => x.Document == document).FirstOrDefault();
+            if (customer == null)
+                return Ok(new CustomerDTO());
+            CustomerHistory customerHistory = customerHistoryService.Get().Where(x => x.CustomerDocument == customer.Document && x.CompanyId == companyId).LastOrDefault();
+            if (customerHistory is not null && customerHistory.OnPlace)
+                return Ok(new ErroDTO("Você possui uma conta aberta em outra mesa."));
+            else if (customer is not null)
                 return Ok(mapper.Map<CustomerDTO>(customer));
             else
                 return BadRequest("Cliente não encontrado");

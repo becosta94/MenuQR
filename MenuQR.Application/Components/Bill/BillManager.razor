@@ -1,4 +1,4 @@
-﻿@page "/bill/manager"
+﻿@page "/bill/manager/"
 @attribute [Authorize]
 @rendermode InteractiveServer
 @inject IConfiguration configuration
@@ -7,7 +7,7 @@
 @inject IHttpContextAccessor HttpContextAcessor
 @inject NavigationManager navigationManager
 @inject UserManager<ApplicationUser> UserManager
-
+@inject StateContainer stateContainer
 <h3>Gerenciador de Contas</h3>
 @if (Bills.Count == 0)
 {
@@ -34,6 +34,7 @@ else
                 <th>Mesa</th>
                 <th>Abertura</th>
                 <th>Fechamento</th>
+                <th></th>
                 <th></th>
             </tr>
         </thead>
@@ -65,18 +66,21 @@ else
                     }
                     else
                     {
-                        <td class="align-middle">@bill.ClosingDate</td>                        
+                        <td class="align-middle">@bill.ClosingDate</td>
                     }
                     @if (bill.Open)
                     {
                         <td class="align-middle">
-                            <a @onclick="(args) => CloseBill(bill.TableId)" class="btn btn-danger">Fechar</a>
+                            <a @onclick="(args) => CloseBill(bill.TableId)" class="btn btn-primary">Fechar</a>
                         </td>
                     }
                     else
                     {
                         <td class="align-middle">Conta Fechada</td>
                     }
+                    <td class="align-middle">
+                        <a @onclick="(args) => ShowBill(bill)" class="btn btn-secondary">Ver</a>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -129,7 +133,7 @@ else
             if (content is not null && contentObjectBill.Id != 0)
             {
                 await JsRuntime.InvokeVoidAsync("alert", "Conta fechada");
-                navigationManager.NavigateTo(configuration["ApplicationLinks:BillManager"].ToString(), true);
+                navigationManager.NavigateTo(configuration["BaseApplicationLink"].ToString() + configuration["ApplicationLinks:BillManager"].ToString(), true);
             }
             else if (content is not null && !string.IsNullOrEmpty(contentObjectErro.Menssage))
                 await JsRuntime.InvokeVoidAsync("alert", contentObjectErro.Menssage);
@@ -138,5 +142,12 @@ else
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+
+    public void ShowBill(BillDTO bill)
+    {
+        stateContainer.ObjectTunnel.Add(bill.GetHashCode(), bill);
+        navigationManager.NavigateTo(configuration["BaseApplicationLink"].ToString() + configuration["ApplicationLinks:BillEdit"].ToString() + bill.GetHashCode(), true);
+
     }
 }

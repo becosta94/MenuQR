@@ -1,0 +1,73 @@
+﻿@page "/bill/edit/{SetHashCode:int}"
+@inject IHttpContextAccessor HttpContextAcessor
+@inject IConfiguration configuration
+@inject StateContainer stateContainer
+@inject IApiService ApiService
+@inject IJSRuntime JsRuntime
+
+<h3>Conta</h3>
+
+<div>
+    @if (Bill != null)
+    {
+        @foreach (var a in _customersOrders)
+        {
+            <b class="px-5">@a.Where(x => x.Order.CustomerDocument == a.Key).Select(x => x.Order.CustomerDTO.Name).First()</b>
+            @foreach (var b in a.GroupBy(x => x.Product.Id))
+            {
+                <div class="d-flex px-40">
+                    <div class="p-2">@b.Count() x</div>
+                    <div class="p-2">@b.First().Product.Name</div>
+                    <div class="ms-auto p-2">R$ @b.First().Product.Price.ToString("0.00")</div>
+                </div>
+
+            }
+            <div class="d-flex px-40">
+                <div class="p-2">Total Parcial: </div>
+                <div class="ms-auto p-2">R$ @a.Sum(x => x.Total).ToString("0.00")</div>
+            </div>
+        }
+        <div class="d-flex px-40">
+            <div class="p-2">Total Geral: </div>
+            <div class="ms-auto p-2">R$ @Bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
+        </div>
+    }
+</div>
+
+
+@code {
+    BillDTO Bill = new BillDTO();
+    [Parameter]
+    public int SetHashCode { get; set; }
+    private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
+    protected override async Task OnInitializedAsync()
+    {
+        Bill = (BillDTO)stateContainer.ObjectTunnel[SetHashCode];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        var url = configuration["ApiLinks:BillGet"];
+        parameters.Add("tableId", Bill.TableId);
+        parameters.Add("companyId", Bill.CompanyId);
+        parameters.Add("closeTotal", "true");
+        parameters.Add("customerDocument", 0);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        BillDTO billResultObject = JsonConvert.DeserializeObject<BillDTO>(commandResult.Data.ToString());
+        ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0)
+        {
+            url = configuration["ApiLinks:CustomerGetById"];
+            Bill = billResultObject;
+            foreach (var orderProduct in Bill.OrderProducts)
+            {
+                commandResult = await ApiService.GetById<CustomerDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), orderProduct.Order.CustomerDocument);
+                if (commandResult.Sucess && commandResult.Data is CustomerDTO customer)
+                {
+                    orderProduct.Order.CustomerDTO = customer;
+                    _customersOrders = Bill.OrderProducts.GroupBy(x => x.Order.CustomerDocument);
+                }
+            }
+            return;
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+}

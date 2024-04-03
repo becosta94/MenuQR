@@ -55,9 +55,29 @@
     }
     public async void OnSubmit()
     {
-        var url = configuration["ApiLinks:CustomerGetById"];
-        GenericCommandResult commandResult = await ApiService.GetById<CustomerDTO>(url, null, Model.Document);
-        if (commandResult.Sucess && commandResult.Data is CustomerDTO)
+        var url = configuration["ApiLinks:BillClosureOrderGet"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", TableId);
+        parameters.Add("companyId", CompanyId);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        BillClosureOrderDTO billResultObject = JsonConvert.DeserializeObject<BillClosureOrderDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0 && billResultObject.CloseTotal)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Essa conta está sendo paga. Aguarde liberação para abrir nova conta.");
+            return;
+        }
+        else if (!commandResult.Sucess)
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        url = configuration["ApiLinks:CustomerGet"];
+        parameters.Clear();
+        parameters.Add("document", Model.Document);
+        parameters.Add("companyId", CompanyId);
+        commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        CustomerDTO custumer = JsonConvert.DeserializeObject<CustomerDTO>(commandResult.Data.ToString());
+        ErroDTO erro = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && !string.IsNullOrEmpty(erro.Menssage))
+            await JsRuntime.InvokeVoidAsync("alert", erro.Menssage);
+        else if (commandResult.Sucess && custumer.Id != 0)
         {
             stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
             navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());

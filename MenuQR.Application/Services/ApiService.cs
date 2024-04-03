@@ -135,13 +135,13 @@ namespace MenuQR.Application.Services
                 }
                 TEntity? response = await httpClient.GetFromJsonAsync<TEntity>($"{url}{parameters}");
                 if (response is not null)
-                    return new GenericCommandResult(true, "Post made successfully", response);
+                    return new GenericCommandResult(true, "Get made successfully", response);
                 else
-                    return new GenericCommandResult(false, "Post not made", response);
+                    return new GenericCommandResult(false, "Get not made", response);
             }
             catch (Exception ex)
             {
-                return new GenericCommandResult(false, "Post not made", ex);
+                return new GenericCommandResult(false, "Get not made", ex);
             }
         }
 

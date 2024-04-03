@@ -74,7 +74,7 @@ else
 @code {
     List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
-        [CascadingParameter]
+    [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;
@@ -96,8 +96,8 @@ else
         commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)
             ProductsType = (from p in productsTypeApi
-                           join pm in Products on p.Id equals pm.Id
-                           select new ProductTypeDTO {Id = p.Id, CompanyId = p.CompanyId, TypeName = p.TypeName}).ToList();
+                            join pm in Products on p.Id equals pm.Id
+                            select new ProductTypeDTO { Id = p.Id, CompanyId = p.CompanyId, TypeName = p.TypeName }).ToList();
 
     }
     public async void ToggleActivity(int productId, int companyId)
