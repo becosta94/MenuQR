@@ -1,4 +1,6 @@
-﻿namespace MenuQR.Application.Entities.DTOs
+﻿using MenuQR.Domain.Entities;
+
+namespace MenuQR.Application.Entities.DTOs
 {
     public class BillClosureOrderDTO : BaseDTOCompanyId
     {
@@ -8,5 +10,7 @@
         public bool OrderCompleted { get; set; }
         public string CustumerDocument { get; set; }
         public double Value { get; set; }
+        public virtual Table Table { get; set; }
+        public virtual Customer Customer { get; set; }
     }
 }

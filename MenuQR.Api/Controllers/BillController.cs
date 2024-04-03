@@ -20,10 +20,7 @@ namespace MenuQR.Api.Controllers
         public IActionResult GetAll([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
         {
             List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
-            foreach (var bill in bills)
-            {
-                context.Entry(bill).Reference(x => x.Table).Load();
-            }
+            bills.ForEach(x => context.Entry(x).Reference(x => x.Table).Load());
             if (bills is not null)
             {
                 List<BillDTO> billDTO = new List<BillDTO>();
@@ -86,9 +83,11 @@ namespace MenuQR.Api.Controllers
         [HttpGet]
         [Route("billclosureordergetall")]
         //[Authorize]
-        public IActionResult Get([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int companyId)
+        public IActionResult Get([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, [FromServices] SqlContext context, int companyId)
         {
             List<BillClosureOrder> billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted).ToList();
+            billClosureOrders.ForEach(x => context.Entry(x).Reference(x => x.Table).Load());
+            billClosureOrders.ForEach(x => context.Entry(x).Reference(x => x.Customer).Load());
             if (billClosureOrders is not null)
                 return Ok(billClosureOrders);
             else

@@ -22,10 +22,6 @@
         <label class="form-label">Identificação:</label>
         <InputText @bind-Value="Model.Identification" class="form-control" />
     </div>
-    <div class="mb-3">
-        <label class="form-label">QRCode:</label>
-        <InputText @bind-Value="Model.QRLink" class="form-control" />
-    </div>
     <button type="submit" class="btn btn-primary">Enviar</button>
 </EditForm>
 
@@ -41,6 +37,8 @@
     {
         var url = configuartion["ApiLinks:TableCreate"];
         Model.CompanyId = _companyId;
+        Model.Unique = Guid.NewGuid();
+        Model.Link = string.Empty;
         GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
         if (commandResult.Sucess)
         {

@@ -47,7 +47,7 @@ namespace MenuQR.Services.Services
                     throw new Exception();
                 bill.CustomersAndTotals.Remove(bill.OrderProducts.Select(x => x.Order.Customer).Where(x => x.Document == custmerDocument).First());
             }
-            BillClosureOrder? billClosureOrder = new BillClosureOrder() { CompanyId = companyId, OrderCompleted = false, TableId = tableId, CustumerDocument = custmerDocument, CloseTotal = closeTotal, Value = bill.Total };
+            BillClosureOrder? billClosureOrder = new BillClosureOrder() { CompanyId = companyId, OrderCompleted = false, TableId = tableId, TableCompanyId = companyId, CustomerDocument = custmerDocument, CloseTotal = closeTotal, Value = bill.Total };
             billClosureOrder = _validator.Execute(() => _billClosureOrderService.Add<BillClosureOrderValidator>(billClosureOrder)) as BillClosureOrder;
             if (billClosureOrder is not null)
                 return billClosureOrder;
@@ -58,7 +58,7 @@ namespace MenuQR.Services.Services
         public object Close(BillClosureOrder billClosureOrder)
         {
             CustomerHistory? customerHistory = null;
-            Bill? bill = _billValueGetter.Get(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustumerDocument, false) as Bill;
+            Bill? bill = _billValueGetter.Get(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, false) as Bill;
             if (billClosureOrder.CloseTotal)
             {
                 foreach (var custumerAndTotal in bill.CustomersAndTotals)
@@ -74,7 +74,7 @@ namespace MenuQR.Services.Services
             else
             {
 
-                customerHistory = _customerHistoryService.Get().Where(x => x.CustomerDocument == billClosureOrder.CustumerDocument && x.CompanyId == billClosureOrder.CompanyId && x.OnPlace).FirstOrDefault();
+                customerHistory = _customerHistoryService.Get().Where(x => x.CustomerDocument == billClosureOrder.CustomerDocument && x.CompanyId == billClosureOrder.CompanyId && x.OnPlace).FirstOrDefault();
                 if (customerHistory is null)
                     throw new Exception();
                 customerHistory.OnPlace = false;

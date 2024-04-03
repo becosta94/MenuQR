@@ -33,16 +33,16 @@ namespace MenuQR.Infra.Data.Mapping
                    .HasColumnName("Identification")
                    .HasColumnType("varchar(100)");
 
-            builder.Property(prop => prop.QRLink)
+            builder.Property(prop => prop.Link)
                    .IsRequired()
-                   .HasColumnName("QRLink")
+                   .HasColumnName("Link")
                    .HasColumnType("varchar(300)");
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");
 
 
-            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 1, Unique = Guid.Parse("440cdeee-5b8a-462a-96fd-20b24bd82f55"), QRLink = "Teste" });
+            builder.HasData(new Table("Mesa1", 0) { Id = 1, CompanyId = 1, Unique = Guid.Parse("440cdeee-5b8a-462a-96fd-20b24bd82f55"), Link = "https://localhost:44361/1/6/customer/login/" });
 
         }
     }

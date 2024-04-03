@@ -10,7 +10,7 @@ namespace MenuQR.Services.Validators
             RuleFor(c => c.Identification)
                 .NotNull().WithMessage("Por favor insira uma identificação.");
 
-            RuleFor(c => c.QRLink)
+            RuleFor(c => c.Link)
                 .NotNull().WithMessage("Por favor insira um link.");
 
         }

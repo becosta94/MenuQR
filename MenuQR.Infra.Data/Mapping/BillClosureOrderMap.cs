@@ -42,13 +42,20 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("OrderCompleted")
                .HasColumnType("bit");
 
-            builder.Property(prop => prop.CustumerDocument)
+            builder.Property(prop => prop.CustomerDocument)
                .IsRequired()
-               .HasColumnName("CustumerDocument")
+               .HasColumnName("CustomerDocument")
                .HasColumnType("varchar(50)");
 
             builder.HasIndex(prop => prop.CompanyId)
                 .HasDatabaseName("IX_Order_Company");
+
+            builder.HasOne(prop => prop.Customer)
+                .WithMany()
+                .HasForeignKey(prop => prop.CustomerDocument);
+
+            builder.HasOne(prop => prop.Table)
+                .WithMany();
         }
     }
 }

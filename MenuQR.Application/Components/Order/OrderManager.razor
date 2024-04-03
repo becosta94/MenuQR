@@ -108,19 +108,19 @@ else
             {
                 <tr>
                     <td class="align-middle">@billClosureOrder.Id</td>
-                    <td class="align-middle">@billClosureOrder.TableId</td>
-                    <td class="align-middle">@billClosureOrder.CustumerDocument</td>
-                    <td class="align-middle">@billClosureOrder.Value</td>
-                    <td class="align-middle">
-                        @if (billClosureOrder.CloseTotal)
-                        {
-                            <p>Não</p>
-                        }
-                        else
-                        {
-                            <p>Sim</p>
-                        }
-                    </td>
+                    <td class="align-middle">@billClosureOrder.Table.Identification</td>
+                    <td class="align-middle">@billClosureOrder.Customer.Name.Split().First() @billClosureOrder.Customer.Name.Split().Last()</td>
+                    <td class="align-middle">R$ @billClosureOrder.Value.ToString("0.00")</td>
+                    @if (billClosureOrder.CloseTotal)
+                    {
+
+                        <td class="align-middle">Não</td>
+                    }
+                    else
+
+                    {
+                        <td class="align-middle">Sim</td>
+                    }
                     <td class="align-middle">
                         <div class="form-check form-switch">
                             @if (billClosureOrder.OrderCompleted)

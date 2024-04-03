@@ -52,14 +52,14 @@ else
 
                     <div class="d-flex">
                         <div class="p-2">Total Parcial: </div>
-                        <div class="ms-auto p-2">@a.Sum(x => x.Total).ToString("0.00")</div>
+                        <div class="ms-auto p-2">R$ @a.Sum(x => x.Total).ToString("0.00")</div>
                     </div>
                 }
                 <br />
             }
             <div class="d-flex">
                 <div class="p-2">Total Geral: </div>
-                <div class="ms-auto p-2">@_bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
+                <div class="ms-auto p-2">R$ @_bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
             </div>
         }
     </div>
@@ -162,7 +162,7 @@ else
             ErroDTO? contentObjectErro = JsonConvert.DeserializeAnonymousType(content, new ErroDTO());
             if (content is not null && contentObjectBill.Id != 0)
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Conta fechada");
+                await JsRuntime.InvokeVoidAsync("alert", "Conta foi enviada para fechamento, aguarde o garçom para o pagamento.");
                 navigationManager.NavigateTo(_bill.CompanyId.ToString() + "/" + _bill.TableId.ToString() + "/" + configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
             }
             else if (content is not null && !string.IsNullOrEmpty(contentObjectErro.Menssage))

@@ -6,6 +6,6 @@ namespace MenuQR.Domain.DTOs
     {
         public string Identification { get; set; }
         public Guid Unique {  get; set; }
-        public string QRLink { get; set; }
+        public string Link { get; set; }
     }
 }
