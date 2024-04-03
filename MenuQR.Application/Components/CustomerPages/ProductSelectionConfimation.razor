@@ -68,10 +68,24 @@
     }
     private async void Confirm()
     {
-        string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
-        var url = configuration["ApiLinks:OrderCreate"] + $"tableId={_tableId}&customerDocument={customerDocument}";
+        var url = configuration["ApiLinks:BillClosureOrderGet"];
+        string tableId = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
+        string companyId = HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString();
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
+        parameters.Add("tableId", tableId);
+        parameters.Add("companyId", companyId);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        BillClosureOrderDTO billResultObject = JsonConvert.DeserializeObject<BillClosureOrderDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0 && billResultObject.CloseTotal)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Conta fechada.");
+            navigationManager.NavigateTo(companyId + "/" + tableId + "/" + configuration["ApplicationLinks:LoginCustomer"], true);
+            return;
+        }
+        string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
+        url = configuration["ApiLinks:OrderCreate"] + $"tableId={_tableId}&customerDocument={customerDocument}";
+        parameters.Clear();
+        commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
         if (commandResult.Sucess)
             navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
         else

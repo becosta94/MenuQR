@@ -8,6 +8,8 @@ namespace MenuQR.Services.Services
     {
         public DomainDTOMapping()
         {
+            CreateMap<BillClosureOrder, BillClosureOrderDTO>().ForMember(x => x.Table, opt => opt.MapFrom(y => y.Table)).ForMember(x => x.Customer, opt => opt.MapFrom(y => y.Customer));
+            CreateMap<BillClosureOrderDTO, BillClosureOrder>();
             CreateMap<Bill, BillDTO>().ForMember(x => x.Table, opt => opt.MapFrom(y => y.Table));
             CreateMap<BillDTO, Bill>();
             CreateMap<Customer, CustomerDTO>();

@@ -26,7 +26,7 @@ namespace MenuQR.Services.Services
             _customerHistoryService = costuerHistoryService;
             _validator = validator;
         }
-        public object Get(int tableId, int companyId, bool closeTotal, string custmerDocument, bool customerRequest)
+        public object GetOpen(int tableId, int companyId, bool closeTotal, string custmerDocument, bool customerRequest)
         {
             Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             List<Order> orders = new List<Order>();
@@ -99,6 +99,38 @@ namespace MenuQR.Services.Services
                 else
                     return null;
             }
+
+        }
+
+        public object GetClose(int billId, int companyId)
+        {
+            Bill? bill = _billService.GetByCompoundKey(new object[] { billId, companyId });
+            List<Order> orders = new List<Order>();
+            List<CustomerHistory> customerHistoryList = _customerHistoryService.Get().Where(x => !x.OnPlace &&
+                                                                                   x.BillId == bill.Id &&
+                                                                                   x.BillCompanyId == bill.CompanyId &&
+                                                                                   x.CompanyId == bill.CompanyId).ToList();
+            foreach (CustomerHistory customerHistory in customerHistoryList)
+            {
+                orders = _orderService.Get().Where(x => x.TableId == bill.TableId && x.CompanyId == bill.CompanyId && customerHistoryList.Any(y => y.Id == x.CustomerHistoryId && y.CompanyId == x.CustomerHistoryCompanyId && !y.OnPlace)).ToList();
+            }
+            if (orders.Where(x => !x.Deliverd).Count() > 0)
+                return new ErroDTO("Existem pedidos em aberto.");
+            orders.ForEach(x => x.Customer = _customerService.Get().Where(y => y.Document == x.CustomerDocument).FirstOrDefault());
+            List<OrderProduct> orderProducts = new List<OrderProduct>();
+            if (bill is null)
+                return null;
+            foreach (Order order in orders)
+                orderProducts.AddRange(_orderProductService.Get().Where(x => x.OrderId == order.Id && x.CompanyId == order.CompanyId && x.BillId == bill.Id && x.BillCompanyId == bill.CompanyId).ToList());
+            ICollection<IGrouping<Customer, OrderProduct>> orderProducts1 = new HashSet<IGrouping<Customer, OrderProduct>>();
+            orderProducts1 =  orderProducts.GroupBy(x => x.Order.Customer).ToList();
+            foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
+                bill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => !x.Order.CustomerHistory.OnPlace).Sum(x => x.Total));
+            if (bill is not null)
+                return bill;
+            else
+                return null;
+
         }
     }
 }

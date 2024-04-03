@@ -187,6 +187,7 @@ else
     public async void CompleteBillOrder(BillClosureOrderDTO billClosureOrder)
     {
         var url = configuration["ApiLinks:CloseBill"];
+        billClosureOrder.CustumerDocument = billClosureOrder.Customer.Document;
         GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<BillClosureOrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), billClosureOrder);
         if (commandResult.Sucess)
         {

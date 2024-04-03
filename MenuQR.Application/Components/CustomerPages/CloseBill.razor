@@ -97,7 +97,7 @@ else
         _customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
         _tableId = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
         _companyId = HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString();
-        var url = configuration["ApiLinks:BillGet"];
+        var url = configuration["ApiLinks:BillGetOpen"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", _tableId);
         parameters.Add("companyId", _companyId);
@@ -116,11 +116,15 @@ else
         ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
         if (commandResult.Sucess && billResultObject.Id != 0)
         {
-            url = configuration["ApiLinks:CustomerGetById"];
+            url = configuration["ApiLinks:CustomerGet"];
             _bill = billResultObject;
             foreach (var a in _bill.OrderProducts)
             {
-                commandResult = await ApiService.GetById<CustomerDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), a.Order.CustomerDocument);
+                parameters.Clear();
+                parameters.Add("document", _customerDocument);
+                parameters.Add("companyId", _bill.CompanyId);
+                parameters.Add("tableId", _bill.Table.Id);
+                commandResult = await ApiService.GetWithParameters<CustomerDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
                 if (commandResult.Sucess && commandResult.Data is CustomerDTO customer)
                 {
                     a.Order.CustomerDTO = customer;
@@ -144,32 +148,31 @@ else
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", _tableId);
         parameters.Add("companyId", _companyId);
-        if (CloseTotal)
-        {
-            parameters.Add("closeTotal", "true");
-            parameters.Add("customerDocument", 0);
-        }
-        else
-        {
-            parameters.Add("closeTotal", "false");
             parameters.Add("customerDocument", _customerDocument);
-        }
-        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
-        if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
+        if (CloseTotal)
+            parameters.Add("closeTotal", "true");
+        else
+            parameters.Add("closeTotal", "false");
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<object>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        BillDTO billResultObject = JsonConvert.DeserializeObject<BillDTO>(commandResult.Data.ToString());
+        ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0)
         {
-            string? content = response.Content.ReadAsStringAsync().Result;
-            BillDTO? contentObjectBill = JsonConvert.DeserializeAnonymousType(content, new BillDTO());
-            ErroDTO? contentObjectErro = JsonConvert.DeserializeAnonymousType(content, new ErroDTO());
-            if (content is not null && contentObjectBill.Id != 0)
+            url = configuration["ApiLinks:CustomerGetById"];
+            _bill = billResultObject;
+            foreach (var a in _bill.OrderProducts)
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Conta foi enviada para fechamento, aguarde o garçom para o pagamento.");
-                navigationManager.NavigateTo(_bill.CompanyId.ToString() + "/" + _bill.TableId.ToString() + "/" + configuration["ApplicationLinks:LoginCustomer"].ToString(), true);
+                commandResult = await ApiService.GetById<CustomerDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), a.Order.CustomerDocument);
+                if (commandResult.Sucess && commandResult.Data is CustomerDTO customer)
+                {
+                    a.Order.CustomerDTO = customer;
+                    _customersOrders = _bill.OrderProducts.GroupBy(x => x.Order.CustomerDocument);
+                }
             }
-            else if (content is not null && !string.IsNullOrEmpty(contentObjectErro.Menssage))
-                await JsRuntime.InvokeVoidAsync("alert", contentObjectErro.Menssage);
-            else
-                await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+            return;
         }
+        if (commandResult.Sucess && !string.IsNullOrEmpty(erroResultObject.Menssage))
+            openOrder = true;
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }

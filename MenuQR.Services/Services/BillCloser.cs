@@ -58,7 +58,7 @@ namespace MenuQR.Services.Services
         public object Close(BillClosureOrder billClosureOrder)
         {
             CustomerHistory? customerHistory = null;
-            Bill? bill = _billValueGetter.Get(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, false) as Bill;
+            Bill? bill = _billValueGetter.GetOpen(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, false) as Bill;
             if (billClosureOrder.CloseTotal)
             {
                 foreach (var custumerAndTotal in bill.CustomersAndTotals)

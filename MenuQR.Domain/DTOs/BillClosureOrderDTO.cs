@@ -1,6 +1,8 @@
-﻿namespace MenuQR.Application.Entities.DTOs
+﻿using MenuQR.Domain.Entities;
+
+namespace MenuQR.Domain.DTOs
 {
-    public class BillClosureOrderDTO : BaseDTOCompanyId
+    public class BillClosureOrderDTO : BaseEntityCompanyId
     {
         public int TableId { get; set; }
         public int CompanyId { get; set; }

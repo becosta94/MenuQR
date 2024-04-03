@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MenuQR.Domain.DTOs;
 using MenuQR.Domain.Entities;
+using MenuQR.Infra.Data.Context;
 using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using Microsoft.AspNetCore.Authorization;
@@ -26,14 +27,20 @@ namespace MenuQR.Api.Controllers
         }
         [HttpGet]
         [Route("get")]
-        public IActionResult Get([FromServices] IBaseService<Customer> customerService, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IMapper mapper, string document, int companyId)
+        public IActionResult Get([FromServices] IBaseService<Customer> customerService, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IMapper mapper, [FromServices] SqlContext context, string document, int companyId, int tableId)
         {
             Customer? customer = customerService.Get().Where(x => x.Document == document).FirstOrDefault();
             if (customer == null)
                 return Ok(new CustomerDTO());
             CustomerHistory customerHistory = customerHistoryService.Get().Where(x => x.CustomerDocument == customer.Document && x.CompanyId == companyId).LastOrDefault();
             if (customerHistory is not null && customerHistory.OnPlace)
-                return Ok(new ErroDTO("Você possui uma conta aberta em outra mesa."));
+            {
+                context.Entry(customerHistory).Reference(x => x.Bill).Load();
+                if (customerHistory.Bill.TableId != tableId)
+                    return Ok(new ErroDTO("Você possui uma conta aberta em outra mesa."));
+                else
+                    return Ok(mapper.Map<CustomerDTO>(customer));
+            }
             else if (customer is not null)
                 return Ok(mapper.Map<CustomerDTO>(customer));
             else

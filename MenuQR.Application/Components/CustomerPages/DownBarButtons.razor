@@ -49,10 +49,10 @@
     }
     private void NavigateToClosePartial()
     {
-        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + configuration["ApplicationLinks:BillClose"] + false);
+        navigationManager.NavigateTo(configuration["ApplicationLinks:BaseApplicationLink"] + "/" + CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:BillClose"] + false);
     }
     private void NavigateToCloseTotal()
     {
-        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + configuration["ApplicationLinks:BillClose"] + true);
+        navigationManager.NavigateTo(configuration["ApplicationLinks:BaseApplicationLink"] + "/" + CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:BillClose"] + true);
     }
 }

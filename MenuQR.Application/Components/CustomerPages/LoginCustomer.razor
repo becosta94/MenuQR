@@ -72,6 +72,7 @@
         parameters.Clear();
         parameters.Add("document", Model.Document);
         parameters.Add("companyId", CompanyId);
+        parameters.Add("tableId", TableId);
         commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
         CustomerDTO custumer = JsonConvert.DeserializeObject<CustomerDTO>(commandResult.Data.ToString());
         ErroDTO erro = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());

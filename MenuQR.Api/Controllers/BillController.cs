@@ -44,8 +44,9 @@ namespace MenuQR.Api.Controllers
         [HttpPut]
         [Route("close")]
         [Authorize]
-        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, BillClosureOrder billClosureOrder)
+        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, BillClosureOrderDTO billClosureOrderDTO, IMapper mapper)
         {
+            BillClosureOrder billClosureOrder = mapper.Map<BillClosureOrder>(billClosureOrderDTO);
             object returnedObjectBill = billCloser.Close(billClosureOrder);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
                 return Ok(bill);
@@ -57,10 +58,10 @@ namespace MenuQR.Api.Controllers
 
         [HttpPost]
         [Route("billclosureorder")]
-        [Authorize]
+        //[Authorize]
         public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
-            object returnedBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument, true);
+            object returnedBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
             if (returnedBill is not null && returnedBill is Bill bill)
             {
 
@@ -109,11 +110,28 @@ namespace MenuQR.Api.Controllers
 
 
         [HttpGet]
-        [Route("get")]
-        [Authorize]
-        public IActionResult Get([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
+        [Route("getopen")]
+        //[Authorize]
+        public IActionResult GetOpen([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
-            object returnedObjectBill = billValueGetter.Get(tableId, companyId, closeTotal, customerDocument, true);
+            object returnedObjectBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
+            if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
+            {
+                bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
+                bill.OrderProducts.ToList().ForEach(x => x.Product.Image = string.Empty);
+                return Ok(bill);
+            }
+            else if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
+                return Ok(erro);
+            else
+                return BadRequest("Não foi possível gerar a conta");
+        }
+        [HttpGet]
+        [Route("getclose")]
+        //[Authorize]
+        public IActionResult GetClose([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int billId, int companyId)
+        {
+            object returnedObjectBill = billValueGetter.GetClose(billId, companyId);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
             {
                 bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
