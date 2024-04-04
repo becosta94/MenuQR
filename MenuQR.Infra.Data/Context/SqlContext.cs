@@ -21,6 +21,7 @@ namespace MenuQR.Infra.Data.Context
         public virtual DbSet<OrderProduct> OrderProducts { get; set; }
         public virtual DbSet<Table> Tables { get; set; }
         public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<ProductOffList> ProductsOffList { get; set; }
         public virtual DbSet<ProductType> ProductsType { get; set; }
         public SqlContext(DbContextOptions<SqlContext> options, IHttpContextAccessor httpContext) : base(options)
         {
@@ -38,6 +39,7 @@ namespace MenuQR.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new OrderMap());
             modelBuilder.ApplyConfiguration(new OrderProductMap());
             modelBuilder.ApplyConfiguration(new ProductMap());
+            modelBuilder.ApplyConfiguration(new ProductOffListMap());
             modelBuilder.ApplyConfiguration(new ProductTypeMap());
             modelBuilder.ApplyConfiguration(new TableMap());
         }

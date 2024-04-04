@@ -12,14 +12,12 @@ namespace MenuQR.Services.Services.Factories
         private readonly IMapper _mapper;
         private readonly IBaseService<Product> _productBaseService;
         private readonly IValidator _validator;
-
         public ProductFactory(IMapper mapper, IBaseService<Product> productBaseService, IValidator validator)
         {
             _mapper = mapper;
             _productBaseService = productBaseService;
             _validator = validator;
         }
-
         public Product Make(ProductDTO productDTO)
         {
             Product? product = _mapper.Map<Product>(productDTO);

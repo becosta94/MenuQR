@@ -20,6 +20,8 @@ namespace MenuQR.Services.Services
             CreateMap<ProductDTO, Product>();            
             CreateMap<ProductType, ProductTypeDTO>();
             CreateMap<ProductTypeDTO, ProductType>();
+            CreateMap<ProductOffList, ProductOffListDTO>();
+            CreateMap<ProductOffListDTO, ProductOffList>();
             CreateMap<Order, OrderDTO>().ForMember(x => x.Products, opt => opt.MapFrom(y => y.OrderProducts));
             CreateMap<OrderDTO, Order>();
             CreateMap<OrderProduct, OrderProductDTO>().ForMember(x => x.Product, opt => opt.MapFrom(y => y.Product));

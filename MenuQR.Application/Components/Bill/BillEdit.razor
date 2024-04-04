@@ -4,12 +4,15 @@
 @inject StateContainer stateContainer
 @inject IApiService ApiService
 @inject IJSRuntime JsRuntime
-
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
 <h3>Conta</h3>
 
 <div>
     @if (Bill != null)
     {
+        int i = 0;
+        string formName = "addproduct";
         @foreach (var a in _customersOrders)
         {
             <b class="px-5">@a.Where(x => x.Order.CustomerDocument == a.Key).Select(x => x.Order.CustomerDTO.Name).First()</b>
@@ -20,33 +23,96 @@
                     <div class="p-2">@b.First().Product.Name</div>
                     <div class="ms-auto p-2">R$ @b.First().Product.Price.ToString("0.00")</div>
                 </div>
-
             }
+            @foreach (var productOffList in Bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key))
+            {
+                <div class="d-flex px-40">
+                    <div class="p-2">@productOffList.Amount x</div>
+                    <div class="p-2">@productOffList.Name</div>
+                    <div class="ms-auto p-2">R$ @productOffList.Price.ToString("0.00")</div>
+                </div>
+            }
+            <EditForm OnValidSubmit="(() => OnSubmitProduct(a.Key))" Model="@OrderProduct" FormName=@string.Concat(formName, i.ToString())>
+                <div class="input-group input-group-sm d-flex px-40">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">Adicionar Produtos</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Quantidade</span>
+                    </div>
+                    <InputNumber @bind-Value="OrderProduct.Amount" class="form-control" style="max-width: 60%" />
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Produto</span>
+                    </div>
+                    <InputSelect @bind-Value="OrderProduct.ProductId" class="form-control" style="max-width: 60%">
+                        <option selected value="@(new ProductDTO())"></option>
+                        @foreach (ProductDTO product in Products)
+                        {
+                            <option value="@product.Id">@product.Name</option>
+                        }
+                    </InputSelect>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Adicionar</button>
+                    </div>
+                </div>
+            </EditForm>
+            <EditForm OnValidSubmit="(() => OnSubmitProductOffList(a.Key))" Model="@ProductOffList" FormName="addProductOffList">
+                <div class="input-group input-group-sm mb-3 d-flex px-40">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">Adicionar Valores</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Quantidade:</span>
+                    </div>
+                    <InputNumber @bind-Value="ProductOffList.Amount" class="form-control" style="max-width: 60%" />
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Preço:</span>
+                    </div>
+                    <InputNumber @bind-Value="ProductOffList.Price" class="form-control" style="max-width: 60%" />
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-sm">Descrição:</span>
+                    </div>
+                    <InputText @bind-Value="ProductOffList.Name" class="form-control" style="max-width: 60%" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Adicionar</button>
+                    </div>
+                </div>
+            </EditForm>
             <div class="d-flex px-40">
                 <div class="p-2">Total Parcial: </div>
                 <div class="ms-auto p-2">R$ @a.Sum(x => x.Total).ToString("0.00")</div>
             </div>
+            i++;
         }
         <div class="d-flex px-40">
             <div class="p-2">Total Geral: </div>
             <div class="ms-auto p-2">R$ @Bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
         </div>
     }
+    else
+    {
+        <p>Conta sem pedidos</p>
+    }
 </div>
-
 
 @code {
     BillDTO Bill = new BillDTO();
     [Parameter]
     public int SetHashCode { get; set; }
+    public OrderProductCreateDTO OrderProduct { get; set; } = new OrderProductCreateDTO();
+    public ProductOffListDTO ProductOffList { get; set; } = new ProductOffListDTO();
+    List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
     private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
     protected override async Task OnInitializedAsync()
     {
         Bill = (BillDTO)stateContainer.ObjectTunnel[SetHashCode];
+        OrderProduct.Product = new ProductDTO();
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        var url = configuration["ApiLinks:BillGetClose"];
-        parameters.Add("billId", Bill.Id);
+        var url = configuration["ApiLinks:BillGetOpen"];
+        parameters.Add("tableId", Bill.TableId);
         parameters.Add("companyId", Bill.CompanyId);
+        parameters.Add("closeTotal", true.ToString());
+        parameters.Add("customerDocument", Bill.OrderProducts.First().Order.CustomerDocument);
         GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         BillDTO billResultObject = JsonConvert.DeserializeObject<BillDTO>(commandResult.Data.ToString());
         ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
@@ -67,9 +133,43 @@
                     _customersOrders = Bill.OrderProducts.GroupBy(x => x.Order.CustomerDocument);
                 }
             }
-            return;
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        url = configuration["ApiLinks:ProductGetAll"];
+        commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Bill.CompanyId);
+        if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
+            Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
+        await Task.Delay(1);
+    }
+    private async void OnSubmitProduct(string customerDocument)
+    {
+        OrderProduct.Product = Products.Where(x => x.Id == OrderProduct.ProductId).FirstOrDefault();
+        OrderProduct.CompanyId = Bill.CompanyId;
+        var url = configuration["ApiLinks:OrderCreateByCompany"] + $"tableId={Bill.TableId}&customerDocument={customerDocument}";
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<OrderProductCreateDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProduct);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Ok.");
+            navigationManager.Refresh(true);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
+    }
+    private async void OnSubmitProductOffList(string customerDocument)
+    {
+        ProductOffList.BillId = Bill.Id;
+        ProductOffList.BillCompanyId = Bill.CompanyId;
+        ProductOffList.CompanyId = Bill.CompanyId;
+        ProductOffList.CustomerDocument = customerDocument;
+        var url = configuration["ApiLinks:ProductOffListCreate"] /* + $"customerDocument={customerDocument} "*/;
+        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductOffListDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), ProductOffList);
+        if (commandResult.Sucess)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Ok.");
+            navigationManager.Refresh(true);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
     }
 }

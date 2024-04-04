@@ -19,6 +19,7 @@ namespace MenuQR.Api
             builder.AddTransient<IBaseRepository<Order>, BaseRepository<Order>>();
             builder.AddTransient<IBaseRepository<OrderProduct>, BaseRepository<OrderProduct>>();
             builder.AddTransient<IBaseRepository<Product>, BaseRepository<Product>>();
+            builder.AddTransient<IBaseRepository<ProductOffList>, BaseRepository<ProductOffList>>();
             builder.AddTransient<IBaseRepository<ProductType>, BaseRepository<ProductType>>();
             builder.AddTransient<IBaseRepository<Table>, BaseRepository<Table>>();
 
@@ -30,6 +31,7 @@ namespace MenuQR.Api
             builder.AddTransient<IBaseService<Order>, BaseService<Order>>();
             builder.AddTransient<IBaseService<OrderProduct>, BaseService<OrderProduct>>();
             builder.AddTransient<IBaseService<Product>, BaseService<Product>>();
+            builder.AddTransient<IBaseService<ProductOffList>, BaseService<ProductOffList>>();
             builder.AddTransient<IBaseService<ProductType>, BaseService<ProductType>>();
             builder.AddTransient<IBaseService<Table>, BaseService<Table>>();
             builder.AddTransient<ICpfValidatorService, CpfValidatorService>();
@@ -43,6 +45,7 @@ namespace MenuQR.Api
             builder.AddTransient<IOrderFactory, OrderFactory>();
             builder.AddTransient<IOrderProductFactory, OrderProductFactory>();
             builder.AddTransient<IProductFactory, ProductFactory>();
+            builder.AddTransient<IProductOffListFactory, ProductOffListFactory>();
             builder.AddTransient<IProductTypeFactory, ProductTypeFactory>();
             builder.AddTransient<ITableFactory, TableFactory>();
             builder.AddTransient<IValidator, Validator>();

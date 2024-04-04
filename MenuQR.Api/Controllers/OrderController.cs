@@ -17,9 +17,9 @@ namespace MenuQR.Api.Controllers
     public class OrderController : ControllerBase
     {
         [HttpPost]
-        [Route("create")]
+        [Route("createbycustomer")]
         [Authorize]
-        public IActionResult Create([FromBody] ICollection<OrderProductCreateDTO> listOrderProductReceived,
+        public IActionResult CreateByCustomer([FromBody] ICollection<OrderProductCreateDTO> listOrderProductReceived,
                                     [FromServices] IOrderFactory newOrderFactory,
                                     [FromServices] IOrderProductFactory newOrderProductFactory,
                                     [FromServices] IBaseService<Order> orderService,
@@ -29,7 +29,7 @@ namespace MenuQR.Api.Controllers
         {
             try
             {
-                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, listOrderProductReceived.FirstOrDefault().CompanyId);
+                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, listOrderProductReceived.FirstOrDefault().CompanyId, true);
                 try
                 {
                     if (newOrder is not null)
@@ -45,6 +45,45 @@ namespace MenuQR.Api.Controllers
                 catch
                 {
                     orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId  });
+                    throw new Exception("Problema ao registar OrderProduct");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost]
+        [Route("createbycompany")]
+        [Authorize]
+        public IActionResult CreateByCompany([FromBody] OrderProductCreateDTO orderProductReceived,
+                            [FromServices] IOrderFactory newOrderFactory,
+                            [FromServices] IOrderProductFactory newOrderProductFactory,
+                            [FromServices] IBaseService<Order> orderService,
+                            [FromServices] IMapper mapper,
+                            int tableId,
+                            string customerDocument)
+        {
+            try
+            {
+                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, orderProductReceived.CompanyId, false);
+                try
+                {
+                    if (newOrder is not null)
+                    {
+                        List<OrderProductCreateDTO> orderProductDTOs = new List<OrderProductCreateDTO>();
+                        orderProductDTOs.Add(orderProductReceived);
+                        ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, orderProductDTOs);
+                        if (orderProducts is not null)
+                            return Ok(mapper.Map<OrderDTO>(newOrder));
+                        return BadRequest("Pedido não realizado");
+                    }
+                    else
+                        return BadRequest("Pedido não realizado");
+                }
+                catch
+                {
+                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId });
                     throw new Exception("Problema ao registar OrderProduct");
                 }
             }

@@ -47,6 +47,14 @@ else
                         <div class="ms-auto p-2">R$ @b.First().Product.Price.ToString("0.00")</div>
                     </div>
                 }
+                @foreach (var b in _bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key).ToList())
+                {
+                    <div class="d-flex">
+                        <div class="p-2">@b.Amount x</div>
+                        <div class="p-2">@b.Name</div>
+                        <div class="ms-auto p-2">R$ @b.Price.ToString("0.00")</div>
+                    </div>
+                }
                 if (CloseTotal)
                 {
 
@@ -148,7 +156,7 @@ else
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", _tableId);
         parameters.Add("companyId", _companyId);
-            parameters.Add("customerDocument", _customerDocument);
+        parameters.Add("customerDocument", _customerDocument);
         if (CloseTotal)
             parameters.Add("closeTotal", "true");
         else

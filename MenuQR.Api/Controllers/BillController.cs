@@ -21,6 +21,8 @@ namespace MenuQR.Api.Controllers
         {
             List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
             bills.ForEach(x => context.Entry(x).Reference(x => x.Table).Load());
+            bills.ForEach(x => context.Entry(x).Collection(x => x.OrderProducts).Load());
+            bills.ForEach(x => x.OrderProducts.ForEach(y => context.Entry(y).Reference(y => y.Order).Load()));
             if (bills is not null)
             {
                 List<BillDTO> billDTO = new List<BillDTO>();
@@ -59,7 +61,7 @@ namespace MenuQR.Api.Controllers
         [HttpPost]
         [Route("billclosureorder")]
         //[Authorize]
-        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
+        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
             object returnedBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
             if (returnedBill is not null && returnedBill is Bill bill)
@@ -111,15 +113,15 @@ namespace MenuQR.Api.Controllers
 
         [HttpGet]
         [Route("getopen")]
-        //[Authorize]
-        public IActionResult GetOpen([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int tableId, int companyId, bool closeTotal, string customerDocument)
+        [Authorize]
+        public IActionResult GetOpen([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, [FromServices] IMapper mapper,int tableId, int companyId, bool closeTotal, string customerDocument)
         {
             object returnedObjectBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
             {
                 bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
                 bill.OrderProducts.ToList().ForEach(x => x.Product.Image = string.Empty);
-                return Ok(bill);
+                return Ok(mapper.Map<BillDTO>(bill));
             }
             else if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
                 return Ok(erro);

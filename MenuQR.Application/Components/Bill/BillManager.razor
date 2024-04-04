@@ -144,10 +144,14 @@ else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 
-    public void ShowBill(BillDTO bill)
+    public async void ShowBill(BillDTO bill)
     {
-        stateContainer.ObjectTunnel.Add(bill.GetHashCode(), bill);
-        navigationManager.NavigateTo(configuration["BaseApplicationLink"].ToString() + configuration["ApplicationLinks:BillEdit"].ToString() + bill.GetHashCode(), true);
-
+        if (bill.OrderProducts.Count != 0)
+        {
+            stateContainer.ObjectTunnel.Add(bill.GetHashCode(), bill);
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"].ToString() + configuration["ApplicationLinks:BillEdit"].ToString() + bill.GetHashCode(), true);
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Conta sem pedidos");
     }
 }

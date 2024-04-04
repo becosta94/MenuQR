@@ -83,8 +83,7 @@
             return;
         }
         string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
-        url = configuration["ApiLinks:OrderCreate"] + $"tableId={_tableId}&customerDocument={customerDocument}";
-        parameters.Clear();
+        url = configuration["ApiLinks:OrderCreateByCustomer"] + $"tableId={_tableId}&customerDocument={customerDocument}";
         commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
         if (commandResult.Sucess)
             navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
@@ -94,6 +93,7 @@
     private void Cancel()
     {
         navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
-
     }
+
+
 }

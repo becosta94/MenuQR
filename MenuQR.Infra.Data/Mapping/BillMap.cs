@@ -60,6 +60,9 @@ namespace MenuQR.Infra.Data.Mapping
             builder.HasMany(prop => prop.OrderProducts)
                 .WithOne(prop => prop.Bill);
 
+            builder.HasMany(prop => prop.ProductOffLists)
+                .WithOne(prop => prop.Bill);
+
 
         }
     }

@@ -12,6 +12,7 @@ namespace MenuQR.Domain.Entities
         public DateTime ClosingDate { get; set; }
         public virtual Table Table { get; set; }
         public virtual List<OrderProduct> OrderProducts { get; set; } = null!;
+        public virtual List<ProductOffList> ProductOffLists {  get; set; } = null!; 
 
         public Bill()
         {
@@ -34,7 +35,10 @@ namespace MenuQR.Domain.Entities
 
         public void AddNewCustomerTotal(Customer customer, double total)
         {
-            CustomersAndTotals.Add(customer, total);
+            if (CustomersAndTotals.ContainsKey(customer))
+                CustomersAndTotals[customer] += total;
+            else
+                CustomersAndTotals.Add(customer, total);
         }
 
         public void SumTotal()
