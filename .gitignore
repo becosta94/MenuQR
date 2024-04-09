@@ -153,3 +153,12 @@
 /MenuQR.Api/MenuQR.Api.csproj.user
 /MenuQR.Application/MenuQR.Application.csproj.user
 /.vs/MenuQR/config/applicationhost.config
+/MenuQR.Api/obj/Debug/net8.0/MenuQR.Api.MvcApplicationPartsAssemblyInfo.cs
+/MenuQR.Application/Data/Migrations/20240405172836_migra4.cs
+/MenuQR.Application/Data/Migrations/20240405172836_migra4.Designer.cs
+/MenuQR.Application/Data/Migrations/20240405173129_migra1.cs
+/MenuQR.Application/Data/Migrations/20240405173129_migra1.Designer.cs
+/MenuQR.Application/Data/Migrations/ApplicationDbContextModelSnapshot.cs
+/MenuQR.Infra.Data/Migrations/20240409154349_migra1.cs
+/MenuQR.Infra.Data/Migrations/20240409154349_migra1.Designer.cs
+/MenuQR.Infra.Data/Migrations/SqlContextModelSnapshot.cs
