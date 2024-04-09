@@ -29,6 +29,7 @@ namespace MenuQR.Api.Controllers
         [Route("get")]
         public IActionResult Get([FromServices] IBaseService<Customer> customerService, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IMapper mapper, [FromServices] SqlContext context, string document, int companyId, int tableId)
         {
+            document = document.Replace("-", "").Replace(".", "");
             Customer? customer = customerService.Get().Where(x => x.Document == document).FirstOrDefault();
             if (customer == null)
                 return Ok(new CustomerDTO());

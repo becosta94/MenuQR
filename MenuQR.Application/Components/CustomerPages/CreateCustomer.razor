@@ -1,4 +1,4 @@
-﻿@page "/{CompanyId:int}/{TableId:int}/customer/create/{CPF:long}"
+﻿@page "/{CompanyId:int}/{TableId:int}/customer/create/{SetHashCode:int}"
 @using MenuQR.Application.Data
 @using Microsoft.AspNetCore.Identity
 @inject IConfiguration configuration
@@ -15,12 +15,13 @@
     <ValidationSummary />
     <div class="container">
         <div class="card card-container">
-            <img id="profile-img" class="profile-img-card" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" />
             <p id="profile-name" class="profile-name-card">Insira o nome completo.</p>
             <div class="div-signin" id="div-signin">
                 <span id="reauth-cpf" class="reauth"></span>
-                <InputText @bind-Value="Model.Document" type="text" id="inputCPFS" class="form-control" placeholder="CPF" required autofocus />
-                <span id="reauth-cpf" class="reauth"></span>
+                <fieldset disabled>
+                    <InputText @bind-Value="Model.Document" type="text" id="inputCPFS" class="form-control" placeholder="CPF" required autofocus />
+                    <span id="reauth-cpf" class="reauth"></span>
+                </fieldset>
                 <InputText @bind-Value="Model.Name" type="text" id="inputName" class="form-control" placeholder="Nome" required autofocus />
                 <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Entrar</button>
             </div>
@@ -31,14 +32,14 @@
 @code {
     public CustomerDTO Model { get; set; } = new CustomerDTO();
     [Parameter]
-    public long CPF { get; set; }
+    public int SetHashCode { get; set; }
     [Parameter]
     public int CompanyId { get; set; }
     [Parameter]
     public int TableId { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        Model.Document = CPF.ToString();
+        Model = (CustomerDTO)stateContainer.ObjectTunnel[SetHashCode];
     }
     public async void OnSubmit()
     {

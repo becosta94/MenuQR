@@ -23,7 +23,14 @@
         </div>
     </div>
 </EditForm>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var $seuCampoCpf = $("#inputCPF");
+        $seuCampoCpf.mask('000.000.000-00', { reverse: false });
+    });
+</script>
 @code {
     [CascadingParameter]
     private HttpContext HttpContext { get; set; }
@@ -51,7 +58,6 @@
             Company = company;
         else
             navigationManager.NavigateTo("/Error");
-
     }
     public async void OnSubmit()
     {
@@ -74,16 +80,19 @@
         parameters.Add("companyId", CompanyId);
         parameters.Add("tableId", TableId);
         commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
-        CustomerDTO custumer = JsonConvert.DeserializeObject<CustomerDTO>(commandResult.Data.ToString());
+        CustomerDTO customer = JsonConvert.DeserializeObject<CustomerDTO>(commandResult.Data.ToString());
         ErroDTO erro = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
         if (commandResult.Sucess && !string.IsNullOrEmpty(erro.Menssage))
             await JsRuntime.InvokeVoidAsync("alert", erro.Menssage);
-        else if (commandResult.Sucess && custumer.Id != 0)
+        else if (commandResult.Sucess && customer.Id != 0)
         {
             stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
             navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
         else
-            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerCreate"] +   +long.Parse(Model.Document));
+        {
+            stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerCreate"] + Model.GetHashCode());
+        }
     }
 }

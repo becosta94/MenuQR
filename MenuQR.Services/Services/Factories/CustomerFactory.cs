@@ -27,6 +27,7 @@ namespace MenuQR.Services.Services.Factories
         }
         public object Make(CustomerDTO customerDTO)
         {
+            customerDTO.Document = customerDTO.Document.Replace("-", "").Replace(".","");
             Customer? exitingcustomer = _customerBaseService.Get().Where(x => x.Document == customerDTO.Document).FirstOrDefault();
             if (exitingcustomer is not null)
                 return new ErroDTO("Número de CPF já cadastrado");
