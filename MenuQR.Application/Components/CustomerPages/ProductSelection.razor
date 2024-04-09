@@ -1,4 +1,6 @@
 ﻿@page "/{CompanyName}/{TableGuid:guid}/product/selection"
+
+
 @inject IConfiguration configuration
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
@@ -8,8 +10,8 @@
 @inject StateContainer stateContainer
 @inject NavigationManager navigationManager
 @inject IHttpContextAccessor HttpContextAcessor
-
-
+@inject IModalServices modalServices
+<MenuQR.Application.Components.Utilities.BlazoredModal />
 @if (Products.Count == 0) { }
 else
 {
@@ -20,28 +22,42 @@ else
         }
     </div>
     <div style="padding-top: 60px"></div>
-    <EditForm OnValidSubmit="@HandleValidSubmit" Model="@OrderProducts" FormName="addOrder">
+    <EditForm OnValidSubmit="@HandleValidSubmit" Model="@OrderProducts" FormName="addOrder" class="container">
         <DataAnnotationsValidator />
         <ValidationSummary />
         @foreach (ProductDTO product in Products)
         {
-
-            <div class="justify-content-center border border-light rounded mt-60 mb-2 px-3 @string.Concat("typeProduct", product.TypeId)">
-                <h2 class="col-sm">@product.Name</h2>
-                <div class="row justify-content-around mb-1">
-                    <p class="col-6">@product.Description</p>
-                    <div class="col-6 d-flex justify-content-end">
-                        <img height="100" width="105" src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="border border-dark">
+            <div class="justify-content-center shadow-sm rounded mt-60 mb-2 @string.Concat("typeProduct", product.ProductTypeId)">
+                <div class="row">
+                    <div class="col-4 ">
+                        <img height="100" width="115" src="@string.Format("data:image/png;base64, {0}", product.Image)" alt="Product 1" class="rounded">
                     </div>
-                </div>
-                <div class="mb-2 row justify-content-around">
-                    <div class="col-6 d-flex align-items-center ">
-                        <p class="mb-0">R$ @product.Price.ToString("0.00")</p>
-                    </div>
-                    <div class="col-6 d-flex justify-content-end align-items-center">
-                        <p @onclick="() => ChangeAmount(false, product)" class="col-3 text-secondary mb-0 d-flex justify-content-center" style="font-size: 20px">-</p>
-                        <p id="@string.Concat("amount", product.Id)" class="mb-0 me-1 ms-1">0</p>
-                        <p @onclick="() => ChangeAmount(true, product)" class="col-3 text-danger mb-0 d-flex justify-content-center" style="font-size: 20px">+</p>
+                    <div class="col-8 d-flex flex-column">
+                        <h2 class="col-sm">@product.Name</h2>
+                        <div>
+                            <p class="small mb-0" style="line-height: 1.5em; height: 3em; overflow: hidden;">
+                                @if (product.Description.Length > 40)
+                                {
+                                    @product.Description.Substring(0, 60)
+                                    <span>...</span>
+                                    <a @onclick="(() => ShowModal(product))" class="pe-auto">Ver Mais</a>
+                                }
+                                else
+                                {
+                                    @product.Description
+                                    <span>.</span>
+                                    <a @onclick="(() => ShowModal(product))" class="pe-auto">Ver Mais</a>
+                                }
+                            </p>
+                        </div>
+                        <div class="mt-auto d-flex align-items-center justify-content-between">
+                            <p class="mb-0">R$ @product.Price.ToString("0.00")</p>
+                            <div class="col-6  d-flex justify-content-end align-items-center justify-content-between">
+                                <p @onclick="() => ChangeAmount(false, product)" class="col-3 text-secondary mb-0 d-flex justify-content-center" style="font-size: 20px">-</p>
+                                <p id="@string.Concat("amount", product.Id)" class="mb-0 me-1 ms-1">0</p>
+                                <p @onclick="() => ChangeAmount(true, product)" class="col-3 text-danger mb-0 d-flex justify-content-center" style="font-size: 20px">+</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -97,6 +113,10 @@ else
     [Parameter]
     public Guid TableGuid { get; set; }
     private int _companyId;
+
+
+
+
     protected override async Task OnInitializedAsync()
     {
         var url = configuration["ApiLinks:ProductGetAll"];
@@ -105,7 +125,7 @@ else
         _companyId = int.Parse(HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString());
         GenericCommandResult commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
-            Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
+            Products = productsApi.Where(x => x.Active).OrderBy(x => x.ProductTypeId).ToList();
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
         url = configuration["ApiLinks:ProductTypeGetAll"];
@@ -115,6 +135,7 @@ else
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
         StateHasChanged();
+
     }
 
     public async void OnSubmit()
@@ -153,5 +174,27 @@ else
     protected async void SetFocus(int typeProductId)
     {
         await JsRuntime.InvokeVoidAsync("SetFocus", typeProductId);
+    }
+
+    void ShowModal(ProductDTO product)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("ProductName", product.Name);
+        parameters.Add("ProductDescription", product.Description);
+        parameters.Add("ProductImage", product.Image);
+        var modalOptions = new ModalOptions() { DisableBackgroundCancel = true, HideCloseButton = false, HideHeader = false };
+        modalServices.OnClose += ModalClose;
+        modalServices.Show(typeof(Popup), product.Name, parameters, modalOptions);
+        this.StateHasChanged();
+    }
+    void ModalClose(ModalResult modalResult)
+    {
+        Console.WriteLine("Modal closed");
+        if (modalResult.Cancelled)
+            Console.WriteLine("Modal cancelled");
+        else
+            Console.WriteLine(modalResult.Data.ToString());
+
+        modalServices.OnClose -= ModalClose;
     }
 }

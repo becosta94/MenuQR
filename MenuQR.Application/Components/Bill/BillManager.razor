@@ -36,6 +36,7 @@ else
                 <th>Fechamento</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -81,6 +82,16 @@ else
                     <td class="align-middle">
                         <a @onclick="(args) => ShowBill(bill)" class="btn btn-secondary">Ver</a>
                     </td>
+                    @if (bill.Open)
+                    {
+                        <td>
+                            <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="bill.CompanyId" Id="bill.Id" Controller="@_controllerBill" />
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
                 </tr>
             }
         </tbody>
@@ -94,6 +105,7 @@ else
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;
     private int _companyId;
+    private string _controllerBill = "Bill";
 
     protected override async Task OnInitializedAsync()
     {

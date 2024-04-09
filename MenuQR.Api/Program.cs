@@ -69,6 +69,18 @@ builder.Services.AddDbContext<SqlContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("HmlConnection"));
 });
+
+var allowedOrigin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("myAppCors", policy =>
+    {
+        policy.WithOrigins(allowedOrigin)
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST", "DELETE", "PUT");
+    });
+});
+
 ServiceAdd.Add(builder.Services);
 
 
@@ -83,7 +95,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseCors("myAppCors");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

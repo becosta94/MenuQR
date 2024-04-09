@@ -85,5 +85,12 @@ namespace MenuQR.Api.Controllers
             else
                 return BadRequest("Não foi possível obter a lista de produtos");
         }
+        [HttpDelete]
+        [Route("delete")]
+        [Authorize]
+        public void Delete([FromServices] IBaseService<Product> productBaseService, int id, int companyId)
+        {
+            productBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+        }
     }
 }

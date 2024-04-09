@@ -63,5 +63,12 @@ namespace MenuQR.Api.Controllers
             else
                 return BadRequest("Não foi possível atualizar o produto");
         }
+        [HttpDelete]
+        [Route("delete")]
+        //[Authorize]
+        public void Delete([FromServices] IBaseService<Table> tableBaseService, int id, int companyId)
+        {
+            tableBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+        }
     }
 }

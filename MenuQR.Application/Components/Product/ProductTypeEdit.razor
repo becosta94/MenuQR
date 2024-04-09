@@ -34,7 +34,7 @@
             Model = (ProductTypeDTO)commandResult.Data;
         }
         else
-            await JsRuntime.InvokeVoidAsync("Alert", "Produto não encontrado!");
+            await JsRuntime.InvokeVoidAsync("alert", "Produto não encontrado!");
     }
 
     private async void OnSubmit()

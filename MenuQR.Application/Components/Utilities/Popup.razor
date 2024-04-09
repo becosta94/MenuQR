@@ -1,0 +1,38 @@
+﻿@using MenuQR.Application.Components.Utilities
+@using MenuQR.Application.Entities.Modal
+@inject IModalServices ModalService
+
+<div>
+    <img height="300" width="300" src="@string.Format("data:image/png;base64, {0}", ProductImage)" alt="Product 1" class="rounded">
+</div>
+<div class="mt-2">
+    <p style="max-width: 300px">@ProductDescription</p>
+</div>
+
+@code {
+    [CascadingParameter] ModalParameters Parameters { get; set; }
+    [CascadingParameter] BlazoredModal BlazoredModal { get; set; }
+    string ProductName { get; set; } = "";
+    string ProductDescription { get; set; } = "";
+    string ProductImage { get; set; } = "";
+    bool ShowForm { get; set; } = true;
+    protected override void OnInitialized()
+    {
+        ProductName = Parameters.Get<string>("ProductName");
+        ProductDescription = Parameters.Get<string>("ProductDescription");
+        ProductImage = Parameters.Get<string>("ProductImage");
+        BlazoredModal.SetTitle(ProductName);
+    }
+    void SubmitForm()
+    {
+        ShowForm = false;
+    }
+    void Done()
+    {
+        ModalService.Close(ModalResult.Ok("Form Submitted"));
+    }
+    void Cancel()
+    {
+        ModalService.Close(ModalResult.Cancel());
+    }
+}

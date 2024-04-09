@@ -67,5 +67,19 @@ namespace MenuQR.Api.Controllers
             else
                 return BadRequest("Não foi possível encontrar o produto");
         }
+        [HttpDelete]
+        [Route("delete")]
+        [Authorize]
+        public IActionResult Delete([FromServices] IBaseService<ProductType> productTypeBaseService, [FromServices] IBaseService<Product> productBaseService, int id, int companyId)
+        {
+            bool hasProducts = productBaseService.Get().Where(x => x.ProductTypeId == id && x.ProductTypeCompanyId == companyId).Any();
+            if (!hasProducts)
+            {
+                productTypeBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+                return Ok();
+            }
+            else
+                return BadRequest();
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace MenuQR.Services.Services
             _billValueGetter=billValueGetter;
         }
 
-        public object RequestClosure(int tableId, int companyId, bool closeTotal, string custmerDocument, Bill bill)
+        public object RequestClosure(int tableId, int companyId, bool closeTotal, string custmerDocument, bool tips, Bill bill)
         {
             CustomerHistory? customerHistory = null;
             List<CustomerHistory> customersOnPlace = bill.OrderProducts.Select(x => x.Order.CustomerHistory).Where(x => x.OnPlace).ToList();
@@ -47,7 +47,7 @@ namespace MenuQR.Services.Services
                     throw new Exception();
                 bill.CustomersAndTotals.Remove(bill.OrderProducts.Select(x => x.Order.Customer).Where(x => x.Document == custmerDocument).First());
             }
-            BillClosureOrder? billClosureOrder = new BillClosureOrder() { CompanyId = companyId, OrderCompleted = false, TableId = tableId, TableCompanyId = companyId, CustomerDocument = custmerDocument, CloseTotal = closeTotal, Value = bill.Total };
+            BillClosureOrder? billClosureOrder = new BillClosureOrder() { CompanyId = companyId, OrderCompleted = false, TableId = tableId, TableCompanyId = companyId, CustomerDocument = custmerDocument, CloseTotal = closeTotal, Value = bill.Total, Tips = tips, BillId = bill.Id, BillCompanyId = bill.CompanyId };
             billClosureOrder = _validator.Execute(() => _billClosureOrderService.Add<BillClosureOrderValidator>(billClosureOrder)) as BillClosureOrder;
             if (billClosureOrder is not null)
                 return billClosureOrder;
@@ -58,7 +58,7 @@ namespace MenuQR.Services.Services
         public object Close(BillClosureOrder billClosureOrder)
         {
             CustomerHistory? customerHistory = null;
-            Bill? bill = _billValueGetter.GetOpen(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, false) as Bill;
+            Bill? bill = _billValueGetter.GetOpen(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, billClosureOrder.Tips, false) as Bill;
             if (billClosureOrder.CloseTotal)
             {
                 foreach (var custumerAndTotal in bill.CustomersAndTotals)
@@ -82,7 +82,7 @@ namespace MenuQR.Services.Services
             }
             billClosureOrder.OrderCompleted = true;
             billClosureOrder = _validator.Execute(() => _billClosureOrderService.Update<BillClosureOrderValidator>(billClosureOrder)) as BillClosureOrder;
-            bill.SumTotal();
+            bill.SumTotal(billClosureOrder.Tips);
             bill.ClosingDate = DateTime.Now;
             bill = _validator.Execute(() => _billService.Update<BillValidator>(bill)) as Bill;
             if (bill is not null)

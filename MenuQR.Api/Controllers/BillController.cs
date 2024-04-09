@@ -6,6 +6,7 @@ using MenuQR.Services.Interfaces;
 using MenuQR.Services.Interfaces.Factories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 
 namespace MenuQR.Api.Controllers
@@ -15,11 +16,11 @@ namespace MenuQR.Api.Controllers
     public class BillController : ControllerBase
     {
         [HttpGet]
-        [Route("getall")]
-        [Authorize]
-        public IActionResult GetAll([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
+        [Route("getallfromtheday")]
+        //[Authorize]
+        public IActionResult GetAllFromTheDay([FromServices] IBaseService<Bill> billBaseService, [FromServices] SqlContext context, [FromServices] IMapper mapper, int companyId)
         {
-            List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId).OrderByDescending(x => x.Open).ToList();
+            List<Bill>? bills = billBaseService.Get().Where(x => x.CompanyId == companyId && x.CreatedAt.Value >= DateTime.Today.AddHours(-6)).OrderByDescending(x => x.Open).ToList();
             bills.ForEach(x => context.Entry(x).Reference(x => x.Table).Load());
             bills.ForEach(x => context.Entry(x).Collection(x => x.OrderProducts).Load());
             bills.ForEach(x => x.OrderProducts.ForEach(y => context.Entry(y).Reference(y => y.Order).Load()));
@@ -45,8 +46,8 @@ namespace MenuQR.Api.Controllers
         }
         [HttpPut]
         [Route("close")]
-        [Authorize]
-        public IActionResult Close([FromServices] IBillValueGetter billValueGetter, [FromServices] IBillCloser billCloser, BillClosureOrderDTO billClosureOrderDTO, IMapper mapper)
+        //[Authorize]
+        public IActionResult Close([FromServices] IBillCloser billCloser, BillClosureOrderDTO billClosureOrderDTO, IMapper mapper)
         {
             BillClosureOrder billClosureOrder = mapper.Map<BillClosureOrder>(billClosureOrderDTO);
             object returnedObjectBill = billCloser.Close(billClosureOrder);
@@ -58,65 +59,12 @@ namespace MenuQR.Api.Controllers
                 return BadRequest("Não foi possível gerar a conta");
         }
 
-        [HttpPost]
-        [Route("billclosureorder")]
-        //[Authorize]
-        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument)
-        {
-            object returnedBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
-            if (returnedBill is not null && returnedBill is Bill bill)
-            {
-
-                List<CustomerHistory> customerHistoryList = customerHistoryService.Get().Where(x => x.OnPlace &&
-                                                                                       x.BillId == bill.Id &&
-                                                                                       x.BillCompanyId == bill.CompanyId &&
-                                                                                       x.CompanyId == companyId).ToList();
-                if (customerHistoryList.Count == 1)
-                    closeTotal = true;
-                object returnedRequestClosure = billCloser.RequestClosure(tableId, companyId, closeTotal, customerDocument, bill);
-                if (returnedRequestClosure is not null && returnedRequestClosure is BillClosureOrder billClosureOrder)
-                    return Ok(billClosureOrder);
-            }
-            if (returnedBill is not null && returnedBill is ErroDTO erro)
-                return Ok(erro);
-            else
-                return BadRequest("Não foi possível gerar a conta");
-        }
-
-        [HttpGet]
-        [Route("billclosureordergetall")]
-        [Authorize]
-        public IActionResult Get([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, [FromServices] SqlContext context, int companyId)
-        {
-            List<BillClosureOrder> billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted).ToList();
-            billClosureOrders.ForEach(x => context.Entry(x).Reference(x => x.Table).Load());
-            billClosureOrders.ForEach(x => context.Entry(x).Reference(x => x.Customer).Load());
-            if (billClosureOrders is not null)
-                return Ok(billClosureOrders);
-            else
-                return BadRequest("Não foi possível gerar a conta");
-        }
-
-        [HttpGet]
-        [Route("billclosureorderget")]
-        public IActionResult GetClose([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int companyId, int tableId)
-        {
-            BillClosureOrder? billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted && x.TableId == tableId && x.TableCompanyId == companyId).LastOrDefault();
-            if (billClosureOrders is not null)
-                return Ok(billClosureOrders);
-            else if (billClosureOrders is null)
-                return Ok(new BillClosureOrder());
-            else
-                return BadRequest("Não foi possível gerar a conta");
-        }
-
-
         [HttpGet]
         [Route("getopen")]
         [Authorize]
-        public IActionResult GetOpen([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, [FromServices] IMapper mapper,int tableId, int companyId, bool closeTotal, string customerDocument)
+        public IActionResult GetOpen([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, [FromServices] IMapper mapper, int tableId, int companyId, bool closeTotal, string customerDocument)
         {
-            object returnedObjectBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, true);
+            object returnedObjectBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, null, true);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
             {
                 bill.OrderProducts.ToList().ForEach(x => context.Entry(x).Reference(o => o.Product).Load());
@@ -130,7 +78,7 @@ namespace MenuQR.Api.Controllers
         }
         [HttpGet]
         [Route("getclose")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetClose([FromServices] IBillValueGetter billValueGetter, [FromServices] SqlContext context, int billId, int companyId)
         {
             object returnedObjectBill = billValueGetter.GetClose(billId, companyId);
@@ -144,6 +92,17 @@ namespace MenuQR.Api.Controllers
                 return Ok(erro);
             else
                 return BadRequest("Não foi possível gerar a conta");
+        }
+
+        [HttpDelete]
+        [Route("delete")]
+        //[Authorize]
+        public void Delete([FromServices] IBaseService<Bill> billBaseService, [FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int id, int companyId)
+        {
+            Bill bill = billBaseService.GetByCompoundKey(new object[] { id, companyId });
+            BillClosureOrder? billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted && x.TableId == bill.TableId && x.TableCompanyId == companyId).LastOrDefault();
+            billBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+            billClosureOrderService.DeleteByCompoundKey(new object[] { billClosureOrders.Id, billClosureOrders.CompanyId });
         }
     }
 }

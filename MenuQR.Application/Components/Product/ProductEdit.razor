@@ -28,14 +28,14 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Tipo:</label>
-        <InputSelect @bind-Value="Model.TypeId" class="form-select" style="max-width: 60%">
+        <InputSelect @bind-Value="Model.ProductTypeId" class="form-select" style="max-width: 60%">
             @if (ProductsType == null || ProductsType.Count == 0)
             {
                 <option selected value=""></option>
             }
             @foreach (ProductTypeDTO productType in ProductsType)
             {
-                if (productType.Id == Model.TypeId)
+                if (productType.Id == Model.ProductTypeId)
                 {
                     <option selected value="@productType.Id">@productType.TypeName</option>
                 }
@@ -65,6 +65,7 @@
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
     [Parameter]
     public int Id { get; set; }
+    [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;

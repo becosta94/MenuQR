@@ -7,6 +7,7 @@ namespace MenuQR.Application.Entities.DTOs
         public int Id { get; set; }
         [Required]
         public string? Name { get; set; }
+        [StringLength(400)]
         public string? Description { get; set; }
         [Required]
         [Range(1.00, double.MaxValue)]
@@ -16,7 +17,10 @@ namespace MenuQR.Application.Entities.DTOs
         public bool Active { get; set; }
         [Required]
         [Range(1, int.MaxValue)]
-        public int TypeId { get; set; }
+        public int ProductTypeId { get; set; }
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int ProductTypeCompanyId { get; set; }
 
     }
 }

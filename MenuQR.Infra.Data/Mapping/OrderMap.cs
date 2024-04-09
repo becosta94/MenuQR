@@ -37,7 +37,7 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasOne(prop => prop.CustomerHistory)
                 .WithMany(prop => prop.Orders)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(prop => prop.Customer)
                 .WithMany()

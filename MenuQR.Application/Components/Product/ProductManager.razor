@@ -48,8 +48,10 @@ else
                     </td>
                     <td class="align-middle" scope="row">@product.Name</td>
                     <td class="align-middle">R$ @product.Price.ToString("0.00")</td>
-                    <td class="align-middle">@product.Description</td>
-                    <td class="align-middle">@ProductsType.Where(x => x.Id == product.TypeId).First().TypeName</td>
+                    <td class="align-middle text-break" style="max-width: 300px;">
+                        <p class="align-middle">@product.Description</p>
+                    </td>
+                    <td class="align-middle">@ProductsType.Where(x => x.Id == product.ProductTypeId).First().TypeName</td>
                     <td class="align-middle">
                         <div class="form-check form-switch">
                             @if (product.Active)

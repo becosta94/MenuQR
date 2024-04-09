@@ -10,33 +10,34 @@
 @inject ISessionStorageService SessionStorage
 
 
-<div class="title-container-top d-flex justify-content-around">
+<div class="title-container-top d-flex justify-content-around" style="margin-bottom: 60px">
     <div>
-        <p class="nav-item nav-link">Carrinho</p>
+        <p class="nav-item nav-link mb-0">Carrinho</p>
     </div>
 </div>
 <div style="padding-top: 60px"></div>
-@foreach (OrderProductCreateDTO orderProductDTO in OrderProductsCrete)
-{
+<div class="container">
+    @foreach (OrderProductCreateDTO orderProductDTO in OrderProductsCrete)
+    {
+        <div class="justify-content-center shadow-sm rounded mt-60 mb-2 @string.Concat("typeProduct", orderProductDTO.Product.ProductTypeId)">
+            <div class="row">
+                <div class="col-4 ">
+                    <img height="100" width="115" src="@string.Format("data:image/png;base64, {0}", orderProductDTO.Product.Image)" alt="Product 1" class="rounded">
+                </div>
+                <div class="col-8 d-flex flex-column">
+                    <div>
+                        <h2 class="col-sm">@(orderProductDTO.Amount)x @orderProductDTO.Product.Name</h2>
+                        <p class="mb-0">Preço: R$ @orderProductDTO.Product.Price.ToString("0.00")</p>
+                    </div>
+                    <div class="mt-auto d-flex align-items-center justify-content-between">
+                        <p class="mb-0">Total: R$ @((orderProductDTO.Product.Price * orderProductDTO.Amount).ToString("0.00"))</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="justify-content-center border border-light rounded mt-60 mb-2 px-3">
-        <div class="row justify-content-around mb-1">
-            <h2 class="col-sm">@orderProductDTO.Product.Name</h2>
-            <div class="col-6 d-flex justify-content-end">
-                <p class="col-6">@orderProductDTO.Product.Description</p>
-                <img height="100" width="100" src="@string.Format("data:image/png;base64, {0}", @orderProductDTO.Product.Image)" alt="Product 1" class="img-fluid border border-dark">
-            </div>
-        </div>
-        <div class="mb-2 row justify-content-around">
-            <div class="col-6 d-flex align-items-center ">
-                <p class="mb-0">R$ @orderProductDTO.Product.Price.ToString("0.00")</p>
-            </div>
-            <div class="col-2 d-flex align-items-center ">
-                <p class="mb-0">@orderProductDTO.Amount</p>
-            </div>
-        </div>
-    </div>
-}
+    }
+</div>
 <footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
     <div class="justify-content-around bd-highlight btn-toolbar">
         <div class="btn-group mr-md-3" role="group">
@@ -57,13 +58,14 @@
     public string CompanyName { get; set; }
     [Parameter]
     public Guid TableGuid { get; set; }
+    private bool _firstProduct = true;
     protected override void OnInitialized()
     {
         if (HttpContextAcessor.HttpContext.Request.Cookies["TableId"] == null)
             navigationManager.NavigateTo("/Error");
         _tableId  = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
         List<OrderProductDTO> orderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
-        orderProducts.ForEach(x => OrderProductsCrete.Add(new OrderProductCreateDTO() { Amount = x.Amount, CompanyId = x.CompanyId, Id = x.Id, Product = x.Product, ProductId = x.ProductId, Total = x.Total}));
+        orderProducts.ForEach(x => OrderProductsCrete.Add(new OrderProductCreateDTO() { Amount = x.Amount, CompanyId = x.CompanyId, Id = x.Id, Product = x.Product, ProductId = x.ProductId, Total = x.Total }));
 
     }
     private async void Confirm()

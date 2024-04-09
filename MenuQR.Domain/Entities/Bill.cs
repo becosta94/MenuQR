@@ -41,9 +41,13 @@ namespace MenuQR.Domain.Entities
                 CustomersAndTotals.Add(customer, total);
         }
 
-        public void SumTotal()
+        public void SumTotal(bool? tips)
         {
-            Total = Total + CustomersAndTotals.Sum(x => x.Value);
+            if (tips.HasValue && tips.Value)
+                Total = Total + CustomersAndTotals.Sum(x => x.Value) * 1.10;
+            else
+                Total = Total + CustomersAndTotals.Sum(x => x.Value);
+
         }
     }
 }

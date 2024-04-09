@@ -10,7 +10,10 @@ namespace MenuQR.Infra.Data.Mapping
         {
             builder.ToTable("BillClosureOrder");
 
-            builder.HasKey(prop => prop.Id);
+            builder.HasKey(prop => new { prop.Id, prop.CompanyId });
+
+            builder.Property(prop => prop.Id)
+                .ValueGeneratedOnAdd();
 
             builder.Property(prop => prop.CompanyId)
                .IsRequired()
@@ -32,6 +35,10 @@ namespace MenuQR.Infra.Data.Mapping
                .HasColumnName("TableId")
                .HasColumnType("int");
 
+            builder.Property(prop => prop.BillId)
+               .HasColumnName("BillId")
+               .HasColumnType("int");
+
             builder.Property(prop => prop.CloseTotal)
                .IsRequired()
                .HasColumnName("CloseTotal")
@@ -40,6 +47,11 @@ namespace MenuQR.Infra.Data.Mapping
             builder.Property(prop => prop.OrderCompleted)
                .IsRequired()
                .HasColumnName("OrderCompleted")
+               .HasColumnType("bit");
+
+            builder.Property(prop => prop.Tips)
+               .IsRequired()
+               .HasColumnName("Tips")
                .HasColumnType("bit");
 
             builder.Property(prop => prop.CustomerDocument)
@@ -56,6 +68,10 @@ namespace MenuQR.Infra.Data.Mapping
 
             builder.HasOne(prop => prop.Table)
                 .WithMany();
+
+            builder.HasOne(prop => prop.Bill)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

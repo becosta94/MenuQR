@@ -18,6 +18,7 @@
             <tr>
                 <th>Nome</th>
                 <th>Editar</th>
+                @*                 <th>Deletar</th> *@
             </tr>
         </thead>
     </table>
@@ -29,6 +30,7 @@ else
             <tr>
                 <th>Nome</th>
                 <th>Editar</th>
+                @*                 <th>Deletar</th> *@
             </tr>
         </thead>
         <tbody>
@@ -39,6 +41,9 @@ else
                     <td class="align-middle">
                         <a href="/product/typeedit/@productType.Id" class="btn btn-primary">Editar</a>
                     </td>
+@*                     <td>
+                        <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="productType.CompanyId" Id="productType.Id" Controller="@Controller" ErrorMenssage="@ErrorMenssage" />
+                    </td> *@
                 </tr>
             }
         </tbody>
@@ -46,11 +51,13 @@ else
 }
 @code {
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
-        [CascadingParameter]
+    [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;
     private int _companyId;
+    private string Controller = "ProductType";
+    private string ErrorMenssage = "Existem produtos com esse tipo de serviço. Delete ou mude o tipo desses produtos.";
 
     protected override async Task OnInitializedAsync()
     {

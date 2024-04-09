@@ -1,7 +1,6 @@
 ﻿using MenuQR.Domain.DTOs;
 using MenuQR.Domain.Entities;
 using MenuQR.Services.Interfaces;
-
 namespace MenuQR.Services.Services
 {
     public class BillValueGetter : IBillValueGetter
@@ -12,14 +11,12 @@ namespace MenuQR.Services.Services
         private readonly IBaseService<Bill> _billService;
         private readonly IBaseService<CustomerHistory> _customerHistoryService;
         private readonly IBaseService<ProductOffList> _productOffListService;
-        private readonly IValidator _validator;
         public BillValueGetter(IBaseService<Order> orderService,
                       IBaseService<OrderProduct> orderProductRepository,
                       IBaseService<Customer> customerRepository,
                       IBaseService<Bill> billService,
                       IBaseService<CustomerHistory> costuerHistoryService,
-                      IBaseService<ProductOffList> productOffListService,
-                      IValidator validator)
+                      IBaseService<ProductOffList> productOffListService)
         {
             _orderService = orderService;
             _orderProductService = orderProductRepository;
@@ -27,9 +24,9 @@ namespace MenuQR.Services.Services
             _billService = billService;
             _customerHistoryService = costuerHistoryService;
             _productOffListService = productOffListService;
-            _validator = validator;
+
         }
-        public object GetOpen(int tableId, int companyId, bool closeTotal, string custmerDocument, bool customerRequest)
+        public object GetOpen(int tableId, int companyId, bool closeTotal, string custmerDocument, bool? tips, bool customerRequest)
         {
             Bill? bill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             List<Order> orders = new List<Order>();
@@ -74,6 +71,7 @@ namespace MenuQR.Services.Services
                                                                              x.BillCompanyId == bill.CompanyId).ToList());
             ICollection<IGrouping<Customer, OrderProduct>> orderProducts1 = new HashSet<IGrouping<Customer, OrderProduct>>();
             Bill returnedBill = new Bill(bill);
+            bill.OrderProducts = _orderProductService.Get().Where(x => x.BillId == bill.Id &&  x.BillCompanyId == bill.CompanyId).ToList();
             returnedBill.OrderProducts = new List<OrderProduct>(bill.OrderProducts);
             if (closeTotal)
             {
@@ -95,7 +93,7 @@ namespace MenuQR.Services.Services
             productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price));
             returnedBill.ProductOffLists = productsOffList;
             bill.ProductOffLists = productsOffList;
-            returnedBill.SumTotal();
+            returnedBill.SumTotal(tips);
             if (customerRequest)
             {
                 returnedBill.OrderProducts = orderProducts;
@@ -118,6 +116,7 @@ namespace MenuQR.Services.Services
         {
             Bill? bill = _billService.GetByCompoundKey(new object[] { billId, companyId });
             List<Order> orders = new List<Order>();
+            List<ProductOffList> productsOffList = new List<ProductOffList>();
             List<CustomerHistory> customerHistoryList = _customerHistoryService.Get().Where(x => !x.OnPlace &&
                                                                                    x.BillId == bill.Id &&
                                                                                    x.BillCompanyId == bill.CompanyId &&
@@ -138,6 +137,9 @@ namespace MenuQR.Services.Services
             orderProducts1 =  orderProducts.GroupBy(x => x.Order.Customer).ToList();
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
                 bill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => !x.Order.CustomerHistory.OnPlace).Sum(x => x.Total));
+            productsOffList = _productOffListService.Get().Where(x => x.BillId == bill.Id && x.BillCompanyId == bill.CompanyId).ToList();
+            productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price));
+            bill.ProductOffLists = productsOffList;
             if (bill is not null)
                 return bill;
             else

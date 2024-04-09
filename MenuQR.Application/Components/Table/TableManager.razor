@@ -7,7 +7,9 @@
 @inject IHttpContextAccessor HttpContextAcessor
 @inject UserManager<ApplicationUser> UserManager
 
+
 <h3>Gerenciador de Mesas</h3>
+<h3>@teste</h3>
 <a href="/table/create/" class="btn btn-primary">Adicionar</a>
 @if (Tables.Count == 0)
 {
@@ -32,7 +34,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (TableDTO table in Tables)
+            @foreach (var table in Tables)
             {
                 <tr>
                     <td class="align-middle">@table.Identification</td>
@@ -52,6 +54,8 @@ else
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;
     private int _companyId;
+    private string _tableController = "Table";
+    private string teste;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,7 +70,8 @@ else
         GenericCommandResult commandResult = await ApiService.Get<List<TableDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<TableDTO> tables)
             Tables = tables.OrderBy(x => x.Identification).ToList();
-    else
-            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        teste = commandResult.Data.ToString();
+        // else
+        //     await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 }

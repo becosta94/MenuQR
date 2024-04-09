@@ -20,73 +20,58 @@
             {
                 <div class="d-flex px-40">
                     <div class="p-2">@b.Count() x</div>
-                    <div class="p-2">@b.First().Product.Name</div>
-                    <div class="ms-auto p-2">R$ @b.First().Product.Price.ToString("0.00")</div>
+                    <div class="p-2">@b.First().Product.Name (R$ @b.First().Product.Price.ToString("0.00"))</div>
+                    <div class="ms-auto p-2">R$ @((b.First().Product.Price * b.Count()).ToString("0.00"))</div>
+                    @if (Bill.Open)
+                    {
+                        <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="b.First().CompanyId" Id="b.First().Id" Controller="@_controllerOrder" />
+                    }
                 </div>
             }
             @foreach (var productOffList in Bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key))
             {
                 <div class="d-flex px-40">
                     <div class="p-2">@productOffList.Amount x</div>
-                    <div class="p-2">@productOffList.Name</div>
-                    <div class="ms-auto p-2">R$ @productOffList.Price.ToString("0.00")</div>
+                    <div class="p-2">@productOffList.Name (R$ @productOffList.Price.ToString("0.00"))</div>
+                    <div class="ms-auto p-2">R$ @((productOffList.Price * @productOffList.Amount).ToString("0.00"))  </div>
+                    @if (Bill.Open)
+                    {
+                        <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="productOffList.CompanyId" Id="productOffList.Id" Controller="@_controllerProductOffList" />
+                    }
                 </div>
             }
-            <EditForm OnValidSubmit="(() => OnSubmitProduct(a.Key))" Model="@OrderProduct" FormName=@string.Concat(formName, i.ToString())>
-                <div class="input-group input-group-sm d-flex px-40">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="">Adicionar Produtos</span>
-                    </div>
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Quantidade</span>
-                    </div>
-                    <InputNumber @bind-Value="OrderProduct.Amount" class="form-control" style="max-width: 60%" />
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Produto</span>
-                    </div>
-                    <InputSelect @bind-Value="OrderProduct.ProductId" class="form-control" style="max-width: 60%">
-                        <option selected value="@(new ProductDTO())"></option>
-                        @foreach (ProductDTO product in Products)
-                        {
-                            <option value="@product.Id">@product.Name</option>
-                        }
-                    </InputSelect>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">Adicionar</button>
-                    </div>
+            @if (custumerDocumentPaidTips[a.Key])
+            {
+                <div class="d-flex px-40">
+                    <div class="p-2">Opcional: </div>
+                    <div class="ms-auto p-2">R$ @(((a.Sum(x => x.Total) + Bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key).Sum(x => x.Amount * x.Price)) * 0.1).ToString("0.00"))</div>
                 </div>
-            </EditForm>
-            <EditForm OnValidSubmit="(() => OnSubmitProductOffList(a.Key))" Model="@ProductOffList" FormName="addProductOffList">
-                <div class="input-group input-group-sm mb-3 d-flex px-40">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="">Adicionar Valores</span>
-                    </div>
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Quantidade:</span>
-                    </div>
-                    <InputNumber @bind-Value="ProductOffList.Amount" class="form-control" style="max-width: 60%" />
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Preço:</span>
-                    </div>
-                    <InputNumber @bind-Value="ProductOffList.Price" class="form-control" style="max-width: 60%" />
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroup-sizing-sm">Descrição:</span>
-                    </div>
-                    <InputText @bind-Value="ProductOffList.Name" class="form-control" style="max-width: 60%" />
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">Adicionar</button>
-                    </div>
+            }
+            @if (Bill.Open)
+            {
+                <BillProductAdd Bill="@Bill" Products="@Products" Cpf="@a.Key"></BillProductAdd>
+            }
+
+            @if (custumerDocumentPaidTips[a.Key])
+            {
+                <div class="d-flex px-40">
+                    <div class="p-2">Parcial: </div>
+                    <div class="ms-auto p-2">R$ @(((a.Sum(x => x.Total) + Bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key).Sum(x => x.Amount * x.Price)) * 1.1).ToString("0.00"))</div>
                 </div>
-            </EditForm>
-            <div class="d-flex px-40">
-                <div class="p-2">Total Parcial: </div>
-                <div class="ms-auto p-2">R$ @a.Sum(x => x.Total).ToString("0.00")</div>
-            </div>
+            }
+            else
+            {
+                <div class="d-flex px-40">
+                    <div class="p-2">Parcial: </div>
+                    <div class="ms-auto p-2">R$ @(((a.Sum(x => x.Total) + Bill.ProductOffLists.Where(x => x.CustomerDocument == a.Key).Sum(x => x.Amount * x.Price))).ToString("0.00"))</div>
+                </div>
+            }
+
             i++;
         }
         <div class="d-flex px-40">
-            <div class="p-2">Total Geral: </div>
-            <div class="ms-auto p-2">R$ @Bill.OrderProducts.Sum(x => x.Total).ToString("0.00")</div>
+            <div class="p-2">Total: </div>
+            <div class="ms-auto p-2">R$ @Bill.Total.ToString("0.00")</div>
         </div>
     }
     else
@@ -99,20 +84,30 @@
     BillDTO Bill = new BillDTO();
     [Parameter]
     public int SetHashCode { get; set; }
-    public OrderProductCreateDTO OrderProduct { get; set; } = new OrderProductCreateDTO();
-    public ProductOffListDTO ProductOffList { get; set; } = new ProductOffListDTO();
     List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
     private IEnumerable<IGrouping<string, OrderProductDTO>> _customersOrders = new List<IGrouping<string, OrderProductDTO>>();
+    private string _controllerOrder = "Order";
+    private string _controllerProductOffList = "ProductOffList";
+    private bool openOrder = false;
+    private Dictionary<string, bool> custumerDocumentPaidTips = new Dictionary<string, bool>();
     protected override async Task OnInitializedAsync()
     {
         Bill = (BillDTO)stateContainer.ObjectTunnel[SetHashCode];
-        OrderProduct.Product = new ProductDTO();
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        var url = configuration["ApiLinks:BillGetOpen"];
-        parameters.Add("tableId", Bill.TableId);
+        string url = string.Empty;
         parameters.Add("companyId", Bill.CompanyId);
-        parameters.Add("closeTotal", true.ToString());
-        parameters.Add("customerDocument", Bill.OrderProducts.First().Order.CustomerDocument);
+        if (Bill.Open)
+        {
+            url = configuration["ApiLinks:BillGetOpen"];
+            parameters.Add("tableId", Bill.TableId);
+            parameters.Add("closeTotal", true.ToString());
+            parameters.Add("customerDocument", Bill.OrderProducts.First().Order.CustomerDocument);
+        }
+        else
+        {
+            url = configuration["ApiLinks:BillGetClose"];
+            parameters.Add("billId", Bill.Id);
+        }
         GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
         BillDTO billResultObject = JsonConvert.DeserializeObject<BillDTO>(commandResult.Data.ToString());
         ErroDTO erroResultObject = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
@@ -134,42 +129,34 @@
                 }
             }
         }
+        else if (!string.IsNullOrEmpty(erroResultObject.Menssage))
+            openOrder = true;
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
         url = configuration["ApiLinks:ProductGetAll"];
         commandResult = await ApiService.Get<List<ProductDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Bill.CompanyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductDTO> productsApi)
-            Products = productsApi.Where(x => x.Active).OrderBy(x => x.TypeId).ToList();
-        await Task.Delay(1);
-    }
-    private async void OnSubmitProduct(string customerDocument)
-    {
-        OrderProduct.Product = Products.Where(x => x.Id == OrderProduct.ProductId).FirstOrDefault();
-        OrderProduct.CompanyId = Bill.CompanyId;
-        var url = configuration["ApiLinks:OrderCreateByCompany"] + $"tableId={Bill.TableId}&customerDocument={customerDocument}";
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<OrderProductCreateDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProduct);
-        if (commandResult.Sucess)
+            Products = productsApi.Where(x => x.Active).OrderBy(x => x.ProductTypeId).ToList();
+        url = configuration["ApiLinks:BillClosureOrderGetPaid"];
+        foreach (string custumerDocument in _customersOrders.Select(x => x.Key))
         {
-            await JsRuntime.InvokeVoidAsync("alert", "Ok.");
-            navigationManager.Refresh(true);
+            parameters.Clear();
+            parameters.Add("biilId", Bill.Id);
+            parameters.Add("companyId", Bill.CompanyId);
+            parameters.Add("customerDocument", custumerDocument);
+            commandResult = await ApiService.GetWithParameters<BillClosureOrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+            if (commandResult.Sucess && commandResult.Data is BillClosureOrderDTO billClosureOrder)
+                custumerDocumentPaidTips.Add(custumerDocument, billClosureOrder.Tips);
         }
-        else
-            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
+
     }
-    private async void OnSubmitProductOffList(string customerDocument)
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ProductOffList.BillId = Bill.Id;
-        ProductOffList.BillCompanyId = Bill.CompanyId;
-        ProductOffList.CompanyId = Bill.CompanyId;
-        ProductOffList.CustomerDocument = customerDocument;
-        var url = configuration["ApiLinks:ProductOffListCreate"] /* + $"customerDocument={customerDocument} "*/;
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductOffListDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), ProductOffList);
-        if (commandResult.Sucess)
+        if (!firstRender && openOrder)
         {
-            await JsRuntime.InvokeVoidAsync("alert", "Ok.");
-            navigationManager.Refresh(true);
+            await JsRuntime.InvokeVoidAsync("alert", "Existem pedidos em aberto, entregue ou cancele para calcualar a conta.");
+            navigationManager.NavigateTo(configuration["ApplicationLinks:BaseApplicationLink"] + "/" + configuration["ApplicationLinks:BillManager"].ToString(), true);
         }
-        else
-            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
     }
 }

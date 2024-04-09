@@ -196,6 +196,40 @@ namespace MenuQR.Application.Services
         }
         #endregion
 
+        #region Delete
+
+        public async Task<GenericCommandResult> DeleteWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(jwt))
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                string parameters = string.Empty;
+                int totalParameters = 0;
+                foreach (KeyValuePair<string, object> parameterData in parameterDataPairs)
+                {
+                    if (totalParameters == parameterDataPairs.Count - 1)
+                        parameters += $"{parameterData.Key}={parameterData.Value}";
+                    else
+                    {
+                        parameters += $"{parameterData.Key}={parameterData.Value}&";
+                        totalParameters++;
+                    }
+                }
+                HttpResponseMessage? response = await httpClient.DeleteAsync($"{url}{parameters}");
+                if (response.IsSuccessStatusCode)
+                    return new GenericCommandResult(true, "Delete made successfully", response);
+                else
+                    return new GenericCommandResult(false, "Delete not made", response);
+            }
+            catch (Exception ex)
+            {
+                return new GenericCommandResult(false, "Delete not made", ex);
+            }
+        }
+
+        #endregion
+
         public static StringContent PrepareStringContent(object obj)
         {
             return new(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");

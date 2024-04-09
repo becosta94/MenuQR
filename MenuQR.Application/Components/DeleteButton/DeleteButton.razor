@@ -1,0 +1,43 @@
+﻿@inject IHttpContextAccessor HttpContextAcessor
+@inject IConfiguration configuration
+@inject IApiService ApiService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navigationManager
+
+<div class="btn-group mr-md-3" role="group">
+    <button @onclick="Delete" class="btn btn-primary">Deletar</button>
+</div>
+@code {
+    [Parameter]
+    public int Id { get; set; } = new int();
+    [Parameter]
+    public int CompanyId { get; set; }
+    [Parameter]
+    public string Controller { get; set; }
+    [Parameter]
+    public string ErrorMenssage { get; set; }
+    public async void Delete()
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir elemento?");
+        if (confirmed)
+        {
+            var url = configuration["ApiLinks:Delete"].Replace("*", Controller);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("id", Id);
+            parameters.Add("companyId", CompanyId);
+            GenericCommandResult commandResult = await ApiService.DeleteWithParameters<ProductOffListDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+            if (commandResult.Sucess)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Elemento excluído.");
+                navigationManager.Refresh(true);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(ErrorMenssage))
+                    await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
+                else
+                    await JsRuntime.InvokeVoidAsync("alert", ErrorMenssage);
+            }
+        }
+    }
+}

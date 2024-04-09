@@ -9,7 +9,9 @@ namespace MenuQR.Domain.Entities
         public double Price { get; set; }
         public string Image { get; set; }
         public bool Active { get; set; }
-        public int TypeId { get; set; }
+        public int ProductTypeId { get; set; }
+        public int ProductTypeCompanyId { get; set; }
+        public virtual ProductType ProductType { get; set; }
         public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
         public Product()
         {

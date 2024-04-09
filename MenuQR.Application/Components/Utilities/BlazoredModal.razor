@@ -1,0 +1,30 @@
+﻿<div class="blazored-modal-container @_componentPosition @(_isVisible ? "blazored-modal-active" : string.Empty)">
+
+    <div class="blazored-modal-overlay" @onclick="HandleBackgrounClick"></div>
+
+    <div class="blazored-modal-wrapper">
+        <div class="@_componentStyle modal-content">
+            @if (_componentHideHeader.HasValue && !_componentHideHeader.Value)
+            {
+                <div class="modal-header">
+                    <h3 class="modal-title">@_title</h3>
+                    @if (_componentHideCloseButton.HasValue && !_componentHideCloseButton.Value)
+                    {
+                        <button type="button" class="btn-close" @onclick="@(() => ModalService.Cancel())"></button>
+                    }
+                </div>
+            }
+            <div class="modal-body">
+                <CascadingValue Value="@this">
+                    <CascadingValue Value="@_modalParameters">
+                        @_content
+                    </CascadingValue>
+                </CascadingValue>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}

@@ -20,6 +20,7 @@
                 <th>Produtos</th>
                 <th>Horário do Pedido</th>
                 <th>Entregue</th>
+                <th>Excluir</th>
             </tr>
         </thead>
     </table>
@@ -34,6 +35,7 @@ else
                 <th>Produtos</th>
                 <th>Horário do Pedido</th>
                 <th>Entregue</th>
+                <th>Excluir</th>
             </tr>
         </thead>
         <tbody>
@@ -68,6 +70,9 @@ else
 
                             </div>
                         </td>
+                        <td>
+                            <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="order.CompanyId" Id="order.Id" Controller="@_controllerOrder"  />
+                        </td>
                     </tr>
                     firstIteration++;
                 }
@@ -86,6 +91,7 @@ else
                 <th>Valor</th>
                 <th>Fechamento Parcial</th>
                 <th>Pago</th>
+                <th>Excluir</th>
             </tr>
         </thead>
     </table>
@@ -100,7 +106,9 @@ else
                 <th>Cliente</th>
                 <th>Valor</th>
                 <th>Fechamento Parcial</th>
+                <th>Tem 10%?</th>
                 <th>Pago</th>
+                <th>Excluir</th>
             </tr>
         </thead>
         <tbody>
@@ -121,6 +129,16 @@ else
                     {
                         <td class="align-middle">Sim</td>
                     }
+                    @if (billClosureOrder.Tips)
+                    {
+
+                        <td class="align-middle">Sim</td>
+                    }
+                    else
+
+                    {
+                        <td class="align-middle">Não</td>
+                    }
                     <td class="align-middle">
                         <div class="form-check form-switch">
                             @if (billClosureOrder.OrderCompleted)
@@ -133,6 +151,9 @@ else
                             }
 
                         </div>
+                    </td>
+                    <td>
+                        <MenuQR.Application.Components.DeleteButton.DeleteButton CompanyId="billClosureOrder.CompanyId" Id="billClosureOrder.Id" Controller="@_controllerBillClosureOrders" />
                     </td>
                 </tr>
             }
@@ -147,6 +168,8 @@ else
     ClaimsPrincipal CurrentUser;
     private ApplicationUser user = default!;
     private int _companyId;
+    private string _controllerOrder = "Order";
+    private string _controllerBillClosureOrders = "BillClosureOrder";
 
     protected override async Task OnInitializedAsync()
     {
