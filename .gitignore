@@ -162,3 +162,4 @@
 /MenuQR.Infra.Data/Migrations/20240409154349_migra1.cs
 /MenuQR.Infra.Data/Migrations/20240409154349_migra1.Designer.cs
 /MenuQR.Infra.Data/Migrations/SqlContextModelSnapshot.cs
+/MenuQR.Application/Properties/PublishProfiles/FolderProfile.pubxml.user
