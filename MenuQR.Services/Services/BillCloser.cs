@@ -61,14 +61,24 @@ namespace MenuQR.Services.Services
             Bill? bill = _billValueGetter.GetOpen(billClosureOrder.TableId, billClosureOrder.CompanyId, billClosureOrder.CloseTotal, billClosureOrder.CustomerDocument, billClosureOrder.Tips, false) as Bill;
             if (billClosureOrder.CloseTotal)
             {
-                foreach (var custumerAndTotal in bill.CustomersAndTotals)
+                if (bill.CustomersAndTotals.Count > 0)
+                    foreach (var custumerAndTotal in bill.CustomersAndTotals)
+                    {
+                        customerHistory = _customerHistoryService.Get().Where(x => x.CustomerDocument == custumerAndTotal.Key.Document && x.CompanyId == billClosureOrder.CompanyId && x.OnPlace).FirstOrDefault();
+                        if (customerHistory is null)
+                            throw new Exception();
+                        customerHistory.OnPlace = false;
+                        bill.Open = false;
+                        _customerHistoryService.Update<CustomerHistoryValidator>(customerHistory);
+                    }
+                else
                 {
-                    customerHistory = _customerHistoryService.Get().Where(x => x.CustomerDocument == custumerAndTotal.Key.Document && x.CompanyId == billClosureOrder.CompanyId && x.OnPlace).FirstOrDefault();
-                    if (customerHistory is null)
+                    List<CustomerHistory> customerHistoryList = _customerHistoryService.Get().Where(x => x.BillId == bill.Id && x.BillCompanyId == bill.CompanyId).ToList();
+                    if (customerHistoryList is null)
                         throw new Exception();
-                    customerHistory.OnPlace = false;
+                    customerHistoryList.ForEach(x => x.OnPlace = false);
                     bill.Open = false;
-                    _customerHistoryService.Update<CustomerHistoryValidator>(customerHistory);
+                    customerHistoryList.ForEach(x => _customerHistoryService.Update<CustomerHistoryValidator>(x));                    ;
                 }
             }
             else
