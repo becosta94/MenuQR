@@ -49,7 +49,7 @@
         Model = (CustomerDTO)stateContainer.ObjectTunnel[SetHashCode];
         string token = TokenService.GenerateToken(Model.Document);
         HttpContext.Response.Cookies.Append("Token", token);
-        HttpContext.Response.Cookies.Append("CustomerDocument", Model.Document);
+        HttpContext.Response.Cookies.Append("CustomerDocument", Model.Document.Replace("-","").Replace(".",""));
         url = configuration["ApiLinks:BillCreate"];
         Dictionary<string, object> keyParametersPair = new Dictionary<string, object>();
         keyParametersPair.Add("tableId", TableId);

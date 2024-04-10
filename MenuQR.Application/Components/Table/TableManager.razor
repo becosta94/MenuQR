@@ -9,7 +9,6 @@
 
 
 <h3>Gerenciador de Mesas</h3>
-<h3>@teste</h3>
 <a href="/table/create/" class="btn btn-primary">Adicionar</a>
 @if (Tables.Count == 0)
 {
@@ -55,7 +54,6 @@ else
     private ApplicationUser user = default!;
     private int _companyId;
     private string _tableController = "Table";
-    private string teste;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,8 +68,7 @@ else
         GenericCommandResult commandResult = await ApiService.Get<List<TableDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<TableDTO> tables)
             Tables = tables.OrderBy(x => x.Identification).ToList();
-        teste = commandResult.Data.ToString();
-        // else
-        //     await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
     }
 }

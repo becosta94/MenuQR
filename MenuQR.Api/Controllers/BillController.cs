@@ -38,7 +38,7 @@ namespace MenuQR.Api.Controllers
         [Authorize]
         public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument)
         {
-            Bill bill = newBillFactory.Make(tableId, companyId, customerDocument);
+            Bill bill = newBillFactory.Make(tableId, companyId, customerDocument.Replace("-","").Replace(".",""));
             if (bill is not null)
                 return Ok(bill);
             else
