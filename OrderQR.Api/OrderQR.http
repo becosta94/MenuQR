@@ -1,0 +1,6 @@
+@OrderQR.Api_HostAddress = http://localhost:5018
+
+GET {{OrderQR.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

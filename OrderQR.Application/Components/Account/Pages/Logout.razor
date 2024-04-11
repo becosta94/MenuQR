@@ -1,0 +1,18 @@
+﻿@page "/Account/Logout"
+@using OrderQR.Application.Data
+@using Microsoft.AspNetCore.Identity
+@inject IHttpContextAccessor HttpContextAcessor
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+@inject NavigationManager NavigationManager
+<PageTitle>Home</PageTitle>
+
+<h1>Bye, world!</h1>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
+        await SignInManager.SignOutAsync();
+    }
+}

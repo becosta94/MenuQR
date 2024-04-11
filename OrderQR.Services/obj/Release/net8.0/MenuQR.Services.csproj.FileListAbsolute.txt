@@ -1,0 +1,16 @@
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\bin\Release\net8.0\MenuQR.Services.deps.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\bin\Release\net8.0\MenuQR.Services.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\bin\Release\net8.0\MenuQR.Services.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\bin\Release\net8.0\MenuQR.Domain.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\bin\Release\net8.0\MenuQR.Domain.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.csproj.AssemblyReference.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.AssemblyInfoInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.AssemblyInfo.cs
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.csproj.CoreCompileInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.sourcelink.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.csproj.CopyComplete
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\refint\MenuQR.Services.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\MenuQR.Services.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Services\obj\Release\net8.0\ref\MenuQR.Services.dll

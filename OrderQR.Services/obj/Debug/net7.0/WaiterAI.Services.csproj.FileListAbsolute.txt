@@ -1,0 +1,5 @@
+C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Services\obj\Debug\net7.0\WaiterAI.Services.csproj.AssemblyReference.cache
+C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Services\obj\Debug\net7.0\WaiterAI.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Services\obj\Debug\net7.0\WaiterAI.Services.AssemblyInfoInputs.cache
+C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Services\obj\Debug\net7.0\WaiterAI.Services.AssemblyInfo.cs
+C:\Users\Bernardo Costa\source\repos\WaiterAI\WaiterAI.Services\obj\Debug\net7.0\WaiterAI.Services.csproj.CoreCompileInputs.cache

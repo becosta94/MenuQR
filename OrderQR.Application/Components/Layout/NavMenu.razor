@@ -1,0 +1,115 @@
+﻿@using OrderQR.Application.Components.Account
+@using OrderQR.Application.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IHttpContextAccessor HttpContextAcessor
+@inject NavigationManager NavigationManager
+
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">OrderQR</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3 d-flex align-items-center">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true" ></span>
+                        <p style="  overflow: hidden;  white-space: nowrap;  text-overflow: ellipsis; margin: 0;">@context.User.Identity?.Name</p>
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/bill/manager">
+                        <span class="fa fa-regular fa-money-bill-1 fa-lg" aria-hidden="true"></span> Contas
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="table/manager">
+                        <span class="fa fa-solid fa-people-line fa-lg" aria-hidden="true"></span> Mesas
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/order/manager">
+                        <span class="fa fa-regular fa-bell fa-lg" aria-hidden="true"></span> Chamados
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="product/manager">
+                        <span class="fa fa-cutlery fa-lg" aria-hidden="true"></span> Produtos
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/product/typemanager">
+                        <span class="fa fa-brands fa-product-hunt fa-lg" aria-hidden="true"></span> Tipos de produtos
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Logout">
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Sair
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private string? currentUrl;
+    private string? urlLogout = "/logout";
+
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    @functions {
+
+        public async void OnPost()
+        {
+
+            await SignInManager.SignOutAsync();
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
+            NavigationManager.NavigateTo("/logout");
+        }
+
+    }
+}
+

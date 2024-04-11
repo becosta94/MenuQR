@@ -1,0 +1,101 @@
+﻿@page "/{CompanyName}/{TableGuid:guid}/product/selection/confirmation/{SetHashCode:int}"
+@rendermode InteractiveServer
+@inject StateContainer stateContainer
+@layout OrderQR.Application.Components.Layout.CustomerLayout
+@inject IConfiguration configuration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject NavigationManager navigationManager
+@inject IHttpContextAccessor HttpContextAcessor
+@inject ISessionStorageService SessionStorage
+
+
+<div class="title-container-top d-flex justify-content-around" style="margin-bottom: 60px">
+    <div>
+        <p class="nav-item nav-link mb-0">Carrinho</p>
+    </div>
+</div>
+<div style="padding-top: 60px"></div>
+<div class="container">
+    @foreach (OrderProductCreateDTO orderProductDTO in OrderProductsCrete)
+    {
+        <div class="justify-content-center shadow-sm rounded mt-60 mb-2 @string.Concat("typeProduct", orderProductDTO.Product.ProductTypeId)">
+            <div class="row">
+                <div class="col-4 ">
+                    <img height="100" width="115" src="@string.Format("data:image/png;base64, {0}", orderProductDTO.Product.Image)" alt="Product 1" class="rounded">
+                </div>
+                <div class="col-8 d-flex flex-column">
+                    <div>
+                        <h2 class="col-sm">@(orderProductDTO.Amount)x @orderProductDTO.Product.Name</h2>
+                        <p class="mb-0">Preço: R$ @orderProductDTO.Product.Price.ToString("0.00")</p>
+                    </div>
+                    <div class="mt-auto d-flex align-items-center justify-content-between">
+                        <p class="mb-0">Total: R$ @((orderProductDTO.Product.Price * orderProductDTO.Amount).ToString("0.00"))</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+</div>
+<footer class="footer text-center scroll-container-bottom" style="margin-top: auto">
+    <div class="justify-content-around bd-highlight btn-toolbar">
+        <div class="btn-group mr-md-3" role="group">
+            <button @onclick="Cancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+        <div class="btn-group mr-md-3" role="group">
+            <button @onclick="Confirm" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</footer>
+
+@code {
+    private string _tableId;
+    List<OrderProductCreateDTO> OrderProductsCrete { get; set; } = new List<OrderProductCreateDTO>();
+    [Parameter]
+    public int SetHashCode { get; set; }
+    [Parameter]
+    public string CompanyName { get; set; }
+    [Parameter]
+    public Guid TableGuid { get; set; }
+    private bool _firstProduct = true;
+    protected override void OnInitialized()
+    {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableId"] == null)
+            navigationManager.NavigateTo("/Error");
+        _tableId  = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
+        List<OrderProductDTO> orderProducts = (List<OrderProductDTO>)stateContainer.ObjectTunnel[SetHashCode];
+        orderProducts.ForEach(x => OrderProductsCrete.Add(new OrderProductCreateDTO() { Amount = x.Amount, CompanyId = x.CompanyId, Id = x.Id, Product = x.Product, ProductId = x.ProductId, Total = x.Total }));
+
+    }
+    private async void Confirm()
+    {
+        var url = configuration["ApiLinks:BillClosureOrderGet"];
+        string tableId = HttpContextAcessor.HttpContext.Request.Cookies["TableId"].ToString();
+        string companyId = HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"].ToString();
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", tableId);
+        parameters.Add("companyId", companyId);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        BillClosureOrderDTO billResultObject = JsonConvert.DeserializeObject<BillClosureOrderDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0 && billResultObject.CloseTotal)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Conta fechada.");
+            navigationManager.NavigateTo(companyId + "/" + tableId + "/" + configuration["ApplicationLinks:LoginCustomer"], true);
+            return;
+        }
+        string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
+        url = configuration["ApiLinks:OrderCreateByCustomer"] + $"tableId={_tableId}&customerDocument={customerDocument}";
+        commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
+        if (commandResult.Sucess)
+            navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro.");
+    }
+    private void Cancel()
+    {
+        navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
+    }
+
+
+}

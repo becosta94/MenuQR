@@ -1,0 +1,78 @@
+﻿@page "/product/typemanager"
+@attribute [Authorize]
+@inject HttpClient http
+@inject IConfiguration configuration
+@rendermode InteractiveServer
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+@inject IJSRuntime JsRuntime
+@inject UserManager<ApplicationUser> UserManager
+
+<h3>Gerenciador de Tipos de Produtos</h3>
+<a href="/product/typecreate/" class="btn btn-primary">Adicionar</a>
+@if (ProductsType.Count == 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Editar</th>
+                @*                 <th>Deletar</th> *@
+            </tr>
+        </thead>
+    </table>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Editar</th>
+                @*                 <th>Deletar</th> *@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ProductTypeDTO productType in ProductsType)
+            {
+                <tr>
+                    <td class="align-middle" scope="row">@productType.TypeName</td>
+                    <td class="align-middle">
+                        <a href="/product/typeedit/@productType.Id" class="btn btn-primary">Editar</a>
+                    </td>
+@*                     <td>
+                        <OrderQR.Application.Components.DeleteButton.DeleteButton CompanyId="productType.CompanyId" Id="productType.Id" Controller="@Controller" ErrorMenssage="@ErrorMenssage" />
+                    </td> *@
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
+    private string Controller = "ProductType";
+    private string ErrorMenssage = "Existem produtos com esse tipo de serviço. Delete ou mude o tipo desses produtos.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = (await authenticationStateTask).User;
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
+        var url = configuration["ApiLinks:ProductTypeGetAll"];
+        GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
+        if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO>)
+            ProductsType =  commandResult.Data as List<ProductTypeDTO>;
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+    }
+
+}

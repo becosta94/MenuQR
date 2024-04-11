@@ -1,0 +1,98 @@
+﻿@page "/{CompanyId:int}/{TableId:int}/customer/login/"
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+@inject IConfiguration configuration
+@inject IJSRuntime JsRuntime
+@inject IApiService ApiService
+@inject IHttpContextAccessor HttpContextAcessor
+@inject StateContainer stateContainer
+@layout OrderQR.Application.Components.Layout.EmptyLayout
+
+<EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="loginCustomer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="container">
+        <div class="card card-container">
+            <img id="profile-img" class="profile-img-card" src="@string.Format("data:image/png;base64, {0}", Company.Banner)" />
+            <p id="profile-name" class="profile-name-card"></p>
+            <div class="div-signin" id="div-signin">
+                <span id="reauth-cpf" class="reauth-cpf"></span>
+                <InputText @bind-Value="Model.Document" type="text" id="inputCPF" class="form-control" placeholder="CPF" required autofocus />
+                <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Entrar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var $seuCampoCpf = $("#inputCPF");
+        $seuCampoCpf.mask('000.000.000-00', { reverse: false });
+    });
+</script>
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; }
+    [Parameter]
+    public int CompanyId { get; set; }
+    [Parameter]
+    public int TableId { get; set; }
+    public CustomerDTO Model { get; set; } = new CustomerDTO();
+    public CompanyDTO Company { get; set; } = new CompanyDTO();
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("CustomerDocument");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["CompanyId"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("CompanyId");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableId"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableId");
+        if (HttpContextAcessor.HttpContext.Request.Cookies["TableGuid"] != null)
+            HttpContextAcessor.HttpContext.Response.Cookies.Delete("TableGuid");
+        var url = configuration["ApiLinks:CompanyGetById"];
+        GenericCommandResult commandResult = await ApiService.GetById<CompanyDTO>(url, null, CompanyId.ToString());
+        if (commandResult.Sucess && commandResult.Data is CompanyDTO company)
+            Company = company;
+        else
+            navigationManager.NavigateTo("/Error");
+    }
+    public async void OnSubmit()
+    {
+        var url = configuration["ApiLinks:BillClosureOrderGet"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", TableId);
+        parameters.Add("companyId", CompanyId);
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        BillClosureOrderDTO billResultObject = JsonConvert.DeserializeObject<BillClosureOrderDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && billResultObject.Id != 0 && billResultObject.CloseTotal)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Essa conta está sendo paga. Aguarde liberação para abrir nova conta.");
+            return;
+        }
+        else if (!commandResult.Sucess)
+            await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, contate a administração");
+        url = configuration["ApiLinks:CustomerGet"];
+        parameters.Clear();
+        parameters.Add("document", Model.Document);
+        parameters.Add("companyId", CompanyId);
+        parameters.Add("tableId", TableId);
+        commandResult = await ApiService.GetWithParameters<object>(url, null, parameters);
+        CustomerDTO customer = JsonConvert.DeserializeObject<CustomerDTO>(commandResult.Data.ToString());
+        ErroDTO erro = JsonConvert.DeserializeObject<ErroDTO>(commandResult.Data.ToString());
+        if (commandResult.Sucess && !string.IsNullOrEmpty(erro.Menssage))
+            await JsRuntime.InvokeVoidAsync("alert", erro.Menssage);
+        else if (commandResult.Sucess && customer.Id != 0)
+        {
+            stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
+        }
+        else
+        {
+            stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
+            navigationManager.NavigateTo(configuration["BaseApplicationLink"] + CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerCreate"] + Model.GetHashCode());
+        }
+    }
+}

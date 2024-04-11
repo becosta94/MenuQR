@@ -1,0 +1,15 @@
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\bin\Debug\net8.0\OrderQR.Domain.deps.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\bin\Debug\net8.0\OrderQR.Domain.runtimeconfig.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\bin\Debug\net8.0\OrderQR.Domain.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\bin\Debug\net8.0\OrderQR.Domain.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.csproj.AssemblyReference.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.AssemblyInfoInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.AssemblyInfo.cs
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.sourcelink.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\refint\OrderQR.Domain.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\OrderQR.Domain.genruntimeconfig.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Domain\obj\Debug\net8.0\ref\OrderQR.Domain.dll

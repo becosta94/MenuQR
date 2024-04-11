@@ -1,6 +1,0 @@
-@MenuQR.Api_HostAddress = http://localhost:5018
-
-GET {{MenuQR.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,0 +1,13 @@
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\bin\Debug\net8.0\OrderQR.Infra.CrossCutting.deps.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\bin\Debug\net8.0\OrderQR.Infra.CrossCutting.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\bin\Debug\net8.0\OrderQR.Infra.CrossCutting.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.csproj.AssemblyReference.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.AssemblyInfoInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.AssemblyInfo.cs
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.csproj.CoreCompileInputs.cache
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.sourcelink.json
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\refint\OrderQR.Infra.CrossCutting.dll
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\OrderQR.Infra.CrossCutting.pdb
+C:\Users\Bernardo\source\repos\MenuQR\MenuQR.Infra.CrossCutting\obj\Debug\net8.0\ref\OrderQR.Infra.CrossCutting.dll
