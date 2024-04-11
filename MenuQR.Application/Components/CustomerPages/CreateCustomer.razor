@@ -48,6 +48,7 @@
         var result = await ((HttpResponseMessage)commandResult.Data).Content.ReadAsStringAsync();
         if (commandResult.Sucess)
         {
+            stateContainer.ObjectTunnel.Remove(SetHashCode);
             stateContainer.ObjectTunnel.Add(Model.GetHashCode(), Model);
             navigationManager.NavigateTo(CompanyId.ToString() + "/" + TableId + "/" + configuration["ApplicationLinks:CustomerTokenCreate"] + Model.GetHashCode());
         }
