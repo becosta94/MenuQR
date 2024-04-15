@@ -23,13 +23,13 @@ namespace OrderQR.Services.Services.Factories
             _configuration = configuration;
         }
 
-        public Table Make(TableDTO tableDTO)
+        public Table Make(TableDTO tableDTO, string userId)
         {
             Table? table = _mapper.Map<Table>(tableDTO);
             table.Unique = Guid.NewGuid();
-            table = _validator.Execute(() => _tableBaseService.Add<TableValidator>(table)) as Table;
+            table = _validator.Execute(() => _tableBaseService.Add<TableValidator>(table, table.CompanyId, userId)) as Table;
             table.Link = _configuration["ApplicationLink"].ToString() + $"{table.CompanyId}/{table.Id}/customer/login/";
-            table = _validator.Execute(() => _tableBaseService.Update<TableValidator>(table)) as Table;
+            table = _validator.Execute(() => _tableBaseService.Update<TableValidator>(table, table.CompanyId, userId)) as Table;
             if (table is not null)
                 return table;
             return null;

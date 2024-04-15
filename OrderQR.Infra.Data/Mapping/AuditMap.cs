@@ -12,6 +12,7 @@ namespace OrderQR.Infra.Data.Mapping
             builder.ToTable("AuditLogs");
 
             builder.Property(p => p.UserId).HasColumnType("varchar(MAX)");
+            builder.Property(p => p.CompanyId).HasColumnType("varchar(MAX)");
             builder.Property(p => p.Type).HasColumnType("varchar(MAX)");
             builder.Property(p => p.TableName).HasColumnType("varchar(MAX)");
             builder.Property(p => p.OldValues).HasColumnType("varchar(MAX)");

@@ -9,6 +9,7 @@ namespace OrderQR.Domain.Entities
 
         public EntityEntry Entry { get; }
         public string UserId { get; set; }
+        public string CompanyId { get; set; }
         public string TableName { get; set; }
         public Dictionary<string, object> KeyValues { get; } = new();
         public Dictionary<string, object> OldValues { get; } = new();
@@ -21,6 +22,7 @@ namespace OrderQR.Domain.Entities
             var audit = new Audit
             {
                 UserId = UserId,
+                CompanyId = CompanyId,
                 Type = AuditType.ToString(),
                 TableName = TableName,
                 DateTime = DateTime.Now,

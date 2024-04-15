@@ -4,6 +4,7 @@
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
 
 <EditForm OnValidSubmit="(() => OnSubmitProduct(Cpf))" Model="@OrderProduct" FormName=@string.Concat(Cpf)>
     <div class="input-group input-group-sm d-flex px-40">
@@ -39,6 +40,10 @@
         </div>
         <InputNumber @bind-Value="ProductOffList.Amount" class="form-control" style="max-width: 60%" />
         <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-sm">Custo:</span>
+        </div>
+        <InputNumber @bind-Value="ProductOffList.Cost" class="form-control" style="max-width: 60%" />
+        <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-sm">Preço:</span>
         </div>
         <InputNumber @bind-Value="ProductOffList.Price" class="form-control" style="max-width: 60%" />
@@ -61,12 +66,19 @@
     public List<ProductDTO> Products { get; set; } = new List<ProductDTO>();
     [Parameter]
     public BillDTO Bill { get; set; } = new BillDTO();
+    [Parameter]
+    public string UserId { get; set; }
+
     private async void OnSubmitProduct(string customerDocument)
     {
         OrderProduct.Product = Products.Where(x => x.Id == OrderProduct.ProductId).FirstOrDefault();
         OrderProduct.CompanyId = Bill.CompanyId;
-        var url = configuration["ApiLinks:OrderCreateByCompany"] + $"tableId={Bill.TableId}&customerDocument={customerDocument}";
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<OrderProductCreateDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProduct);
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("tableId", Bill.TableId);
+        parameters.Add("customerDocument", customerDocument);
+        parameters.Add("userId", UserId);
+        var url = configuration["ApiLinks:OrderCreateByCompany"];
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<OrderProductCreateDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, OrderProduct);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Ok.");
@@ -77,12 +89,15 @@
     }
     private async void OnSubmitProductOffList(string customerDocument)
     {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
         ProductOffList.BillId = Bill.Id;
         ProductOffList.BillCompanyId = Bill.CompanyId;
         ProductOffList.CompanyId = Bill.CompanyId;
         ProductOffList.CustomerDocument = customerDocument;
-        var url = configuration["ApiLinks:ProductOffListCreate"] /* + $"customerDocument={customerDocument} "*/;
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductOffListDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), ProductOffList);
+        var url = configuration["ApiLinks:ProductOffListCreate"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", UserId);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<ProductOffListDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, ProductOffList);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Ok.");

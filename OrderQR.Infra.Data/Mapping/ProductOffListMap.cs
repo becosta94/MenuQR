@@ -25,6 +25,11 @@ namespace OrderQR.Infra.Data.Mapping
                .HasColumnName("Price")
                .HasColumnType("decimal(6,2)");
 
+            builder.Property(prop => prop.Cost)
+               .IsRequired()
+               .HasColumnName("Cost")
+               .HasColumnType("decimal(6,2)");
+
             builder.Property(prop => prop.Name)
                .IsRequired()
                .HasColumnName("Name")

@@ -25,7 +25,7 @@ namespace OrderQR.Services.Services.Factories
             _validator = validator;
             _cpfValidatorService = cpfValidatorService;
         }
-        public object Make(CustomerDTO customerDTO)
+        public object Make(CustomerDTO customerDTO, int companyId)
         {
             customerDTO.Document = customerDTO.Document.Replace("-", "").Replace(".","");
             Customer? exitingcustomer = _customerBaseService.Get().Where(x => x.Document == customerDTO.Document).FirstOrDefault();
@@ -33,7 +33,7 @@ namespace OrderQR.Services.Services.Factories
                 return new ErroDTO("Número de CPF já cadastrado");
             else if (!_cpfValidatorService.Validate(customerDTO.Document))
                 return new ErroDTO("CPF inválido");
-            Customer? newCustomer = _validator.Execute(() => _customerBaseService.Add<CustomerValidator>(_mapper.Map<Customer>(customerDTO))) as Customer;
+            Customer? newCustomer = _validator.Execute(() => _customerBaseService.Add<CustomerValidator>(_mapper.Map<Customer>(customerDTO), companyId, customerDTO.Document)) as Customer;
             if (newCustomer is null)
                 return null;
             return newCustomer;

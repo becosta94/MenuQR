@@ -16,9 +16,9 @@ namespace OrderQR.Api.Controllers
     {
         [HttpPost]
         [Route("create")]
-        public IActionResult Create([FromServices] ICustomerFactory customerFactory, [FromServices] IMapper mapper, CustomerDTO customerDTO)
+        public IActionResult Create([FromServices] ICustomerFactory customerFactory, [FromServices] IMapper mapper, CustomerDTO customerDTO, int companyId)
         {
-            object customerResult = customerFactory.Make(customerDTO);
+            object customerResult = customerFactory.Make(customerDTO, companyId);
             if (customerResult is not null && customerResult is Customer customer)
                 return Ok(mapper.Map<CustomerDTO>(customer));
             if (customerResult is not null && customerResult is ErroDTO erro)

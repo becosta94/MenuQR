@@ -25,16 +25,17 @@ namespace OrderQR.Api.Controllers
                                     [FromServices] IBaseService<Order> orderService,
                                     [FromServices] IMapper mapper,
                                     int tableId,
-                                    string customerDocument)
+                                    string customerDocument,
+                                    string userId)
         {
             try
             {
-                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, listOrderProductReceived.FirstOrDefault().CompanyId, true);
+                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, listOrderProductReceived.FirstOrDefault().CompanyId, true, userId);
                 try
                 {
                     if (newOrder is not null)
                     {
-                        ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, listOrderProductReceived);
+                        ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, listOrderProductReceived, userId);
                         if (orderProducts is not null)
                             return Ok(mapper.Map<OrderDTO>(newOrder));
                         return BadRequest("Pedido não realizado");
@@ -44,7 +45,7 @@ namespace OrderQR.Api.Controllers
                 }
                 catch
                 {
-                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId  });
+                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId }, newOrder.CompanyId, userId);
                     throw new Exception("Problema ao registar OrderProduct");
                 }
             }
@@ -62,18 +63,19 @@ namespace OrderQR.Api.Controllers
                             [FromServices] IBaseService<Order> orderService,
                             [FromServices] IMapper mapper,
                             int tableId,
-                            string customerDocument)
+                            string customerDocument,
+                            string userId)
         {
             try
             {
-                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, orderProductReceived.CompanyId, false);
+                Order? newOrder = newOrderFactory.Make(tableId, customerDocument, orderProductReceived.CompanyId, false, userId);
                 try
                 {
                     if (newOrder is not null)
                     {
                         List<OrderProductCreateDTO> orderProductDTOs = new List<OrderProductCreateDTO>();
                         orderProductDTOs.Add(orderProductReceived);
-                        ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, orderProductDTOs);
+                        ICollection<OrderProduct>? orderProducts = newOrderProductFactory.Make(newOrder, orderProductDTOs, userId);
                         if (orderProducts is not null)
                             return Ok(mapper.Map<OrderDTO>(newOrder));
                         return BadRequest("Pedido não realizado");
@@ -83,7 +85,7 @@ namespace OrderQR.Api.Controllers
                 }
                 catch
                 {
-                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId });
+                    orderService.DeleteByCompoundKey(new object[] { newOrder.Id, newOrder.CompanyId }, newOrder.CompanyId, userId);
                     throw new Exception("Problema ao registar OrderProduct");
                 }
             }
@@ -96,7 +98,7 @@ namespace OrderQR.Api.Controllers
         [HttpPut]
         [Route("deliverOrder")]
         [Authorize]
-        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int id, int companyId)
+        public IActionResult DeliverOrder([FromServices] IBaseService<Order> orderBaseService, [FromServices] IValidator validator, int id, int companyId, string userId)
         {
             Order? orderOutdated = orderBaseService.GetByCompoundKey(new object[] {id, companyId});
             if (orderOutdated is null)
@@ -111,7 +113,7 @@ namespace OrderQR.Api.Controllers
                 orderOutdated.DeliveryTime = DateTime.MinValue;
                 orderOutdated.Deliverd = false;
             }
-            Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated)) as Order;
+            Order? orderUpdated = validator.Execute(() => orderBaseService.Update<OrderValidator>(orderOutdated, companyId, userId)) as Order;
             if (orderUpdated is not null)
                 return Ok(orderUpdated);
             else
@@ -120,7 +122,7 @@ namespace OrderQR.Api.Controllers
 
         [HttpGet]
         [Route("getalltodelivery")]
-        //[Authorize]
+        [Authorize]
         public IActionResult GetAllToDelivery([FromServices] IBaseService<Order> orderBaseService, [FromServices] IMapper mapper, [FromServices] SqlContext context, int companyId)
         {
             List<Order>? orders = orderBaseService.Get().Where(x => x.CompanyId == companyId && !x.Deliverd).OrderBy(x => x.CreatedAt).ToList();
@@ -148,9 +150,9 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         [Authorize]
-        public void Delete([FromServices] IBaseService<Order> orderBaseService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<Order> orderBaseService, int id, int companyId, string userId)
         {
-            orderBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+            orderBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
         }
     }
 }

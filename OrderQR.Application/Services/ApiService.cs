@@ -33,7 +33,7 @@ namespace OrderQR.Application.Services
                 return new GenericCommandResult(false, "Post not made", ex);
             }
         }
-        public async Task<GenericCommandResult> PostWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
+        public async Task<GenericCommandResult> PostWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs, TEntity model)
         {
             try
             {
@@ -51,7 +51,11 @@ namespace OrderQR.Application.Services
                         totalParameters++;
                     }
                 }
-                HttpResponseMessage? response = await httpClient.PostAsync($"{url}{parameters}", null);
+                HttpResponseMessage? response = null;
+                if (model != null)
+                    response = await httpClient.PostAsJsonAsync($"{url}{parameters}", model);
+                else
+                    response = await httpClient.PostAsync($"{url}{parameters}", null);
                 if (response.IsSuccessStatusCode)
                     return new GenericCommandResult(true, "Post made successfully", response);
                 else
@@ -148,7 +152,7 @@ namespace OrderQR.Application.Services
         #endregion
 
         #region Put
-        public async Task<GenericCommandResult> PutWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs)
+        public async Task<GenericCommandResult> PutWithParameters<TEntity>(string url, string jwt, Dictionary<string, object> parameterDataPairs, TEntity data)
         {
             try
             {
@@ -166,7 +170,11 @@ namespace OrderQR.Application.Services
                         totalParameters++;
                     }
                 }
-                HttpResponseMessage? response = await httpClient.PutAsync($"{url}{parameters}", null);
+                HttpResponseMessage? response = null;
+                if (data != null)
+                    response = await httpClient.PutAsJsonAsync($"{url}{parameters}", data);
+                else
+                    response = await httpClient.PutAsync($"{url}{parameters}", null);
                 if (response.IsSuccessStatusCode)
                     return new GenericCommandResult(true, "Put made successfully", response);
                 else

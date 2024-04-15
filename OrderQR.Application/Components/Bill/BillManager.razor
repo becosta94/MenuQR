@@ -6,8 +6,8 @@
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
 @inject NavigationManager navigationManager
-@inject UserManager<ApplicationUser> UserManager
 @inject StateContainer stateContainer
+@inject IUserGetter usergetter
 <h3>Gerenciador de Contas</h3>
 @if (Bills.Count == 0)
 {
@@ -100,22 +100,14 @@ else
 
 @code {
     List<BillDTO> Bills { get; set; } = new List<BillDTO>();
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    ClaimsPrincipal CurrentUser;
-    private ApplicationUser user = default!;
+    private ApplicationUser _user = default!;
     private int _companyId;
     private string _controllerBill = "Bill";
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser = (await authenticationStateTask).User;
-        if (CurrentUser.Identity.IsAuthenticated)
-        {
-            user = await UserManager.GetUserAsync(CurrentUser);
-            _companyId = user.CompanyId;
-        }
-
+        ApplicationUser user = await usergetter.Get();
+        _companyId = user.CompanyId;
         string? url = configuration["ApiLinks:BillGetAll"];
         GenericCommandResult commandResult = await ApiService.Get<List<BillDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<BillDTO> bills)
@@ -133,10 +125,10 @@ else
         var url = configuration["ApiLinks:CloseBill"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", tableId);
-        parameters.Add("companyId", 1);
+        parameters.Add("companyId", _companyId);
         parameters.Add("closeTotal", false);
-        parameters.Add("customerDocument", null);
-        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        parameters.Add("customerDocument", null); 
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, null);
         if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
         {
             string? content = response.Content.ReadAsStringAsync().Result;

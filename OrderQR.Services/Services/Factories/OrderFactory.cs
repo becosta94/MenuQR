@@ -24,7 +24,7 @@ namespace OrderQR.Services.Services.Factories
             _customerHistorybaseService = customerHistorybaseService;
             _validator = validator;
         }
-        public Order? Make(int tableId, string customerDocument, int companyId, bool makeByCustomer)
+        public Order? Make(int tableId, string customerDocument, int companyId, bool makeByCustomer, string userId)
         {
             Table table = _baseServiceTable.GetByCompoundKey(new object[] { tableId, companyId });
             Customer? customer = _baseServiceCustomer.Get().Where(x => x.Document == customerDocument).FirstOrDefault();
@@ -34,12 +34,12 @@ namespace OrderQR.Services.Services.Factories
             if (customer is not null && customerHistory.OnPlace)
             {
                 if (makeByCustomer)
-                    return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(new Order(table.Id, customer.Document, companyId, customerHistory.Id, customerHistory.CompanyId))) as Order;
+                    return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(new Order(table.Id, customer.Document, companyId, customerHistory.Id, customerHistory.CompanyId), companyId, userId)) as Order;
                 else
                 {
                     Order order = new Order(table.Id, customer.Document, companyId, customerHistory.Id, customerHistory.CompanyId);
                     order.Deliverd = true;
-                    return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(order)) as Order;
+                    return _validator.Execute(() => _baseServiceOrder.Add<OrderValidator>(order, companyId, userId)) as Order;
                 }
             }
             return null;

@@ -13,27 +13,27 @@ namespace OrderQR.Infra.Data.Repository
             _sqlContext = mySqlContext;
         }
 
-        public void Insert(TEntity obj)
+        public void Insert(TEntity obj, int companyId, string userId)
         {
             _sqlContext.Set<TEntity>().Add(obj);
-            _sqlContext.SaveChanges();
+            _sqlContext.SaveChanges(companyId, userId);
         }
 
-        public void Update(TEntity obj)
+        public void Update(TEntity obj, int companyId, string userId)
         {
             _sqlContext.Entry(obj).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _sqlContext.SaveChanges();
+            _sqlContext.SaveChanges(companyId, userId);
         }
-        public void Delete(int id)
+        public void Delete(int id, int companyId, string userId)
         {
             _sqlContext.Set<TEntity>().Remove(Select(id));
-            _sqlContext.SaveChanges();
+            _sqlContext.SaveChanges(companyId, userId);
         }
 
-        public void DeleteByCompoundKey(object[] compoundKey)
+        public void DeleteByCompoundKey(object[] compoundKey, int companyId, string userId)
         {
             _sqlContext.Set<TEntity>().Remove(SelectByCompoundKey(compoundKey));
-            _sqlContext.SaveChanges();
+            _sqlContext.SaveChanges(companyId, userId);
         }
 
         public IList<TEntity> Select() =>

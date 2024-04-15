@@ -18,10 +18,10 @@ namespace OrderQR.Services.Services.Factories
             _productBaseService = productBaseService;
             _validator = validator;
         }
-        public Product Make(ProductDTO productDTO)
+        public Product Make(ProductDTO productDTO, string userId)
         {
             Product? product = _mapper.Map<Product>(productDTO);
-            product = _validator.Execute(() => _productBaseService.Add<ProductValidator>(product)) as Product;
+            product = _validator.Execute(() => _productBaseService.Add<ProductValidator>(product, product.CompanyId, userId)) as Product;
             if (product is not null)
                 return product;
             return null;

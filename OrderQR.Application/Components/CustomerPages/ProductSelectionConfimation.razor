@@ -85,8 +85,12 @@
             return;
         }
         string customerDocument = HttpContextAcessor.HttpContext.Request.Cookies["CustomerDocument"].ToString();
-        url = configuration["ApiLinks:OrderCreateByCustomer"] + $"tableId={_tableId}&customerDocument={customerDocument}";
-        commandResult = await ApiService.PostAsJsonAsync<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), OrderProductsCrete);
+        url = configuration["ApiLinks:OrderCreateByCustomer"];
+        parameters.Clear();
+        parameters.Add("tableId", tableId);
+        parameters.Add("customerDocument", customerDocument);
+        parameters.Add("userId", customerDocument);
+        commandResult = await ApiService.PostWithParameters<List<OrderProductCreateDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, OrderProductsCrete);
         if (commandResult.Sucess)
             navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:ProductSelection"]);
         else

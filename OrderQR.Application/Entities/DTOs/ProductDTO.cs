@@ -12,6 +12,9 @@ namespace OrderQR.Application.Entities.DTOs
         [Required]
         [Range(1.00, double.MaxValue)]
         public double Price { get; set; }
+        [Required]
+        [Range(1.00, double.MaxValue)]
+        public double Cost { get; set; }
         public string? Image { get; set; }
         [Required]
         public bool Active { get; set; }

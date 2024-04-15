@@ -1,0 +1,142 @@
+﻿@page "/dashboard"
+@inject IHttpContextAccessor HttpContextAcessor
+@inject IConfiguration configuration
+@inject IApiService ApiService
+@inject UserManager<ApplicationUser> UserManager
+@rendermode InteractiveServer
+@inject NavigationManager navigationManager
+
+
+<PageTitle>Dashboard</PageTitle>
+<AuthorizeView Context="authContext">
+    <NotAuthorized>
+        <h3>Bem Vindo!</h3>
+    </NotAuthorized>
+    <Authorized>
+        <div class="container mt-4">
+            <EditForm OnValidSubmit="GetDashboardValues" Model="Model" FormName="addTable">
+                <DataAnnotationsValidator />
+                <div class="row mb-4 d-flex align-items-end">
+                    <div class="col-md-5">
+                        <label for="dataInicial">Data Inicial:</label>
+                        <InputDate placeholder="@DateTime.Now" @bind-Value="Model.From" class="form-control" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="dataFinal">Data Final:</label>
+                        <InputDate placeholder="@DateTime.Now" @bind-Value="Model.To" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </div>
+                </div>
+            </EditForm>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Receita Total</h5>
+                            <p class="card-text">R$ @_incomeValue.ToString("0.00")</p>
+                        </div>
+                    </div>
+                </div>
+                @*             <div class="col-md-4">
+                <div class="card">
+                <div class="card-body">
+                <h5 class="card-title">Custo Total do Mês</h5>
+                <p class="card-text"></p>
+                </div>
+                </div>
+                </div> *@
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Lucro Líquido</h5>
+                            <p class="card-text">R$ @_profitValue.ToString("0.00")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Top 3 Produtos Mais Pedidos</h5>
+                        <ul>
+
+                            @foreach (string product in _top3OrderedProducts)
+                            {
+                                <li class="card-text">@product</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @*         <div class="col-md-6">
+            <div class="card">
+            <div class="card-body">
+            <h5 class="card-title">Gráfico de Evolução da Receita Mensal</h5>
+            <div id="chart"></div>
+            </div>
+            </div>
+            </div> *@
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@code {
+    private double _incomeValue;
+    private double _profitValue;
+    private List<string> _top3OrderedProducts = new List<string>();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    ClaimsPrincipal CurrentUser;
+    private ApplicationUser user = default!;
+    private int _companyId;
+    private Dates Model = new Dates();
+    internal class Dates
+    {
+        public DateTime From = DateTime.Now.Date.AddDays(-1);
+        public DateTime To = DateTime.Now;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = (await authenticationStateTask).User;
+
+        if (CurrentUser.Identity.IsAuthenticated)
+        {
+            user = await UserManager.GetUserAsync(CurrentUser);
+            _companyId = user.CompanyId;
+        }
+        else
+            navigationManager.NavigateTo("/", true);
+    }
+    private async void GetDashboardValues()
+    {
+        if (HttpContextAcessor.HttpContext.Request.Cookies["Token"] == null)
+            return;
+        if (Model.From == DateTime.MinValue || Model.To == DateTime.MinValue)
+        {
+            Model.From = DateTime.Now.AddDays(-7).Date;
+            Model.To = DateTime.Now;
+        }
+        string? url = configuration["ApiLinks:DashboardGetIncome"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("companyId", _companyId);
+        parameters.Add("from", Model.From.ToString("MM/dd/yyy hh:mm:ss"));
+        parameters.Add("to", Model.To.ToString("MM/dd/yyy hh:mm:ss"));
+        GenericCommandResult commandResult = await ApiService.GetWithParameters<double>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess && commandResult.Data is double income)
+            _incomeValue = income;
+        url = configuration["ApiLinks:DashboardGetProfit"];
+        commandResult = await ApiService.GetWithParameters<double>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess && commandResult.Data is double profit)
+            _profitValue = profit;
+        url = configuration["ApiLinks:DashboardGetMostOrderedProducts"];
+        commandResult = await ApiService.GetWithParameters<List<string>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        if (commandResult.Sucess && commandResult.Data is List<string> top3OrderedProducts)
+            _top3OrderedProducts = top3OrderedProducts;
+        StateHasChanged();
+    }
+}

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OrderQR.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aff82b4d4fb2c405b1b7185558260183cd26f942")]
 [assembly: System.Reflection.AssemblyProductAttribute("OrderQR.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OrderQR.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

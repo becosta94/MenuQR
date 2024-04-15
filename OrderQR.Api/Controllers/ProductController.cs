@@ -16,9 +16,9 @@ namespace OrderQR.Api.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize]
-        public IActionResult Create([FromServices] IProductFactory productFactory, [FromServices] IMapper mapper, ProductDTO productDTO)
+        public IActionResult Create([FromServices] IProductFactory productFactory, [FromServices] IMapper mapper, ProductDTO productDTO, string userId)
         {
-            Product product = productFactory.Make(productDTO);
+            Product product = productFactory.Make(productDTO, userId);
             if (product is not null)
                 return Ok(mapper.Map<ProductDTO>(product));
             else
@@ -31,9 +31,10 @@ namespace OrderQR.Api.Controllers
         public IActionResult Update([FromServices] IBaseService<Product> productBaseService,
                                     [FromServices] IValidator validator,
                                     [FromServices] IMapper mapper,
-                                    ProductDTO product)
+                                    ProductDTO product,
+                                    string userId)
         {
-            Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(mapper.Map<Product>(product))) as Product;
+            Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(mapper.Map<Product>(product), product.CompanyId, userId)) as Product;
             if (productUpdated is not null)
                 return Ok(mapper.Map<ProductDTO>(productUpdated));
             else
@@ -47,11 +48,12 @@ namespace OrderQR.Api.Controllers
                                             [FromServices] IMapper mapper,
                                             [FromServices] IValidator validator,
                                             int productId,
-                                            int companyId)
+                                            int companyId,
+                                            string userId)
         {
             Product? productOutdated = productBaseService.GetByCompoundKey(new object[] { productId, companyId });
             productOutdated.Active = !productOutdated.Active;
-            Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated)) as Product;
+            Product? productUpdated = validator.Execute(() => productBaseService.Update<ProductValidator>(productOutdated, productOutdated.CompanyId, userId)) as Product;
             if (productUpdated is not null)
                 return Ok(mapper.Map<ProductDTO>(productUpdated));
             else
@@ -88,9 +90,9 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         [Authorize]
-        public void Delete([FromServices] IBaseService<Product> productBaseService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<Product> productBaseService, int id, int companyId, string userId)
         {
-            productBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+            productBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
         }
     }
 }

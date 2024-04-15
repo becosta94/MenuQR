@@ -35,10 +35,10 @@ namespace OrderQR.Api.Controllers
         }
         [HttpPost]
         [Route("create")]
-        [Authorize]
-        public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument)
+        //[Authorize]
+        public IActionResult Create([FromServices] IBillFactory newBillFactory, int tableId, int companyId, string customerDocument, string userId)
         {
-            Bill bill = newBillFactory.Make(tableId, companyId, customerDocument.Replace("-","").Replace(".",""));
+            Bill bill = newBillFactory.Make(tableId, companyId, customerDocument.Replace("-","").Replace(".",""), userId);
             if (bill is not null)
                 return Ok(bill);
             else
@@ -47,10 +47,10 @@ namespace OrderQR.Api.Controllers
         [HttpPut]
         [Route("close")]
         //[Authorize]
-        public IActionResult Close([FromServices] IBillCloser billCloser, BillClosureOrderDTO billClosureOrderDTO, IMapper mapper)
+        public IActionResult Close([FromServices] IBillCloser billCloser, BillClosureOrderDTO billClosureOrderDTO, IMapper mapper, string userId)
         {
             BillClosureOrder billClosureOrder = mapper.Map<BillClosureOrder>(billClosureOrderDTO);
-            object returnedObjectBill = billCloser.Close(billClosureOrder);
+            object returnedObjectBill = billCloser.Close(billClosureOrder, userId);
             if (returnedObjectBill is not null && returnedObjectBill is Bill bill)
                 return Ok(bill);
             else if (returnedObjectBill is not null && returnedObjectBill is ErroDTO erro)
@@ -97,12 +97,12 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         //[Authorize]
-        public void Delete([FromServices] IBaseService<Bill> billBaseService, [FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<Bill> billBaseService, [FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int id, int companyId, string userId)
         {
             Bill bill = billBaseService.GetByCompoundKey(new object[] { id, companyId });
             BillClosureOrder? billClosureOrders = billClosureOrderService.Get().Where(x => x.CompanyId == companyId && !x.OrderCompleted && x.TableId == bill.TableId && x.TableCompanyId == companyId).LastOrDefault();
-            billBaseService.DeleteByCompoundKey(new object[] { id, companyId });
-            billClosureOrderService.DeleteByCompoundKey(new object[] { billClosureOrders.Id, billClosureOrders.CompanyId });
+            billBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
+            billClosureOrderService.DeleteByCompoundKey(new object[] { billClosureOrders.Id, billClosureOrders.CompanyId }, billClosureOrders.CompanyId, userId);
         }
     }
 }

@@ -59,7 +59,12 @@ namespace OrderQR.Infra.Data.Mapping
             builder.Property(prop => prop.Total)
                .IsRequired()
                .HasColumnName("Total")
-               .HasColumnType("float");
+                .HasColumnType("decimal(6,2)");
+
+            builder.Property(prop => prop.Profit)
+               .IsRequired()
+               .HasColumnName("Profit")
+               .HasColumnType("decimal(6,2)");
 
         }
     }

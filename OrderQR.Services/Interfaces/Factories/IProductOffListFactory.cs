@@ -5,6 +5,6 @@ namespace OrderQR.Services.Interfaces.Factories
 {
     public interface IProductOffListFactory
     {
-        public ProductOffList Make(ProductOffListDTO productoffListDTO);
+        public ProductOffList Make(ProductOffListDTO productoffListDTO, string userId);
     }
 }

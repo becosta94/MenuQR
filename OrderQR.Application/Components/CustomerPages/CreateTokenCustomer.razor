@@ -55,7 +55,8 @@
         keyParametersPair.Add("tableId", TableId);
         keyParametersPair.Add("companyId", CompanyId);
         keyParametersPair.Add("customerDocument", Model.Document);
-        commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair);
+        keyParametersPair.Add("userId", Model.Document.Replace("-", "").Replace(".", ""));
+        commandResult = await ApiService.PostWithParameters<BillDTO>(url, token, keyParametersPair, null);
         if (commandResult.Sucess)
         {
             navigationManager.NavigateTo(CompanyName + "/" + TableGuid + "/" + configuration["ApplicationLinks:CustomerLogged"] +  Model.GetHashCode());

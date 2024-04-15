@@ -191,7 +191,8 @@ else
         parameters.Add("customerDocument", _customerDocument);
         parameters.Add("tips", _tips ? "true" : "false");
         parameters.Add("closeTotal", CloseTotal ? "true" : "false");
-        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        parameters.Add("userId", _customerDocument);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<BillDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, null);
         if (commandResult.Sucess && commandResult.Data is HttpResponseMessage response)
         {
             string? content = response.Content.ReadAsStringAsync().Result;

@@ -22,7 +22,7 @@ namespace OrderQR.Services.Services.Factories
             _custumerHistoryService = custumerHistoryService;
             _validator = validator;
         }
-        public Bill Make(int tableId, int companyId, string custumerDocument)
+        public Bill Make(int tableId, int companyId, string custumerDocument, string userId)
         {
             Bill exitingBill = _billService.Get().Where(x => x.TableId == tableId && x.CompanyId == companyId && x.Open).FirstOrDefault();
             if (exitingBill is not null)
@@ -31,7 +31,7 @@ namespace OrderQR.Services.Services.Factories
                 if (customerHistoryList.Count == 0)
                 {
                     CustomerHistory customerHistory = new CustomerHistory() { BillId = exitingBill.Id, CompanyId = companyId, BillCompanyId = exitingBill.CompanyId, OnPlace = true, CustomerDocument = custumerDocument };
-                    customerHistory = _validator.Execute(() => _custumerHistoryService.Add<CustomerHistoryValidator>(customerHistory)) as CustomerHistory;
+                    customerHistory = _validator.Execute(() => _custumerHistoryService.Add<CustomerHistoryValidator>(customerHistory, customerHistory.CompanyId, userId)) as CustomerHistory;
                     if (customerHistory is not null)
                         return exitingBill;
                     else
@@ -45,15 +45,15 @@ namespace OrderQR.Services.Services.Factories
             if (table is null)
                 return null;
             Bill? bill = new Bill() { TableId = table.Id, TableCompanyId = table.CompanyId, CompanyId = companyId };
-            bill = _validator.Execute(() => _billService.Add<BillValidator>(bill)) as Bill;
+            bill = _validator.Execute(() => _billService.Add<BillValidator>(bill, bill.CompanyId, userId)) as Bill;
             if (bill is not null)
             {
                 CustomerHistory customerHistory = new CustomerHistory() { Bill = bill, BillId = bill.Id, BillCompanyId = bill.CompanyId, CompanyId = companyId, OnPlace = true, CustomerDocument = custumerDocument };
-                customerHistory = _validator.Execute(() => _custumerHistoryService.Add<CustomerHistoryValidator>(customerHistory)) as CustomerHistory;
+                customerHistory = _validator.Execute(() => _custumerHistoryService.Add<CustomerHistoryValidator>(customerHistory, customerHistory.CompanyId, userId)) as CustomerHistory;
                 if (customerHistory is not null)
                     return bill;
                 else
-                    _billService.DeleteByCompoundKey(new object[] { bill.Id, bill.CompanyId });
+                    _billService.DeleteByCompoundKey(new object[] { bill.Id, bill.CompanyId }, bill.CompanyId, userId);
             }
             return null;
         }

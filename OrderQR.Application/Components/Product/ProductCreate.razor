@@ -7,7 +7,7 @@
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor HttpContextAcessor
-@inject UserManager<ApplicationUser> UserManager
+@inject IUserGetter usergetter
 
 <h3>Adicionar Produto</h3>
 
@@ -20,6 +20,10 @@
     <div class="mb-3">
         <label class="form-label">Preço:</label>
         <InputNumber @bind-Value="Model.Price" class="form-control" style="max-width: 60%" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Custo:</label>
+        <InputNumber @bind-Value="Model.Cost" class="form-control" style="max-width: 60%" />
     </div>
     <div class="mb-3">
         <label class="form-label">Descrição:</label>
@@ -60,18 +64,17 @@
     public string ImageDataUrl;
     List<ProductTypeDTO> ProductsType { get; set; } = new List<ProductTypeDTO>();
     public string Base64;
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    ClaimsPrincipal CurrentUser;
-    private ApplicationUser user = default!;
     private int _companyId;
+    private string _userId;
 
     public async void OnSubmit()
     {
         Model.Active = true;
         Model.CompanyId = _companyId;
         string url = configuration["ApiLinks:ProductCreate"];
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", _userId);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters,  Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
@@ -83,12 +86,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser = (await authenticationStateTask).User;
-        if (CurrentUser.Identity.IsAuthenticated)
-        {
-            user = await UserManager.GetUserAsync(CurrentUser);
-            _companyId = user.CompanyId;
-        }
+        ApplicationUser user = await usergetter.Get();
+        _companyId = user.CompanyId;
+        _userId = user.Id;
         string url = configuration["ApiLinks:ProductTypeGetAll"];
         GenericCommandResult commandResult = await ApiService.Get<List<ProductTypeDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<ProductTypeDTO> productsTypeApi)

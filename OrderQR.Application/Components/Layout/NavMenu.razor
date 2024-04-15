@@ -28,6 +28,12 @@
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3 d-flex align-items-center">
+                    <NavLink class="nav-link" href="/dashboard">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>
+                        <p style="  overflow: hidden;  white-space: nowrap;  text-overflow: ellipsis; margin: 0;">Dashboard</p>
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3 d-flex align-items-center">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true" ></span>
                         <p style="  overflow: hidden;  white-space: nowrap;  text-overflow: ellipsis; margin: 0;">@context.User.Identity?.Name</p>
@@ -104,7 +110,6 @@
 
         public async void OnPost()
         {
-
             await SignInManager.SignOutAsync();
             HttpContextAcessor.HttpContext.Response.Cookies.Delete("Token");
             NavigationManager.NavigateTo("/logout");

@@ -4,6 +4,7 @@
     {
         public virtual int Id { get; set; }
         public string UserId { get; set; }
+        public string CompanyId { get; set; }
         public string Type { get; set; }
         public string TableName { get; set; }
         public DateTime DateTime { get; set; }

@@ -16,9 +16,9 @@ namespace OrderQR.Api.Controllers
         [HttpPost]
         [Route("create")]
         //[Authorize]
-        public IActionResult Create([FromServices] ITableFactory tableFactory, [FromServices] IMapper mapper, TableDTO tableDTO)
+        public IActionResult Create([FromServices] ITableFactory tableFactory, [FromServices] IMapper mapper, TableDTO tableDTO, string userId)
         {
-            Table product = tableFactory.Make(tableDTO);
+            Table product = tableFactory.Make(tableDTO, userId);
             if (product is not null)
                 return Ok(mapper.Map<TableDTO>(product));
             else
@@ -30,9 +30,10 @@ namespace OrderQR.Api.Controllers
         public IActionResult Update([FromServices] IBaseService<Table> tableBaseService,
                                     [FromServices] IValidator validator,
                                     [FromServices] IMapper mapper,
-                                    TableDTO table)
+                                    TableDTO table,
+                                    string userId)
         {
-            Table? tableUpdated = validator.Execute(() => tableBaseService.Update<TableValidator>(mapper.Map<Table>(table))) as Table;
+            Table? tableUpdated = validator.Execute(() => tableBaseService.Update<TableValidator>(mapper.Map<Table>(table), table.CompanyId, userId)) as Table;
             if (tableUpdated is not null)
                 return Ok(mapper.Map<TableDTO>(tableUpdated));
             else
@@ -66,9 +67,9 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         //[Authorize]
-        public void Delete([FromServices] IBaseService<Table> tableBaseService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<Table> tableBaseService, int id, int companyId, string userId)
         {
-            tableBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+            tableBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
         }
     }
 }

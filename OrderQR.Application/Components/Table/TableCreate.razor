@@ -11,7 +11,7 @@
 @inject IConfiguration configuaration
 @inject NavigationManager navigationManager
 @inject IHttpContextAccessor HttpContextAcessor
-@inject UserManager<ApplicationUser> UserManager
+@inject IUserGetter usergetter
 
 <h3>Adicionar Mesa</h3>
 
@@ -27,11 +27,8 @@
 
 @code {
     public TableDTO Model { get; set; } = new TableDTO();
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    private ClaimsPrincipal CurrentUser;
-    private ApplicationUser user = default!;
     private int _companyId;
+    private string _userId;
 
     private async void OnSubmit()
     {
@@ -39,7 +36,9 @@
         Model.CompanyId = _companyId;
         Model.Unique = Guid.NewGuid();
         Model.Link = string.Empty;
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", _userId);
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Mesa cadastrada");
@@ -50,13 +49,9 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser = (await authenticationStateTask).User;
-
-        if (CurrentUser.Identity.IsAuthenticated)
-        {
-            user = await UserManager.GetUserAsync(CurrentUser);
-            _companyId = user.CompanyId;
-        }
+        ApplicationUser user = await usergetter.Get();
+        _companyId = user.CompanyId;
+        _userId = user.Id;
     }
 }
 

@@ -15,9 +15,9 @@ namespace OrderQR.Api.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize]
-        public IActionResult Create([FromServices]IProductOffListFactory productFactory, [FromServices]IMapper mapper, [FromBody]ProductOffListDTO productOffListDTO/*, string customerDocument*/)
+        public IActionResult Create([FromServices]IProductOffListFactory productFactory, [FromServices]IMapper mapper, [FromBody]ProductOffListDTO productOffListDTO, string userId)
         {
-            ProductOffList productOffList = productFactory.Make(productOffListDTO);
+            ProductOffList productOffList = productFactory.Make(productOffListDTO, userId);
             if (productOffList is not null)
                 return Ok(mapper.Map<ProductOffListDTO>(productOffList));
             else
@@ -26,9 +26,9 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         [Authorize]
-        public void Delete([FromServices] IBaseService<ProductOffList> productOffListBaseService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<ProductOffList> productOffListBaseService, int id, int companyId, string userId)
         {
-            productOffListBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+            productOffListBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
         }
     }
 }

@@ -4,6 +4,6 @@ namespace OrderQR.Services.Interfaces.Factories
 {
     public interface IBillFactory
     {
-        public Bill Make(int tableId, int companyId, string customerDocument);
+        public Bill Make(int tableId, int companyId, string customerDocument, string userId);
     }
 }

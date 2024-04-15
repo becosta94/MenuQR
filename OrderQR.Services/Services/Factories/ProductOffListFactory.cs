@@ -20,10 +20,10 @@ namespace OrderQR.Services.Services.Factories
             _validator = validator;
         }
 
-        public ProductOffList Make(ProductOffListDTO productoffListDTO)
+        public ProductOffList Make(ProductOffListDTO productoffListDTO, string userId)
         {
             ProductOffList? product = _mapper.Map<ProductOffList>(productoffListDTO);
-            product = _validator.Execute(() => _productOffListBaseService.Add<ProductOffListValidator>(product)) as ProductOffList;
+            product = _validator.Execute(() => _productOffListBaseService.Add<ProductOffListValidator>(product, product.CompanyId, userId)) as ProductOffList;
             if (product is not null)
                 return product;
             return null;

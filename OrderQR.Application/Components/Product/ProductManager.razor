@@ -17,6 +17,7 @@
                 <th>Imagem</th>
                 <th>Nome</th>
                 <th>Preço</th>
+                <th>Custo</th>
                 <th>Descrição</th>
                 <th>Tipo</th>
                 <th>Ativo</th>
@@ -33,6 +34,7 @@ else
                 <th>Imagem</th>
                 <th>Nome</th>
                 <th>Preço</th>
+                <th>Custo</th>
                 <th>Descrição</th>
                 <th>Tipo</th>
                 <th>Ativo</th>
@@ -48,6 +50,7 @@ else
                     </td>
                     <td class="align-middle" scope="row">@product.Name</td>
                     <td class="align-middle">R$ @product.Price.ToString("0.00")</td>
+                    <td class="align-middle">R$ @product.Cost.ToString("0.00")</td>
                     <td class="align-middle text-break" style="max-width: 300px;">
                         <p class="align-middle">@product.Description</p>
                     </td>
@@ -108,7 +111,7 @@ else
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("productId", productId);
         parameters.Add("companyId", companyId);
-        GenericCommandResult commandResult = await ApiService.PutWithParameters<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<ProductDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, null);
         if (!commandResult.Sucess)
             await JsRuntime.InvokeVoidAsync("alert", "Produto não alterado!");
     }

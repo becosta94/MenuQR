@@ -10,6 +10,7 @@
         public int BillCompanyId { get; set; }
         public double Amount { get; set; }
         public double Total { get; set; }
+        public double Profit { get; set; }
         public virtual Order Order { get; set; } = null!;
         public virtual Product Product { get; set; } = null!;
         public virtual Bill Bill { get; set; } = null!;

@@ -21,7 +21,7 @@ namespace OrderQR.Services.Services.Factories
             customerHistory.CustomerDocument = customer.Document;
             customerHistory.CompanyId = companyId;
             customerHistory.OnPlace = true;
-            customerHistory = _validator.Execute(() => _customerHistoryBaseService.Add<CustomerHistoryValidator>(customerHistory)) as CustomerHistory;
+            customerHistory = _validator.Execute(() => _customerHistoryBaseService.Add<CustomerHistoryValidator>(customerHistory, companyId, customer.Document)) as CustomerHistory;
             if (customerHistory is not null)
                 return customerHistory;
             return null;           

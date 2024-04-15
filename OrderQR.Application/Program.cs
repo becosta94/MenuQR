@@ -24,6 +24,7 @@ builder.Services.AddScoped<IModalServices, ModalServices>();
 builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<HttpClient, HttpClient>();
 builder.Services.AddTransient<IApiService, ApiService>();
+builder.Services.AddTransient<IUserGetter, UserGetter>();
 builder.Services.AddTransient<ITableAndCompanyChecker, TableAndCompanyChecker>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
@@ -31,6 +32,7 @@ builder.Services.AddSingleton<StateContainer>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddAuthentication(options =>
     {

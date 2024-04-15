@@ -16,9 +16,9 @@ namespace OrderQR.Api.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize]
-        public IActionResult Create([FromServices] IProductTypeFactory productTypeFactory, [FromServices] IMapper mapper, ProductTypeDTO productTypeDTO)
+        public IActionResult Create([FromServices] IProductTypeFactory productTypeFactory, [FromServices] IMapper mapper, ProductTypeDTO productTypeDTO, string userId)
         {
-            ProductType productType = productTypeFactory.Make(productTypeDTO);
+            ProductType productType = productTypeFactory.Make(productTypeDTO, userId);
             if (productType is not null)
                 return Ok(mapper.Map<ProductTypeDTO>(productType));
             else
@@ -31,9 +31,10 @@ namespace OrderQR.Api.Controllers
         public IActionResult Update([FromServices] IBaseService<ProductType> productTypeBaseService,
                             [FromServices] IValidator validator,
                             [FromServices] IMapper mapper,
-                            ProductTypeDTO productTypeDTO)
+                            ProductTypeDTO productTypeDTO,
+                            string userId)
         {
-            ProductType? productUpdated = validator.Execute(() => productTypeBaseService.Update<ProductTypeValidator>(mapper.Map<ProductType>(productTypeDTO))) as ProductType;
+            ProductType? productUpdated = validator.Execute(() => productTypeBaseService.Update<ProductTypeValidator>(mapper.Map<ProductType>(productTypeDTO), productTypeDTO.CompanyId, userId)) as ProductType;
             if (productUpdated is not null)
                 return Ok(mapper.Map<ProductTypeDTO>(productUpdated));
             else
@@ -70,12 +71,12 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         [Authorize]
-        public IActionResult Delete([FromServices] IBaseService<ProductType> productTypeBaseService, [FromServices] IBaseService<Product> productBaseService, int id, int companyId)
+        public IActionResult Delete([FromServices] IBaseService<ProductType> productTypeBaseService, [FromServices] IBaseService<Product> productBaseService, int id, int companyId, string userId)
         {
             bool hasProducts = productBaseService.Get().Where(x => x.ProductTypeId == id && x.ProductTypeCompanyId == companyId).Any();
             if (!hasProducts)
             {
-                productTypeBaseService.DeleteByCompoundKey(new object[] { id, companyId });
+                productTypeBaseService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
                 return Ok();
             }
             else

@@ -7,7 +7,7 @@
 @inject IJSRuntime JsRuntime
 @inject IApiService ApiService
 @inject IHttpContextAccessor HttpContextAcessor
-@inject UserManager<ApplicationUser> UserManager
+@inject IUserGetter usergetter
 
 <h3>Editar Mesa</h3>
 
@@ -29,20 +29,14 @@
     private TableDTO Model { get; set; } = new TableDTO();
     [Parameter]
     public int Id { get; set; }
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    ClaimsPrincipal CurrentUser;
-    private ApplicationUser user = default!;
     private int _companyId;
+    private string _userId;
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser = (await authenticationStateTask).User;
-        if (CurrentUser.Identity.IsAuthenticated)
-        {
-            user = await UserManager.GetUserAsync(CurrentUser);
-            _companyId = user.CompanyId;
-        }
+        ApplicationUser user = await usergetter.Get();
+        _companyId = user.CompanyId;
+        _userId = user.Id;
         var url = configuaration["ApiLinks:TableGetById"];
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("tableId", Id);
@@ -59,7 +53,9 @@
     private async void OnSubmit()
     {
         var url = configuaration["ApiLinks:TableUpdate"];
-        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", _userId);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<TableDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Mesa alterada!");

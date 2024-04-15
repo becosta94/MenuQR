@@ -26,7 +26,7 @@ namespace OrderQR.Services.Services.Factories
             _validator = validator;
             _mapper = mapper;
         }
-        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductCreateDTO> listOrderProductReceived)
+        public ICollection<OrderProduct>? Make(Order order, ICollection<OrderProductCreateDTO> listOrderProductReceived, string userId)
         {
             List<OrderProduct> listOrderProductMapped = new List<OrderProduct>();
             if (listOrderProductReceived.Sum(x => x.Amount) == 0)
@@ -41,12 +41,13 @@ namespace OrderQR.Services.Services.Factories
                 if (product is null)
                     continue;
                 orderProduct.Total = product.Price * orderProduct.Amount;
+                orderProduct.Profit = (product.Price - product.Cost) * orderProduct.Amount;
                 orderProduct.Id = 0;
                 orderProduct.Order = order;
                 orderProduct.Product = product;
                 orderProduct.Bill = bill;
                 orderProduct.CompanyId = order.CompanyId;
-                OrderProduct? newOrderProduc = _validator.Execute(() => _baseOrderProductService.Add<OrderProductValidator>(orderProduct)) as OrderProduct;
+                OrderProduct? newOrderProduc = _validator.Execute(() => _baseOrderProductService.Add<OrderProductValidator>(orderProduct, orderProduct.CompanyId, userId)) as OrderProduct;
                 if (newOrderProduc is null)
                     throw new Exception("Erro in OrderProduct");
                 orderProductsAddedd.Add(newOrderProduc);

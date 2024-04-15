@@ -8,7 +8,7 @@
 @inject IApiService ApiService
 @inject NavigationManager navigationManager
 @inject UserManager<ApplicationUser> UserManager
-
+@inject IUserGetter usergetter
 <h3>Gerenciador de Pedidos</h3>
 @if (Orders.Count() == 0)
 {
@@ -170,15 +170,13 @@ else
     private int _companyId;
     private string _controllerOrder = "Order";
     private string _controllerBillClosureOrders = "BillClosureOrder";
+    private string _userId;
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUser = (await authenticationStateTask).User;
-        if (CurrentUser.Identity.IsAuthenticated)
-        {
-            user = await UserManager.GetUserAsync(CurrentUser);
-            _companyId = user.CompanyId;
-        }
+        ApplicationUser user = await usergetter.Get();
+        _userId = user.Id.ToString();
+        _companyId = user.CompanyId;
         string? url = configuration["ApiLinks:OrderGetAllToDelivery"];
         GenericCommandResult commandResult = await ApiService.Get<List<OrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<OrderDTO> orders)
@@ -187,7 +185,7 @@ else
             Orders =  orders.GroupBy(x => x.Table.Id).OrderBy(x => x.First().Table.Identification);
         }
         url = configuration["ApiLinks:BillClosureOrderGetAll"];
-        commandResult = await ApiService.Get<List<BillClosureOrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), 1);
+        commandResult = await ApiService.Get<List<BillClosureOrderDTO>>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), _companyId);
         if (commandResult.Sucess && commandResult.Data is List<BillClosureOrderDTO> billClosureOrderDTO)
             BillClosureOrders =  billClosureOrderDTO;
     }
@@ -198,7 +196,8 @@ else
         Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add("id", id);
         parameters.Add("companyId", _companyId);
-        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters);
+        parameters.Add("userId", _userId);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<OrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, null);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");
@@ -210,8 +209,10 @@ else
     public async void CompleteBillOrder(BillClosureOrderDTO billClosureOrder)
     {
         var url = configuration["ApiLinks:CloseBill"];
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", _userId);
         billClosureOrder.CustumerDocument = billClosureOrder.Customer.Document;
-        GenericCommandResult commandResult = await ApiService.PutAsJsonAsync<BillClosureOrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), billClosureOrder);
+        GenericCommandResult commandResult = await ApiService.PutWithParameters<BillClosureOrderDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, billClosureOrder);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Pedido marcado como entregue.");

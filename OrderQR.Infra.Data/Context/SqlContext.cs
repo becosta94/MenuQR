@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Security.Claims;
+using System.ComponentModel.Design;
 
 namespace OrderQR.Infra.Data.Context
 {
@@ -43,20 +44,20 @@ namespace OrderQR.Infra.Data.Context
             modelBuilder.ApplyConfiguration(new ProductTypeMap());
             modelBuilder.ApplyConfiguration(new TableMap());
         }
-        public override int SaveChanges()
+        public int SaveChanges(int companyId, string userId)
         {
-            BeforeSaveChanges().ConfigureAwait(false).GetAwaiter().GetResult();
+            BeforeSaveChanges(companyId, userId).ConfigureAwait(false).GetAwaiter().GetResult();
             var result = base.SaveChanges();
             return result;
         }
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task<int> SaveChangesAsync(int companyId, string userId, CancellationToken cancellationToken = default)
         {
-            await BeforeSaveChanges();
+            await BeforeSaveChanges(companyId, userId);
             var result = await base.SaveChangesAsync(cancellationToken);
             return result;
         }
 
-        private async Task BeforeSaveChanges()
+        private async Task BeforeSaveChanges(int companyId, string userId)
         {
             try
             {
@@ -74,7 +75,7 @@ namespace OrderQR.Infra.Data.Context
                     if (entry.Entity is Audit || entry.State is EntityState.Detached or EntityState.Unchanged)
                         continue;
 
-                    var auditEntry = new AuditEntry(entry) { TableName = entry.Entity.GetType().Name, UserId = "Teste" };
+                    var auditEntry = new AuditEntry(entry) { TableName = entry.Entity.GetType().Name, UserId = userId.ToString(), CompanyId = companyId.ToString() };
 
                     foreach (var property in entry.Properties)
                     {

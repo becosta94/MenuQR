@@ -14,7 +14,7 @@ namespace OrderQR.Api.Controllers
         [HttpPost]
         [Route("billclosureorder")]
         //[Authorize]
-        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument, bool tips)
+        public IActionResult RequestClosure([FromServices] IBillValueGetter billValueGetter, [FromServices] IBaseService<CustomerHistory> customerHistoryService, [FromServices] IBillCloser billCloser, int tableId, int companyId, bool closeTotal, string customerDocument, bool tips, string userId)
         {
             object returnedBill = billValueGetter.GetOpen(tableId, companyId, closeTotal, customerDocument, tips, true);
             if (returnedBill is not null && returnedBill is Bill bill)
@@ -26,7 +26,7 @@ namespace OrderQR.Api.Controllers
                                                                                        x.CompanyId == companyId).ToList();
                 if (customerHistoryList.Count == 1)
                     closeTotal = true;
-                object returnedRequestClosure = billCloser.RequestClosure(tableId, companyId, closeTotal, customerDocument, tips, bill);
+                object returnedRequestClosure = billCloser.RequestClosure(tableId, companyId, closeTotal, customerDocument, tips, bill, userId);
                 if (returnedRequestClosure is not null && returnedRequestClosure is BillClosureOrder billClosureOrder)
                     return Ok(billClosureOrder);
             }
@@ -66,9 +66,9 @@ namespace OrderQR.Api.Controllers
         [HttpDelete]
         [Route("delete")]
         //[Authorize]
-        public void Delete([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int id, int companyId)
+        public void Delete([FromServices] IBaseService<BillClosureOrder> billClosureOrderService, int id, int companyId, string userId)
         {
-            billClosureOrderService.DeleteByCompoundKey(new object[] { id, companyId });
+            billClosureOrderService.DeleteByCompoundKey(new object[] { id, companyId }, companyId, userId);
         }
         [HttpGet]
         [Route("billclosureordergetpaid")]

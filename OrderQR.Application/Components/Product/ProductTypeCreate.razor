@@ -1,14 +1,13 @@
 ﻿@page "/product/typecreate"
 @rendermode InteractiveServer
-@inject IWebHostEnvironment Env
 @inject IConfiguration configuartion
 @inject IApiService ApiService
 @attribute [Authorize]
-@inject IConfiguration configuaration
+@inject IConfiguration configuration
 @inject NavigationManager navigationManager
 @inject IJSRuntime JsRuntime
 @inject IHttpContextAccessor HttpContextAcessor
-
+@inject IUserGetter usergetter
 <h3>Adicionar Produto</h3>
 
 <EditForm OnValidSubmit="OnSubmit" Model="@Model" FormName="addProductType">
@@ -23,18 +22,28 @@
 
 @code {
     public ProductTypeDTO Model { get; set; } = new ProductTypeDTO();
-
+    private string _userId;
+    private int _companyId;
     public async void OnSubmit()
     {
         var url = configuartion["ApiLinks:ProductTypeCreate"];
-        GenericCommandResult commandResult = await ApiService.PostAsJsonAsync<ProductTypeDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), Model);
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("userId", _userId);
+        Model.CompanyId = _companyId;
+        GenericCommandResult commandResult = await ApiService.PostWithParameters<ProductTypeDTO>(url, HttpContextAcessor.HttpContext.Request.Cookies["Token"].ToString(), parameters, Model);
         if (commandResult.Sucess)
         {
             await JsRuntime.InvokeVoidAsync("alert", "Produto cadastrado");
-            navigationManager.NavigateTo(configuaration["ApplicationLinks:TableManager"]);
+            navigationManager.NavigateTo(configuration["ApplicationLinks:ProductTypeManager"]);
         }
         else
             await JsRuntime.InvokeVoidAsync("alert", "Ocorreu um erro, produto não cadastrado");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        ApplicationUser user = await usergetter.Get();
+        _userId = user.Id;
+        _companyId = user.CompanyId;
     }
 }
 

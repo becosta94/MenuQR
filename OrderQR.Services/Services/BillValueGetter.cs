@@ -85,12 +85,13 @@ namespace OrderQR.Services.Services
             }
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
             {
-                returnedBill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => x.Order.CustomerHistory.OnPlace).Sum(x => x.Total));
+                returnedBill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => x.Order.CustomerHistory.OnPlace).Sum(x => x.Total), gruped.Where(x => x.Order.CustomerHistory.OnPlace).Sum(x => x.Profit));
             }
             bill.CustomersAndTotals = new Dictionary<Customer, double>(returnedBill.CustomersAndTotals);
+            bill.CustomersAndProfit = new Dictionary<Customer, double>(returnedBill.CustomersAndProfit);
             productsOffList = _productOffListService.Get().Where(x => x.BillId == bill.Id && x.BillCompanyId == bill.CompanyId).ToList();
-            productsOffList.ForEach(x => returnedBill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price));
-            productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price));
+            productsOffList.ForEach(x => returnedBill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price, x.Amount * (x.Price - x.Cost)));
+            productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price, x.Amount * (x.Price - x.Cost)));
             returnedBill.ProductOffLists = productsOffList;
             bill.ProductOffLists = productsOffList;
             returnedBill.SumTotal(tips);
@@ -136,9 +137,9 @@ namespace OrderQR.Services.Services
             ICollection<IGrouping<Customer, OrderProduct>> orderProducts1 = new HashSet<IGrouping<Customer, OrderProduct>>();
             orderProducts1 =  orderProducts.GroupBy(x => x.Order.Customer).ToList();
             foreach (IGrouping<Customer, OrderProduct> gruped in orderProducts1)
-                bill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => !x.Order.CustomerHistory.OnPlace).Sum(x => x.Total));
+                bill.AddNewCustomerTotal(gruped.Key, gruped.Where(x => !x.Order.CustomerHistory.OnPlace).Sum(x => x.Total), gruped.Where(x => !x.Order.CustomerHistory.OnPlace).Sum(x => x.Profit));
             productsOffList = _productOffListService.Get().Where(x => x.BillId == bill.Id && x.BillCompanyId == bill.CompanyId).ToList();
-            productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price));
+            productsOffList.ForEach(x => bill.AddNewCustomerTotal(x.Customer, x.Amount * x.Price, x.Amount * (x.Price - x.Cost)));
             bill.ProductOffLists = productsOffList;
             if (bill is not null)
                 return bill;
